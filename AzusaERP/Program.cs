@@ -219,17 +219,7 @@ namespace moe.yo3explorer.azusa
                         try
                         {
                             AzusaPlugin instance = (AzusaPlugin)Activator.CreateInstance(exportedType);
-                            context.Splash.SetLabel(String.Format("Lade Plug-In:" + instance.DisplayName));
-                            instance.OnLoad();
-                            if (instance.IsExecutable)
-                            {
-                                ToolStripButton tsb = new ToolStripButton(instance.DisplayName);
-                                tsb.Click += delegate(object sender, EventArgs args) { instance.Execute(); };
-                                context.MainForm.plugInsToolStripMenuItem.DropDownItems.Add(tsb);
-                                context.MainForm.plugInsToolStripMenuItem.Visible = true;
-                            }
-
-                            context.Plugins.Add(instance);
+                            LoadPlugin(instance);
                         }
                         catch (Exception e)
                         {
@@ -238,6 +228,26 @@ namespace moe.yo3explorer.azusa
                     }
                 }
             }
+
+            while (context.PluginLoadQueue.Count > 0)
+            {
+                LoadPlugin(context.PluginLoadQueue.Dequeue());
+            }
+        }
+
+        private void LoadPlugin(AzusaPlugin instance)
+        {
+            context.Splash.SetLabel(String.Format("Lade Plug-In:" + instance.DisplayName));
+            instance.OnLoad();
+            if (instance.IsExecutable)
+            {
+                ToolStripButton tsb = new ToolStripButton(instance.DisplayName);
+                tsb.Click += delegate (object sender, EventArgs args) { instance.Execute(); };
+                context.MainForm.plugInsToolStripMenuItem.DropDownItems.Add(tsb);
+                context.MainForm.plugInsToolStripMenuItem.Visible = true;
+            }
+
+            context.Plugins.Add(instance);
         }
 
         private bool AttemptSshPortForward()

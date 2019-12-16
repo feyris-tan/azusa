@@ -16,6 +16,11 @@ namespace moe.yo3explorer.azusa
     {
         private static AzusaContext instance;
 
+        public static Queue<AzusaPlugin> GetPluginQueue()
+        {
+            return GetInstance().PluginLoadQueue;
+        }
+
         internal static AzusaContext GetInstance()
         {
             if (instance == null)
@@ -25,6 +30,7 @@ namespace moe.yo3explorer.azusa
                 instance.RandomNumberGenerator = new Random();
                 instance.LicenseSeed = NetworkAdapterLicenseMapper.GetLicenseMapping();
                 instance.Plugins = new List<AzusaPlugin>();
+                instance.PluginLoadQueue = new Queue<AzusaPlugin>();
             }
             
             instance.NumOperations++;
@@ -125,6 +131,7 @@ namespace moe.yo3explorer.azusa
         public SshClient SSH { get; set; }
         public byte[] LicenseSeed { get; private set; }
         public List<AzusaPlugin> Plugins { get; private set; }
+        public Queue<AzusaPlugin> PluginLoadQueue { get; private set; }
     }
 
 }
