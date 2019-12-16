@@ -1867,6 +1867,21 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
+        public bool IsAllowedSyncSource()
+        {
+            return false;
+        }
+
+        public bool IsAllowedSyncTarget()
+        {
+            return true;
+        }
+
+        public object GetConnectionObject()
+        {
+            return connections;
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();

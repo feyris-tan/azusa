@@ -2793,6 +2793,21 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             command2.Dispose();
         }
 
+        public bool IsAllowedSyncSource()
+        {
+            return true;
+        }
+
+        public bool IsAllowedSyncTarget()
+        {
+            return false;
+        }
+
+        public object GetConnectionObject()
+        {
+            return connection;
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();

@@ -152,5 +152,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope);
         void CreateSchema(string schemaName);
         void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName);
+
+        bool IsAllowedSyncSource();
+        bool IsAllowedSyncTarget();
+        object GetConnectionObject();
     }
 }

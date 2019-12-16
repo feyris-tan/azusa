@@ -195,6 +195,11 @@ namespace moe.yo3explorer.azusa
 
         private void LoadPlugins(AzusaContext context)
         {
+            while (context.PluginLoadQueue.Count > 0)
+            {
+                LoadPlugin(context.PluginLoadQueue.Dequeue());
+            }
+
             if (!context.Ini.ContainsKey("plugins"))
                 return;
 
@@ -227,11 +232,6 @@ namespace moe.yo3explorer.azusa
                         }
                     }
                 }
-            }
-
-            while (context.PluginLoadQueue.Count > 0)
-            {
-                LoadPlugin(context.PluginLoadQueue.Dequeue());
             }
         }
 
