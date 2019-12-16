@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using AzusaERP;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Drivers;
+using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.Licensing;
 using moe.yo3explorer.azusa.Control.Setup;
 using Renci.SshNet;
@@ -34,6 +35,15 @@ namespace moe.yo3explorer.azusa
                         break;
                     case "--setup":
                         break;
+                    case "--upgrade1to2":
+                        Program p = new Program();
+                        p.context = AzusaContext.GetInstance();
+                        p.CreateSplashThread();
+                        p.context.Ini = new Ini("azusa.ini");
+                        p.ConnectOnline();
+                        p.context.Splash.InvokeClose();
+                        Migration1to2.Migrate();
+                        return;
                     default:
                         return;
                 }
@@ -75,13 +85,7 @@ namespace moe.yo3explorer.azusa
         private bool PrepareRun()
         {
             context = AzusaContext.GetInstance();
-            Thread splashthread = new Thread(ShowSplash);
-            splashthread.Name = "Splash Screen";
-            splashthread.Priority = ThreadPriority.Lowest;
-            splashthread.Start();
-            while (context.Splash == null)
-                Thread.Sleep(10);
-            context.Splash.WaitForHandle();
+            CreateSplashThread();
 
             context.Splash.SetLabel("Lade Icon...");
             string procFileName = Process.GetCurrentProcess().MainModule.FileName;
@@ -176,6 +180,17 @@ namespace moe.yo3explorer.azusa
 
             context.Splash.InvokeClose();
             return false;
+        }
+
+        private void CreateSplashThread()
+        {
+            Thread splashthread = new Thread(ShowSplash);
+            splashthread.Name = "Splash Screen";
+            splashthread.Priority = ThreadPriority.Lowest;
+            splashthread.Start();
+            while (context.Splash == null)
+                Thread.Sleep(10);
+            context.Splash.WaitForHandle();
         }
 
         private void LoadPlugins(AzusaContext context)
@@ -320,12 +335,12 @@ namespace moe.yo3explorer.azusa
             }
 
             context.Splash.SetLabel("Validiere Datenbank...");
-            List<string> knownTables = context.DatabaseDriver.GetAllTableNames();
+            List<string> knownTables = context.DatabaseDriver.GetAllSchemas();
 
             if (knownTables.Count < 3)
                 throw new DatabaseValidationFailedException();
 
-            bool hasAzusaTables = knownTables.Any(x => x.ToLowerInvariant().StartsWith("azusa_"));
+            bool hasAzusaTables = knownTables.Any(x => x.ToLowerInvariant().StartsWith("azusa"));
             if (!hasAzusaTables)
                 throw new DatabaseValidationFailedException();
 

@@ -87,6 +87,8 @@ namespace libazustreamblob
         private Dictionary<string, Tuple<int, long, int>> dedupTuples;
         public bool CanWrite { get; private set; }
         public bool Obfuscation { get; }
+        private SQLiteTransaction transaction;
+        private int writtenSinceTransaction;
 
         private FileInfo GetFileInfo(string fname)
         {
@@ -96,17 +98,22 @@ namespace libazustreamblob
         private void SetupTables()
         {
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "create table entries\r\n(\r\n\tkey1 int,\r\n\tkey2 int,\r\n\tkey3 int,\r\n\tsegment int,\r\n\toffset int,\r\n\tlength int,\r\n\tdateAdded int default CURRENT_TIMESTAMP,\r\n\tconstraint table_name_pk primary key (key1, key2, key3)\r\n)";
+            cmd.CommandText = "create table entries ( key1 int, key2 int, key3 int, segment int, offset int,\r\n\tlength int,\r\n\tdateAdded int default CURRENT_TIMESTAMP,\r\n\tconstraint table_name_pk primary key (key1, key2, key3)\r\n)";
             cmd.ExecuteNonQuery();
             cmd.Dispose();
 
             cmd = connection.CreateCommand();
-            cmd.CommandText = "create table segments\r\n(\r\n    id        INTEGER\r\n        constraint segments_pk\r\n            primary key autoincrement,\r\n    dateAdded int default CURRENT_TIMESTAMP,\r\n    uuid      VARCHAR(37) not null\r\n);\r\n";
+            cmd.CommandText = "create table segments (id INTEGER constraint segments_pk primary key autoincrement,\r\n    dateAdded int default CURRENT_TIMESTAMP,\r\n    uuid      VARCHAR(37) not null\r\n);\r\n";
             cmd.ExecuteNonQuery();
             cmd.Dispose();
 
             cmd = connection.CreateCommand();
-            cmd.CommandText = "create table mounts\r\n(\r\n\tid INTEGER not null constraint mounts_pk primary key autoincrement,\r\n\tdateAdded int default CURRENT_TIMESTAMP not null,\r\n\tmachineName VARCHAR(64) not null,\r\n\tusername VARCHAR(64) not null,\r\n\tos VARCHAR(128),\r\n\tuuid VARCHAR(36)\r\n)";
+            cmd.CommandText = "create table mounts (id INTEGER not null constraint mounts_pk primary key autoincrement,\r\n\tdateAdded int default CURRENT_TIMESTAMP not null,\r\n\tmachineName VARCHAR(64) not null,\r\n\tusername VARCHAR(64) not null,\r\n\tos VARCHAR(128),\r\n\tuuid VARCHAR(36)\r\n)";
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+
+            cmd = connection.CreateCommand();
+            cmd.CommandText = "create table keys (id INTEGER not null constraint key_ok primary key autoincrement, key varchar(128), dateAdded int default CURRENT_TIMESTAMP)";
             cmd.ExecuteNonQuery();
             cmd.Dispose();
         }
@@ -241,8 +248,29 @@ namespace libazustreamblob
                         dedup.Item1, dedup.Item2, dedup.Item3);
                 }
             }
-            
+
+            if (transaction == null)
+            {
+                transaction = connection.BeginTransaction();
+                writtenSinceTransaction = 0;
+            }
+
             putCommand.ExecuteNonQuery();
+            writtenSinceTransaction += value.Length;
+            if (writtenSinceTransaction > 10000000)
+            {
+                Flush();
+            }
+        }
+
+        public void Flush()
+        {
+            if (transaction != null)
+            {
+                transaction.Commit();
+                transaction.Dispose();
+                transaction = null;
+            }
         }
 
         private void Update(int key1, int key2, int key3, byte[] value)
@@ -399,6 +427,7 @@ namespace libazustreamblob
 
         public void Dispose()
         {
+            Flush();
             fetchCommand?.Dispose();
             createSegment?.Dispose();
             selectAllSegments?.Dispose();
@@ -416,6 +445,40 @@ namespace libazustreamblob
             for (int i = 0; i < data.Length; i++)
             {
                 data[i] = (byte)(data[i] ^ mask[i % mask.Length]);
+            }
+        }
+
+        private SQLiteCommand addKeyCmd;
+        private SQLiteCommand deriveKeyCmd;
+        public int DeriveKey(string key)
+        {
+            if (deriveKeyCmd == null)
+            {
+                deriveKeyCmd = connection.CreateCommand();
+                deriveKeyCmd.CommandText = "SELECT id FROM keys WHERE key=@key";
+                deriveKeyCmd.Parameters.Add("@key", DbType.String);
+            }
+
+            deriveKeyCmd.Parameters["@key"].Value = key;
+            SQLiteDataReader dataReader = deriveKeyCmd.ExecuteReader();
+            int? result = null;
+            if (dataReader.Read())
+                result = dataReader.GetInt32(0);
+            dataReader.Close();
+            if (result.HasValue)
+                return result.Value;
+            else
+            {
+                if (addKeyCmd == null)
+                {
+                    addKeyCmd = connection.CreateCommand();
+                    addKeyCmd.CommandText = "INSERT INTO keys (key) VALUES (@key)";
+                    addKeyCmd.Parameters.Add("@key", DbType.String);
+                }
+
+                addKeyCmd.Parameters["@key"].Value = key;
+                addKeyCmd.ExecuteNonQuery();
+                return DeriveKey(key);
             }
         }
     }

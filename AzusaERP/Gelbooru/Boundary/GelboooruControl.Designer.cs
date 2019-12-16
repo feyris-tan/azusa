@@ -30,18 +30,29 @@ namespace moe.yo3explorer.azusa.Gelbooru.Boundary
         /// </summary>
         private void InitializeComponent()
         {
-            DefaultGalleriaModel defaultGalleriaModel4 = new DefaultGalleriaModel();
+            moe.yo3explorer.azusa.Control.Galleria.DefaultGalleriaModel defaultGalleriaModel1 = new moe.yo3explorer.azusa.Control.Galleria.DefaultGalleriaModel();
+            this.galleria1 = new moe.yo3explorer.azusa.Control.Galleria.Galleria();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.galleria1 = new Galleria();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // galleria1
+            // 
+            this.galleria1.CurrentImageNo = 0;
+            this.galleria1.Dock = System.Windows.Forms.DockStyle.Fill;
+            defaultGalleriaModel1.Galleria = this.galleria1;
+            this.galleria1.GalleriaModel = defaultGalleriaModel1;
+            this.galleria1.Location = new System.Drawing.Point(0, 0);
+            this.galleria1.Name = "galleria1";
+            this.galleria1.Size = new System.Drawing.Size(594, 419);
+            this.galleria1.TabIndex = 0;
             // 
             // splitContainer1
             // 
@@ -60,17 +71,6 @@ namespace moe.yo3explorer.azusa.Gelbooru.Boundary
             this.splitContainer1.SplitterDistance = 185;
             this.splitContainer1.TabIndex = 0;
             // 
-            // galleria1
-            // 
-            this.galleria1.CurrentImageNo = 0;
-            this.galleria1.Dock = System.Windows.Forms.DockStyle.Fill;
-            defaultGalleriaModel4.Galleria = this.galleria1;
-            this.galleria1.GalleriaModel = defaultGalleriaModel4;
-            this.galleria1.Location = new System.Drawing.Point(0, 0);
-            this.galleria1.Name = "galleria1";
-            this.galleria1.Size = new System.Drawing.Size(594, 419);
-            this.galleria1.TabIndex = 0;
-            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
@@ -86,15 +86,6 @@ namespace moe.yo3explorer.azusa.Gelbooru.Boundary
             this.tableLayoutPanel1.Size = new System.Drawing.Size(185, 419);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
-            // textBox1
-            // 
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox1.Location = new System.Drawing.Point(3, 3);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(179, 20);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            // 
             // listBox1
             // 
             this.listBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -104,6 +95,15 @@ namespace moe.yo3explorer.azusa.Gelbooru.Boundary
             this.listBox1.Size = new System.Drawing.Size(179, 363);
             this.listBox1.TabIndex = 3;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox1.Location = new System.Drawing.Point(3, 3);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(179, 20);
+            this.textBox1.TabIndex = 0;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // GelboooruControl
             // 

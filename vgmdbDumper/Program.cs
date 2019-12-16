@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using Npgsql;
 using System.Data;
 using System.IO;
+using System.Net;
 using AzusaERP;
-using Newtonsoft.Json;
 using vgmdbDumper.Model;
 using NpgsqlTypes;
 
@@ -143,9 +141,34 @@ namespace vgmdbDumper
             int? unscrapedAlbum = FindUnscrapedAlbum();
             if (unscrapedAlbum != null)
             {
-                Album album = vgmdbApiClient.GetAlbum(unscrapedAlbum.Value);
-                ScrapeAlbum(album);
-                return true;
+                try
+                {
+                    Album album = vgmdbApiClient.GetAlbum(unscrapedAlbum.Value);
+                    ScrapeAlbum(album);
+                    return true;
+                }
+                catch (WebException e)
+                {
+                    HttpWebResponse hwr = e.Response as HttpWebResponse;
+                    if (hwr != null)
+                    {
+                        if (hwr.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            logger.Error("Got HTTP 404, marking as error.");
+                            SetAlbumScraped(unscrapedAlbum.Value);
+                            InsertError("album", unscrapedAlbum.Value, 404);
+                            return true;
+                        }
+                        else if (hwr.StatusDescription.Contains("Time-out"))
+                        {
+                            logger.Warn("Got HTTP 522, waiting a while.");
+                            Throttle();
+                            return DumpPass();
+                        }
+                    }
+
+                    throw e;
+                }
             }
 
             int? unscrapedArtist = FindUnscrapedArtist();
@@ -197,17 +220,17 @@ namespace vgmdbDumper
             {
                 insertHourlyStatistics = connection.CreateCommand();
                 insertHourlyStatistics.CommandText =
-                    "INSERT INTO dump_vgmdb_0statistics (albumsDone,albumsTotal,artistsDone,artistsTotal) VALUES (@albumsDone,@albumsTotal,@artistsDone,@artistsTotal)";
+                    "INSERT INTO dump_vgmdb.\"0statistics\" (albumsDone,albumsTotal,artistsDone,artistsTotal) VALUES (@albumsDone,@albumsTotal,@artistsDone,@artistsTotal)";
                 insertHourlyStatistics.Parameters.Add(new NpgsqlParameter("@albumsDone", DbType.Int32));
                 insertHourlyStatistics.Parameters.Add(new NpgsqlParameter("@albumsTotal", DbType.Int32));
                 insertHourlyStatistics.Parameters.Add(new NpgsqlParameter("@artistsDone", DbType.Int32));
                 insertHourlyStatistics.Parameters.Add(new NpgsqlParameter("@artistsTotal", DbType.Int32));
             }
 
-            int albumsDone = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb_albums WHERE scraped = TRUE");
-            int albumsTotal = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb_albums");
-            int artistsDone = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb_artist WHERE scraped = TRUE");
-            int artistsTotal = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb_artist");
+            int albumsDone = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb.albums WHERE scraped = TRUE");
+            int albumsTotal = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb.albums");
+            int artistsDone = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb.artist WHERE scraped = TRUE");
+            int artistsTotal = QueryInteger("SELECT COUNT(*) FROM dump_vgmdb.artist");
 
             insertHourlyStatistics.Parameters["@albumsDone"].Value = albumsDone;
             insertHourlyStatistics.Parameters["@albumsTotal"].Value = albumsTotal;
@@ -252,13 +275,49 @@ namespace vgmdbDumper
             }
         }
 
+        private NpgsqlCommand insertErrorCommand;
+        private void InsertError(string type, int itemId, int code)
+        {
+            if (insertErrorCommand == null)
+            {
+                insertErrorCommand = connection.CreateCommand();
+                insertErrorCommand.CommandText = "INSERT INTO dump_vgmdb.\"0errors\" (type,item_id,code)" +
+                                                 "VALUES (@type,@itemId,@code)";
+                insertErrorCommand.Parameters.Add("@type", NpgsqlDbType.Varchar);
+                insertErrorCommand.Parameters.Add("@itemId", NpgsqlDbType.Integer);
+                insertErrorCommand.Parameters.Add("@code", NpgsqlDbType.Integer);
+            }
+
+            insertErrorCommand.Parameters["@type"].Value = type;
+            insertErrorCommand.Parameters["@itemId"].Value = itemId;
+            insertErrorCommand.Parameters["@code"].Value = code;
+            insertErrorCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand setAlbumScrapedCommand;
+        private void SetAlbumScraped(int album)
+        {
+            if (setAlbumScrapedCommand == null)
+            {
+                setAlbumScrapedCommand = connection.CreateCommand();
+                setAlbumScrapedCommand.CommandText = "UPDATE dump_vgmdb.albums " +
+                                                     "SET scraped=TRUE " +
+                                                     "WHERE id=@id";
+                setAlbumScrapedCommand.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
+            }
+            setAlbumScrapedCommand.Parameters["@id"].Value = album;
+            int result = setAlbumScrapedCommand.ExecuteNonQuery();
+            if (result != 1)
+                throw new Exception("unexpected sql update result");
+        }
+
         private void ScrapeAlbum(Album album)
         {
             if (updateAlbum == null)
             {
                 updateAlbum = connection.CreateCommand();
                 updateAlbum.CommandText =
-                    "UPDATE dump_vgmdb_albums " +
+                    "UPDATE dump_vgmdb.albums " +
                     "SET catalog=@catalog, classificationId=@classificationId, mediaFormatId=@mediaFormatId, " +
                     "    meta_added_date=@added_date, meta_edited_date=@edited_date, meta_fetched_date=@fetched_date, meta_ttl=@ttl, " +
                     "    meta_visitors=@visitors, name=@name, notes=@notes, picture_full=@picture_full, " +
@@ -577,7 +636,7 @@ namespace vgmdbDumper
             {
                 updateArtist = connection.CreateCommand();
                 updateArtist.CommandText =
-                    "UPDATE dump_vgmdb_artist " +
+                    "UPDATE dump_vgmdb.artist " +
                     "SET birthdate=@birthdate, birthplace=@birthplace, meta_added_date=@added_date, meta_edited_date=@edited_date, " +
                     "    meta_fetched_date=@fetched_date, meta_ttl=@ttl, meta_visitors=@visitors, name=@name, notes=@notes," +
                     "    picture_full=@picture_full, isFemale=@isFemale, typeId=@typeId, scraped=TRUE " +
@@ -692,7 +751,7 @@ namespace vgmdbDumper
             {
                 updateEvent = connection.CreateCommand();
                 updateEvent.CommandText =
-                    "UPDATE dump_vgmdb_events " +
+                    "UPDATE dump_vgmdb.events " +
                     "SET enddate=@enddate, name=@name, notes=@notes, startdate=@startdate, scraped = TRUE " +
                     "WHERE id=@id";
                 updateEvent.Parameters.Add(new NpgsqlParameter("@enddate", DbType.Date));
@@ -735,7 +794,7 @@ namespace vgmdbDumper
             {
                 updateLabel = connection.CreateCommand();
                 updateLabel.CommandText =
-                    "UPDATE dump_vgmdb_labels " +
+                    "UPDATE dump_vgmdb.labels " +
                     "SET description=@description, meta_added_date=@added_date, meta_edited_date=@edited_date, meta_fetched_date=@fetched_date, " +
                     "    meta_ttl=@ttl, meta_visitors=@visitors, name=@name, regionid=@regionid, type=@type, scraped=TRUE " +
                     "WHERE id=@id";
@@ -807,7 +866,7 @@ namespace vgmdbDumper
             {
                 updateRelease = connection.CreateCommand();
                 updateRelease.CommandText =
-                    "UPDATE dump_vgmdb_product_releases " +
+                    "UPDATE dump_vgmdb.product_releases " +
                     "SET catalog=@catalog, meta_added_date=@added_date, meta_added_user=@added_user, meta_edited_date=@edited_date, " +
                     "    meta_edited_user=@edited_user, meta_fetched_date=@fetched_date, meta_ttl=@ttl, meta_visitors=@visitors, name=@name, " +
                     "    platformid=@platformid, regionid=@regionid, release_date=@release_date, release_type=@release_type, type=@type," +
@@ -893,7 +952,7 @@ namespace vgmdbDumper
             if (updateProduct == null)
             {
                 updateProduct = connection.CreateCommand();
-                updateProduct.CommandText = "UPDATE dump_vgmdb_products " +
+                updateProduct.CommandText = "UPDATE dump_vgmdb.products " +
                     "SET description=@description, meta_added_date=@added_date, meta_added_user=@added_user, meta_edited_date=@edited_date, " +
                     "    meta_edited_user=@edited_user, meta_fetched_date=@fetched_date, meta_ttl=@ttl, meta_visitors=@visitors, " +
                     "    name_real=@name_real, release_date=@release_date, typeid=@type, scraped=TRUE, picture_full=@picture_full, " +
@@ -1197,35 +1256,35 @@ namespace vgmdbDumper
         private void PrepareStatements()
         {
             testForProduct = connection.CreateCommand();
-            testForProduct.CommandText = "SELECT dateAdded FROM dump_vgmdb_products WHERE id=@id";
+            testForProduct.CommandText = "SELECT dateAdded FROM dump_vgmdb.products WHERE id=@id";
             testForProduct.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertProduct = connection.CreateCommand();
-            insertProduct.CommandText = "INSERT INTO dump_vgmdb_products (id,name,typeId) VALUES (@id,@name,@typeId)";
+            insertProduct.CommandText = "INSERT INTO dump_vgmdb.products (id,name,typeId) VALUES (@id,@name,@typeId)";
             insertProduct.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertProduct.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             insertProduct.Parameters.Add(new NpgsqlParameter("@typeId", DbType.Int32));
 
             getProductTypeId = connection.CreateCommand();
-            getProductTypeId.CommandText = "SELECT id FROM dump_vgmdb_product_types WHERE name=@name";
+            getProductTypeId.CommandText = "SELECT id FROM dump_vgmdb.product_types WHERE name=@name";
             getProductTypeId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             insertProductType = connection.CreateCommand();
-            insertProductType.CommandText = "INSERT INTO dump_vgmdb_product_types (name) VALUES (@name)";
+            insertProductType.CommandText = "INSERT INTO dump_vgmdb.product_types (name) VALUES (@name)";
             insertProductType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             testForEvent = connection.CreateCommand();
-            testForEvent.CommandText = "SELECT dateAdded FROM dump_vgmdb_events WHERE id=@id";
+            testForEvent.CommandText = "SELECT dateAdded FROM dump_vgmdb.events WHERE id=@id";
             testForEvent.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertEventTranslation = connection.CreateCommand();
-            insertEventTranslation.CommandText = "INSERT INTO dump_vgmdb_events_translation (id,lang,name) VALUES (@id,@lang,@name)";
+            insertEventTranslation.CommandText = "INSERT INTO dump_vgmdb.events_translation (id,lang,name) VALUES (@id,@lang,@name)";
             insertEventTranslation.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertEventTranslation.Parameters.Add(new NpgsqlParameter("@lang", DbType.String));
             insertEventTranslation.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             insertEvent = connection.CreateCommand();
-            insertEvent.CommandText = "INSERT INTO dump_vgmdb_events (id, year,enddate,shortname,startdate) VALUES (@id,@year,@enddate,@shortname,@startdate)";
+            insertEvent.CommandText = "INSERT INTO dump_vgmdb.events (id, year,enddate,shortname,startdate) VALUES (@id,@year,@enddate,@shortname,@startdate)";
             insertEvent.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertEvent.Parameters.Add(new NpgsqlParameter("@year", DbType.Int32));
             insertEvent.Parameters.Add(new NpgsqlParameter("@enddate", DbType.Date));
@@ -1233,7 +1292,7 @@ namespace vgmdbDumper
             insertEvent.Parameters.Add(new NpgsqlParameter("@startdate", DbType.Date));
 
             insertLabel = connection.CreateCommand();
-            insertLabel.CommandText = "INSERT INTO dump_vgmdb_labels (id,name,imprintid,formerlyid,subsidid) VALUES (@id,@name,@imprintid,@formerlyid,@subsidid)";
+            insertLabel.CommandText = "INSERT INTO dump_vgmdb.labels (id,name,imprintid,formerlyid,subsidid) VALUES (@id,@name,@imprintid,@formerlyid,@subsidid)";
             insertLabel.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertLabel.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             insertLabel.Parameters.Add(new NpgsqlParameter("@imprintid", DbType.Int32));
@@ -1241,60 +1300,60 @@ namespace vgmdbDumper
             insertLabel.Parameters.Add(new NpgsqlParameter("@subsidid", DbType.Int32));
 
             testForLabel = connection.CreateCommand();
-            testForLabel.CommandText = "SELECT dateAdded FROM dump_vgmdb_labels WHERE id=@id";
+            testForLabel.CommandText = "SELECT dateAdded FROM dump_vgmdb.labels WHERE id=@id";
             testForLabel.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertArtist = connection.CreateCommand();
-            insertArtist.CommandText = "INSERT INTO dump_vgmdb_artist (id,namelang,name,namereal) VALUES (@id,@namelang,@name,@namereal)";
+            insertArtist.CommandText = "INSERT INTO dump_vgmdb.artist (id,namelang,name,namereal) VALUES (@id,@namelang,@name,@namereal)";
             insertArtist.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertArtist.Parameters.Add(new NpgsqlParameter("@namelang", DbType.String));
             insertArtist.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             insertArtist.Parameters.Add(new NpgsqlParameter("@namereal", DbType.String));
 
             testForArtist = connection.CreateCommand();
-            testForArtist.CommandText = "SELECT dateAdded FROM dump_vgmdb_artist WHERE id=@id";
+            testForArtist.CommandText = "SELECT dateAdded FROM dump_vgmdb.artist WHERE id=@id";
             testForArtist.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertAlbum = connection.CreateCommand();
-            insertAlbum.CommandText = "INSERT INTO dump_vgmdb_albums (id,catalog,release_date,typeid) VALUES (@id,@catalog,@release_date,@typeid)";
+            insertAlbum.CommandText = "INSERT INTO dump_vgmdb.albums (id,catalog,release_date,typeid) VALUES (@id,@catalog,@release_date,@typeid)";
             insertAlbum.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertAlbum.Parameters.Add(new NpgsqlParameter("@catalog", DbType.String));
             insertAlbum.Parameters.Add(new NpgsqlParameter("@release_date", DbType.Date));
             insertAlbum.Parameters.Add(new NpgsqlParameter("@typeid", DbType.Int16));
 
             testForAlbumType = connection.CreateCommand();
-            testForAlbumType.CommandText = "SELECT id FROM dump_vgmdb_album_types WHERE name=@name";
+            testForAlbumType.CommandText = "SELECT id FROM dump_vgmdb.album_types WHERE name=@name";
             testForAlbumType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             insertAlbumType = connection.CreateCommand();
-            insertAlbumType.CommandText = "INSERT INTO dump_vgmdb_album_types (name) VALUES (@name)";
+            insertAlbumType.CommandText = "INSERT INTO dump_vgmdb.album_types (name) VALUES (@name)";
             insertAlbumType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             insertAlbumTitle = connection.CreateCommand();
-            insertAlbumTitle.CommandText = "INSERT INTO dump_vgmdb_album_titles (albumid,langname,title) VALUES (@albumid,@langname,@title)";
+            insertAlbumTitle.CommandText = "INSERT INTO dump_vgmdb.album_titles (albumid,langname,title) VALUES (@albumid,@langname,@title)";
             insertAlbumTitle.Parameters.Add(new NpgsqlParameter("@albumid", DbType.Int32));
             insertAlbumTitle.Parameters.Add(new NpgsqlParameter("@langname", DbType.String));
             insertAlbumTitle.Parameters.Add(new NpgsqlParameter("@title", DbType.String));
 
             testForAlbum = connection.CreateCommand();
-            testForAlbum.CommandText = "SELECT id FROM dump_vgmdb_albums WHERE id=@id";
+            testForAlbum.CommandText = "SELECT id FROM dump_vgmdb.albums WHERE id=@id";
             testForAlbum.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             testForDumpMetadata = connection.CreateCommand();
             testForDumpMetadata.CommandText =
-                "SELECT id FROM dump_vgmdb_0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
+                "SELECT id FROM dump_vgmdb.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
             testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
             testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
             testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
 
             testForDumpMetadataWithoutDate = connection.CreateCommand();
             testForDumpMetadataWithoutDate.CommandText =
-                "SELECT id FROM dump_vgmdb_0dumpmeta WHERE key1=@key1 AND key2=@key2";
+                "SELECT id FROM dump_vgmdb.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2";
             testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
             testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
 
             setMetadata = connection.CreateCommand();
-            setMetadata.CommandText = "INSERT INTO dump_vgmdb_0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
+            setMetadata.CommandText = "INSERT INTO dump_vgmdb.\"0dumpmeta\" (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
             setMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
             setMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
             setMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -1306,7 +1365,7 @@ namespace vgmdbDumper
             if (insertArtistAlias == null)
             {
                 insertArtistAlias = connection.CreateCommand();
-                insertArtistAlias.CommandText = "INSERT INTO dump_vgmdb_artist_alias (artistId,ordinal,lang,name) VALUES (@artistId,@ordinal,@lang,@name)";
+                insertArtistAlias.CommandText = "INSERT INTO dump_vgmdb.artist_alias (artistId,ordinal,lang,name) VALUES (@artistId,@ordinal,@lang,@name)";
                 insertArtistAlias.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 insertArtistAlias.Parameters.Add(new NpgsqlParameter("@ordinal", DbType.Int32));
                 insertArtistAlias.Parameters.Add(new NpgsqlParameter("@lang", DbType.String));
@@ -1324,7 +1383,7 @@ namespace vgmdbDumper
             if (insertAlbumArbituraryLabel == null)
             {
                 insertAlbumArbituraryLabel = connection.CreateCommand();
-                insertAlbumArbituraryLabel.CommandText = "INSERT INTO dump_vgmdb_album_label_arbiturary (albumId,ordinal,roleId,name) VALUES (@albumId,@ordinal,@roleId,@name)";
+                insertAlbumArbituraryLabel.CommandText = "INSERT INTO dump_vgmdb.album_label_arbiturary (albumId,ordinal,roleId,name) VALUES (@albumId,@ordinal,@roleId,@name)";
                 insertAlbumArbituraryLabel.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumArbituraryLabel.Parameters.Add(new NpgsqlParameter("@ordinal", DbType.Int32));
                 insertAlbumArbituraryLabel.Parameters.Add(new NpgsqlParameter("@roleId", DbType.Int32));
@@ -1343,7 +1402,7 @@ namespace vgmdbDumper
             if (insertAlbumArbituraryProduct == null)
             {
                 insertAlbumArbituraryProduct = connection.CreateCommand();
-                insertAlbumArbituraryProduct.CommandText = "INSERT INTO dump_vgmdb_album_arbituaryproducts (albumId,ordinal,name) VALUES (@albumId,@ordinal,@name)";
+                insertAlbumArbituraryProduct.CommandText = "INSERT INTO dump_vgmdb.album_arbituaryproducts (albumId,ordinal,name) VALUES (@albumId,@ordinal,@name)";
                 insertAlbumArbituraryProduct.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumArbituraryProduct.Parameters.Add(new NpgsqlParameter("@ordinal", DbType.Int32));
                 insertAlbumArbituraryProduct.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -1359,7 +1418,7 @@ namespace vgmdbDumper
             if (insertAlbumReprint == null)
             {
                 insertAlbumReprint = connection.CreateCommand();
-                insertAlbumReprint.CommandText = "INSERT INTO dump_vgmdb_album_reprints (albumId,reprintid) VALUES (@albumId,@reprintid)";
+                insertAlbumReprint.CommandText = "INSERT INTO dump_vgmdb.album_reprints (albumId,reprintid) VALUES (@albumId,@reprintid)";
                 insertAlbumReprint.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumReprint.Parameters.Add(new NpgsqlParameter("@reprintid", DbType.Int32));
             }
@@ -1373,7 +1432,7 @@ namespace vgmdbDumper
             if (insertAlbumRelatedAlbum == null)
             {
                 insertAlbumRelatedAlbum = connection.CreateCommand();
-                insertAlbumRelatedAlbum.CommandText = "INSERT INTO dump_vgmdb_album_relatedalbum (albumId,relatedAlbumId) VALUES (@albumId,@relatedAlbumId)";
+                insertAlbumRelatedAlbum.CommandText = "INSERT INTO dump_vgmdb.album_relatedalbum (albumId,relatedAlbumId) VALUES (@albumId,@relatedAlbumId)";
                 insertAlbumRelatedAlbum.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumRelatedAlbum.Parameters.Add(new NpgsqlParameter("@relatedAlbumId", DbType.Int32));
             }
@@ -1387,7 +1446,7 @@ namespace vgmdbDumper
             if (insertAlbumCover == null)
             {
                 insertAlbumCover = connection.CreateCommand();
-                insertAlbumCover.CommandText = "INSERT INTO dump_vgmdb_album_cover (albumId,covername,buffer,ordinal) VALUES (@albumId,@covername,@buffer,@ordinal)";
+                insertAlbumCover.CommandText = "INSERT INTO dump_vgmdb.album_cover (albumId,covername,buffer,ordinal) VALUES (@albumId,@covername,@buffer,@ordinal)";
                 insertAlbumCover.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumCover.Parameters.Add(new NpgsqlParameter("@covername", DbType.String));
                 insertAlbumCover.Parameters.Add(new NpgsqlParameter("@buffer", NpgsqlDbType.Bytea));
@@ -1405,7 +1464,7 @@ namespace vgmdbDumper
             if (findUnscrapedAlbum == null)
             {
                 findUnscrapedAlbum = connection.CreateCommand();
-                findUnscrapedAlbum.CommandText = "SELECT id FROM dump_vgmdb_albums WHERE scraped = FALSE";
+                findUnscrapedAlbum.CommandText = "SELECT id FROM dump_vgmdb.albums WHERE scraped = FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedAlbum.ExecuteReader();
             int? result = null;
@@ -1420,7 +1479,7 @@ namespace vgmdbDumper
             if (insertAlbumEvent == null)
             {
                 insertAlbumEvent = connection.CreateCommand();
-                insertAlbumEvent.CommandText = "INSERT INTO dump_vgmdb_album_releaseEvent (albumId,eventId) VALUES (@albumId,@eventId)";
+                insertAlbumEvent.CommandText = "INSERT INTO dump_vgmdb.album_releaseEvent (albumId,eventId) VALUES (@albumId,@eventId)";
                 insertAlbumEvent.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumEvent.Parameters.Add(new NpgsqlParameter("@eventId", DbType.Int32));
             }
@@ -1434,7 +1493,7 @@ namespace vgmdbDumper
             if (getAlbumPublishFormatId == null)
             {
                 getAlbumPublishFormatId = connection.CreateCommand();
-                getAlbumPublishFormatId.CommandText = "SELECT id FROM dump_vgmdb_album_mediaformat WHERE name=@name";
+                getAlbumPublishFormatId.CommandText = "SELECT id FROM dump_vgmdb.album_mediaformat WHERE name=@name";
                 getAlbumPublishFormatId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getAlbumPublishFormatId.Parameters["@name"].Value = name;
@@ -1450,7 +1509,7 @@ namespace vgmdbDumper
                 if (insertAlbumPublishFormat == null)
                 {
                     insertAlbumPublishFormat = connection.CreateCommand();
-                    insertAlbumPublishFormat.CommandText = "INSERT INTO dump_vgmdb_album_mediaformat (name) VALUES (@name)";
+                    insertAlbumPublishFormat.CommandText = "INSERT INTO dump_vgmdb.album_mediaformat (name) VALUES (@name)";
                     insertAlbumPublishFormat.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1465,7 +1524,7 @@ namespace vgmdbDumper
             if (insertAlbumLabel == null)
             {
                 insertAlbumLabel = connection.CreateCommand();
-                insertAlbumLabel.CommandText = "INSERT INTO dump_vgmdb_album_labels (albumId,labelId,roleId) VALUES (@albumId,@labelId,@roleId)";
+                insertAlbumLabel.CommandText = "INSERT INTO dump_vgmdb.album_labels (albumId,labelId,roleId) VALUES (@albumId,@labelId,@roleId)";
                 insertAlbumLabel.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumLabel.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
                 insertAlbumLabel.Parameters.Add(new NpgsqlParameter("@roleId", DbType.Int32));
@@ -1481,7 +1540,7 @@ namespace vgmdbDumper
             if (getAlbumLabelRoleId == null)
             {
                 getAlbumLabelRoleId = connection.CreateCommand();
-                getAlbumLabelRoleId.CommandText = "SELECT id FROM dump_vgmdb_album_label_roles WHERE name=@name";
+                getAlbumLabelRoleId.CommandText = "SELECT id FROM dump_vgmdb.album_label_roles WHERE name=@name";
                 getAlbumLabelRoleId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getAlbumLabelRoleId.Parameters["@name"].Value = name;
@@ -1497,7 +1556,7 @@ namespace vgmdbDumper
                 if (insertAlbumLabelRole == null)
                 {
                     insertAlbumLabelRole = connection.CreateCommand();
-                    insertAlbumLabelRole.CommandText = "INSERT INTO dump_vgmdb_album_label_roles (name) VALUES (@name)";
+                    insertAlbumLabelRole.CommandText = "INSERT INTO dump_vgmdb.album_label_roles (name) VALUES (@name)";
                     insertAlbumLabelRole.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1512,7 +1571,7 @@ namespace vgmdbDumper
             if (testForAlbumTitle == null)
             {
                 testForAlbumTitle = connection.CreateCommand();
-                testForAlbumTitle.CommandText = "SELECT dateAdded FROM dump_vgmdb_album_titles WHERE albumid=@albumid AND langname=@langname";
+                testForAlbumTitle.CommandText = "SELECT dateAdded FROM dump_vgmdb.album_titles WHERE albumid=@albumid AND langname=@langname";
                 testForAlbumTitle.Parameters.Add(new NpgsqlParameter("@albumid", DbType.Int32));
                 testForAlbumTitle.Parameters.Add(new NpgsqlParameter("@langname", DbType.String));
             }
@@ -1529,7 +1588,7 @@ namespace vgmdbDumper
             if (getAlbumMediaFormatId == null)
             {
                 getAlbumMediaFormatId = connection.CreateCommand();
-                getAlbumMediaFormatId.CommandText = "SELECT id FROM dump_vgmdb_album_mediaformat WHERE name=@name";
+                getAlbumMediaFormatId.CommandText = "SELECT id FROM dump_vgmdb.album_mediaformat WHERE name=@name";
                 getAlbumMediaFormatId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getAlbumMediaFormatId.Parameters["@name"].Value = name;
@@ -1545,7 +1604,7 @@ namespace vgmdbDumper
                 if (insertAlbumMediaFormat == null)
                 {
                     insertAlbumMediaFormat = connection.CreateCommand();
-                    insertAlbumMediaFormat.CommandText = "INSERT INTO dump_vgmdb_album_mediaformat (name) VALUES (@name)";
+                    insertAlbumMediaFormat.CommandText = "INSERT INTO dump_vgmdb.album_mediaformat (name) VALUES (@name)";
                     insertAlbumMediaFormat.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1561,7 +1620,7 @@ namespace vgmdbDumper
             {
                 insertAlbumDiscTrackTranslation = connection.CreateCommand();
                 insertAlbumDiscTrackTranslation.CommandText = 
-                    "INSERT INTO dump_vgmdb_album_disc_track_translation (albumId, discIndex, trackIndex, lang, name) " +
+                    "INSERT INTO dump_vgmdb.album_disc_track_translation (albumId, discIndex, trackIndex, lang, name) " +
                     "     VALUES (@albumId, @discIndex, @trackIndex, @lang, @name)";
                 insertAlbumDiscTrackTranslation.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumDiscTrackTranslation.Parameters.Add(new NpgsqlParameter("@discIndex", DbType.Int32));
@@ -1582,7 +1641,7 @@ namespace vgmdbDumper
             if (insertAlbumDiscTrack == null)
             {
                 insertAlbumDiscTrack = connection.CreateCommand();
-                insertAlbumDiscTrack.CommandText = "INSERT INTO dump_vgmdb_album_disc_tracks (albumId, discIndex, trackIndex, trackLength) VALUES (@albumId,@discIndex,@trackIndex,@trackLength)";
+                insertAlbumDiscTrack.CommandText = "INSERT INTO dump_vgmdb.album_disc_tracks (albumId, discIndex, trackIndex, trackLength) VALUES (@albumId,@discIndex,@trackIndex,@trackLength)";
                 insertAlbumDiscTrack.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumDiscTrack.Parameters.Add(new NpgsqlParameter("@discIndex", DbType.Int32));
                 insertAlbumDiscTrack.Parameters.Add(new NpgsqlParameter("@trackIndex", DbType.Int32));
@@ -1600,7 +1659,7 @@ namespace vgmdbDumper
             if (insertAlbumDisc == null)
             {
                 insertAlbumDisc = connection.CreateCommand();
-                insertAlbumDisc.CommandText = "INSERT INTO dump_vgmdb_album_discs (albumId,discindex,name) VALUES (@albumId,@discindex,@name)";
+                insertAlbumDisc.CommandText = "INSERT INTO dump_vgmdb.album_discs (albumId,discindex,name) VALUES (@albumId,@discindex,@name)";
                 insertAlbumDisc.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumDisc.Parameters.Add(new NpgsqlParameter("@discindex", DbType.Int32));
                 insertAlbumDisc.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -1616,7 +1675,7 @@ namespace vgmdbDumper
             if (findAlbumClassificationId == null)
             {
                 findAlbumClassificationId = connection.CreateCommand();
-                findAlbumClassificationId.CommandText = "SELECT id FROM dump_vgmdb_album_classification WHERE name=@name";
+                findAlbumClassificationId.CommandText = "SELECT id FROM dump_vgmdb.album_classification WHERE name=@name";
                 findAlbumClassificationId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             findAlbumClassificationId.Parameters["@name"].Value = name;
@@ -1632,7 +1691,7 @@ namespace vgmdbDumper
                 if (insertAlbumClassificationId == null)
                 {
                     insertAlbumClassificationId = connection.CreateCommand();
-                    insertAlbumClassificationId.CommandText = "INSERT INTO dump_vgmdb_album_classification (name) VALUES (@name)";
+                    insertAlbumClassificationId.CommandText = "INSERT INTO dump_vgmdb.album_classification (name) VALUES (@name)";
                     insertAlbumClassificationId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1647,7 +1706,7 @@ namespace vgmdbDumper
             if (insertArbitraryAlbumArtist == null)
             {
                 insertArbitraryAlbumArtist = connection.CreateCommand();
-                insertArbitraryAlbumArtist.CommandText = "INSERT INTO dump_vgmdb_album_artist_arbitrary (albumid,artisttypeid,name) VALUES (@albumid,@artisttypeid,@name)";
+                insertArbitraryAlbumArtist.CommandText = "INSERT INTO dump_vgmdb.album_artist_arbitrary (albumid,artisttypeid,name) VALUES (@albumid,@artisttypeid,@name)";
                 insertArbitraryAlbumArtist.Parameters.Add(new NpgsqlParameter("@albumid", DbType.Int32));
                 insertArbitraryAlbumArtist.Parameters.Add(new NpgsqlParameter("@artisttypeid", DbType.Int32));
                 insertArbitraryAlbumArtist.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -1663,7 +1722,7 @@ namespace vgmdbDumper
             if (testForAlbumArtist == null)
             {
                 testForAlbumArtist = connection.CreateCommand();
-                testForAlbumArtist.CommandText = "SELECT dateAdded FROM dump_vgmdb_album_artists WHERE artistId=@artistId AND albumId=@albumId AND artistTypeId=@artistTypeId";
+                testForAlbumArtist.CommandText = "SELECT dateAdded FROM dump_vgmdb.album_artists WHERE artistId=@artistId AND albumId=@albumId AND artistTypeId=@artistTypeId";
                 testForAlbumArtist.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 testForAlbumArtist.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 testForAlbumArtist.Parameters.Add(new NpgsqlParameter("@artistTypeId", DbType.Int32));
@@ -1680,7 +1739,7 @@ namespace vgmdbDumper
             if (insertAlbumArtist == null)
             {
                 insertAlbumArtist = connection.CreateCommand();
-                insertAlbumArtist.CommandText = "INSERT INTO dump_vgmdb_album_artists (artistId,albumId,artistTypeId) VALUES (@artistId,@albumId,@artistTypeId)";
+                insertAlbumArtist.CommandText = "INSERT INTO dump_vgmdb.album_artists (artistId,albumId,artistTypeId) VALUES (@artistId,@albumId,@artistTypeId)";
                 insertAlbumArtist.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 insertAlbumArtist.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumArtist.Parameters.Add(new NpgsqlParameter("@artistTypeId", DbType.Int32));
@@ -1696,7 +1755,7 @@ namespace vgmdbDumper
             if (findAlbumArtistTypeId == null)
             {
                 findAlbumArtistTypeId = connection.CreateCommand();
-                findAlbumArtistTypeId.CommandText = "SELECT id FROM dump_vgmdb_album_artist_type WHERE name=@name";
+                findAlbumArtistTypeId.CommandText = "SELECT id FROM dump_vgmdb.album_artist_type WHERE name=@name";
                 findAlbumArtistTypeId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             findAlbumArtistTypeId.Parameters["@name"].Value = type;
@@ -1712,7 +1771,7 @@ namespace vgmdbDumper
                 if (insertAlbumArtistType == null)
                 {
                     insertAlbumArtistType = connection.CreateCommand();
-                    insertAlbumArtistType.CommandText = "INSERT INTO dump_vgmdb_album_artist_type (name) VALUES (@name)";
+                    insertAlbumArtistType.CommandText = "INSERT INTO dump_vgmdb.album_artist_type (name) VALUES (@name)";
                     insertAlbumArtistType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1727,7 +1786,7 @@ namespace vgmdbDumper
             if (findUnscrapedArtist == null)
             {
                 findUnscrapedArtist = connection.CreateCommand();
-                findUnscrapedArtist.CommandText = "SELECT id FROM dump_vgmdb_artist WHERE scraped=FALSE";
+                findUnscrapedArtist.CommandText = "SELECT id FROM dump_vgmdb.artist WHERE scraped=FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedArtist.ExecuteReader();
             Nullable<int> result = null;
@@ -1744,7 +1803,7 @@ namespace vgmdbDumper
             if (getArtistTypeId == null)
             {
                 getArtistTypeId = connection.CreateCommand();
-                getArtistTypeId.CommandText = "SELECT id FROM dump_vgmdb_artist_type WHERE name=@name";
+                getArtistTypeId.CommandText = "SELECT id FROM dump_vgmdb.artist_type WHERE name=@name";
                 getArtistTypeId.Parameters.Add(new NpgsqlParameter("@name",DbType.String));
             }
             getArtistTypeId.Parameters["@name"].Value = artistType;
@@ -1761,7 +1820,7 @@ namespace vgmdbDumper
                 if (insertArtistType == null)
                 {
                     insertArtistType = connection.CreateCommand();
-                    insertArtistType.CommandText = "INSERT INTO dump_vgmdb_artist_type (name) VALUES (@name)";
+                    insertArtistType.CommandText = "INSERT INTO dump_vgmdb.artist_type (name) VALUES (@name)";
                     insertArtistType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 insertArtistType.Parameters["@name"].Value = artistType;
@@ -1775,7 +1834,7 @@ namespace vgmdbDumper
             if (insertArtistFeature == null)
             {
                 insertArtistFeature = connection.CreateCommand();
-                insertArtistFeature.CommandText = "INSERT INTO dump_vgmdb_artist_featured (artistId,albumId) VALUES (@artistId,@albumId)";
+                insertArtistFeature.CommandText = "INSERT INTO dump_vgmdb.artist_featured (artistId,albumId) VALUES (@artistId,@albumId)";
                 insertArtistFeature.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 insertArtistFeature.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
             }
@@ -1789,7 +1848,7 @@ namespace vgmdbDumper
             if (findUnscrapedEvent == null)
             {
                 findUnscrapedEvent = connection.CreateCommand();
-                findUnscrapedEvent.CommandText = "SELECT id FROM dump_vgmdb_events WHERE scraped=FALSE";
+                findUnscrapedEvent.CommandText = "SELECT id FROM dump_vgmdb.events WHERE scraped=FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedEvent.ExecuteReader();
             Nullable<int> result = null;
@@ -1806,7 +1865,7 @@ namespace vgmdbDumper
             if (insertEventRelease == null)
             {
                 insertEventRelease = connection.CreateCommand();
-                insertEventRelease.CommandText = "INSERT INTO dump_vgmdb_event_releases (eventId,albumId) VALUES (@eventId,@albumId)";
+                insertEventRelease.CommandText = "INSERT INTO dump_vgmdb.event_releases (eventId,albumId) VALUES (@eventId,@albumId)";
                 insertEventRelease.Parameters.Add(new NpgsqlParameter("@eventId", DbType.Int32));
                 insertEventRelease.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
             }
@@ -1820,7 +1879,7 @@ namespace vgmdbDumper
             if (findUnscrapedLabel == null)
             {
                 findUnscrapedLabel = connection.CreateCommand();
-                findUnscrapedLabel.CommandText = "SELECT id FROM dump_vgmdb_labels WHERE scraped=FALSE";
+                findUnscrapedLabel.CommandText = "SELECT id FROM dump_vgmdb.labels WHERE scraped=FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedLabel.ExecuteReader();
             int? result = null;
@@ -1837,7 +1896,7 @@ namespace vgmdbDumper
             if (getLabelTypeId == null)
             {
                 getLabelTypeId = connection.CreateCommand();
-                getLabelTypeId.CommandText = "SELECT id FROM dump_vgmdb_label_types WHERE name=@name";
+                getLabelTypeId.CommandText = "SELECT id FROM dump_vgmdb.label_types WHERE name=@name";
                 getLabelTypeId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getLabelTypeId.Parameters["@name"].Value = name;
@@ -1854,7 +1913,7 @@ namespace vgmdbDumper
                 if (insertLabelType == null)
                 {
                     insertLabelType = connection.CreateCommand();
-                    insertLabelType.CommandText = "INSERT INTO dump_vgmdb_label_types (name) VALUES (@name)";
+                    insertLabelType.CommandText = "INSERT INTO dump_vgmdb.label_types (name) VALUES (@name)";
                     insertLabelType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 insertLabelType.Parameters["@name"].Value = name;
@@ -1869,7 +1928,7 @@ namespace vgmdbDumper
             if (insertLabelStaff == null)
             {
                 insertLabelStaff = connection.CreateCommand();
-                insertLabelStaff.CommandText = "INSERT INTO dump_vgmdb_label_staff (labelId,artistId,owner) VALUES (@labelId,@artistId,@owner)";
+                insertLabelStaff.CommandText = "INSERT INTO dump_vgmdb.label_staff (labelId,artistId,owner) VALUES (@labelId,@artistId,@owner)";
                 insertLabelStaff.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
                 insertLabelStaff.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 insertLabelStaff.Parameters.Add(new NpgsqlParameter("@owner", DbType.Boolean));
@@ -1885,7 +1944,7 @@ namespace vgmdbDumper
             if (insertLabelRelease == null)
             {
                 insertLabelRelease = connection.CreateCommand();
-                insertLabelRelease.CommandText = "INSERT INTO dump_vgmdb_label_releases (labelId,albumId) VALUES (@labelId,@albumId)";
+                insertLabelRelease.CommandText = "INSERT INTO dump_vgmdb.label_releases (labelId,albumId) VALUES (@labelId,@albumId)";
                 insertLabelRelease.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
                 insertLabelRelease.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
             }
@@ -1899,7 +1958,7 @@ namespace vgmdbDumper
             if (getLabelRegionId == null)
             {
                 getLabelRegionId = connection.CreateCommand();
-                getLabelRegionId.CommandText = "SELECT id FROM dump_vgmdb_label_regions WHERE name=@name";
+                getLabelRegionId.CommandText = "SELECT id FROM dump_vgmdb.label_regions WHERE name=@name";
                 getLabelRegionId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getLabelRegionId.Parameters["@name"].Value = name;
@@ -1915,7 +1974,7 @@ namespace vgmdbDumper
                 if (insertLabelRegion == null)
                 {
                     insertLabelRegion = connection.CreateCommand();
-                    insertLabelRegion.CommandText = "INSERT INTO dump_vgmdb_label_regions (name) VALUES (@name)";
+                    insertLabelRegion.CommandText = "INSERT INTO dump_vgmdb.label_regions (name) VALUES (@name)";
                     insertLabelRegion.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -1931,7 +1990,7 @@ namespace vgmdbDumper
             if (getReleaseTypeId == null)
             {
                 getReleaseTypeId = connection.CreateCommand();
-                getReleaseTypeId.CommandText = "SELECT id FROM dump_vgmdb_product_release_types WHERE name=@name";
+                getReleaseTypeId.CommandText = "SELECT id FROM dump_vgmdb.product_release_types WHERE name=@name";
                 getReleaseTypeId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getReleaseTypeId.Parameters["@name"].Value = name;
@@ -1948,7 +2007,7 @@ namespace vgmdbDumper
                 if (insertReleaseType == null)
                 {
                     insertReleaseType = connection.CreateCommand();
-                    insertReleaseType.CommandText = "INSERT INTO dump_vgmdb_product_release_types (name) VALUES (@name)";
+                    insertReleaseType.CommandText = "INSERT INTO dump_vgmdb.product_release_types (name) VALUES (@name)";
                     insertReleaseType.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 insertReleaseType.Parameters["@name"].Value = name;
@@ -1963,7 +2022,7 @@ namespace vgmdbDumper
             if (insertReleaseAlbum == null)
             {
                 insertReleaseAlbum = connection.CreateCommand();
-                insertReleaseAlbum.CommandText = "INSERT INTO dump_vgmdb_product_release_albums (releaseid,albumid) VALUES (@releaseid,@albumid)";
+                insertReleaseAlbum.CommandText = "INSERT INTO dump_vgmdb.product_release_albums (releaseid,albumid) VALUES (@releaseid,@albumid)";
                 insertReleaseAlbum.Parameters.Add(new NpgsqlParameter("@releaseid", DbType.Int32));
                 insertReleaseAlbum.Parameters.Add(new NpgsqlParameter("@albumid", DbType.Int32));
             }
@@ -1978,7 +2037,7 @@ namespace vgmdbDumper
             if (insertArbitaryProductRelease == null)
             {
                 insertArbitaryProductRelease = connection.CreateCommand();
-                insertArbitaryProductRelease.CommandText = "INSERT INTO dump_vgmdb_product_release_arbitaries (productid,arrayindex,key,value) VALUES (@productid,@arrayindex,@key,@value)";
+                insertArbitaryProductRelease.CommandText = "INSERT INTO dump_vgmdb.product_release_arbitaries (productid,arrayindex,key,value) VALUES (@productid,@arrayindex,@key,@value)";
                 insertArbitaryProductRelease.Parameters.Add(new NpgsqlParameter("@productid", DbType.Int32));
                 insertArbitaryProductRelease.Parameters.Add(new NpgsqlParameter("@arrayindex", DbType.Int32));
                 insertArbitaryProductRelease.Parameters.Add(new NpgsqlParameter("@key", DbType.String));
@@ -1996,7 +2055,7 @@ namespace vgmdbDumper
             if (insertProductAlbum == null)
             {
                 insertProductAlbum = connection.CreateCommand();
-                insertProductAlbum.CommandText = "INSERT INTO dump_vgmdb_product_albums (productid,albumid) VALUES (@productid,@albumid)";
+                insertProductAlbum.CommandText = "INSERT INTO dump_vgmdb.product_albums (productid,albumid) VALUES (@productid,@albumid)";
                 insertProductAlbum.Parameters.Add(new NpgsqlParameter("@productid", DbType.Int32));
                 insertProductAlbum.Parameters.Add(new NpgsqlParameter("@albumid", DbType.Int32));
             }
@@ -2011,7 +2070,7 @@ namespace vgmdbDumper
             if (markReleaseAsScraped == null)
             {
                 markReleaseAsScraped = connection.CreateCommand();
-                markReleaseAsScraped.CommandText = "UPDATE dump_vgmdb_product_releases SET scraped=TRUE WHERE id=@id";
+                markReleaseAsScraped.CommandText = "UPDATE dump_vgmdb.product_releases SET scraped=TRUE WHERE id=@id";
                 markReleaseAsScraped.Parameters.Add(new NpgsqlParameter("@id", DbType.String));
             }
             markReleaseAsScraped.Parameters["@id"].Value = id;
@@ -2024,7 +2083,7 @@ namespace vgmdbDumper
             if (findUnscrapedRelease == null)
             {
                 findUnscrapedRelease = connection.CreateCommand();
-                findUnscrapedRelease.CommandText = "SELECT id FROM dump_vgmdb_product_releases WHERE scraped = FALSE";
+                findUnscrapedRelease.CommandText = "SELECT id FROM dump_vgmdb.product_releases WHERE scraped = FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedRelease.ExecuteReader();
             int? result;
@@ -2041,7 +2100,7 @@ namespace vgmdbDumper
             if (testForArbitaryProductLabel == null)
             {
                 testForArbitaryProductLabel = connection.CreateCommand();
-                testForArbitaryProductLabel.CommandText = "SELECT dateAdded FROM dump_vgmdb_product_labels WHERE productId=@productId AND arbitaryName=@name";
+                testForArbitaryProductLabel.CommandText = "SELECT dateAdded FROM dump_vgmdb.product_labels WHERE productId=@productId AND arbitaryName=@name";
                 testForArbitaryProductLabel.Parameters.Add(new NpgsqlParameter("@productId", DbType.Int32));
                 testForArbitaryProductLabel.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
@@ -2056,7 +2115,7 @@ namespace vgmdbDumper
             if (insertArbitaryProductLabel == null)
             {
                 insertArbitaryProductLabel = connection.CreateCommand();
-                insertArbitaryProductLabel.CommandText = "INSERT INTO dump_vgmdb_product_labels (productId,labelId,arbitary,arbitaryName) VALUES (@productId,@labelId,TRUE,@arbitaryName)";
+                insertArbitaryProductLabel.CommandText = "INSERT INTO dump_vgmdb.product_labels (productId,labelId,arbitary,arbitaryName) VALUES (@productId,@labelId,TRUE,@arbitaryName)";
                 insertArbitaryProductLabel.Parameters.Add(new NpgsqlParameter("@productId", DbType.Int32));
                 insertArbitaryProductLabel.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
                 insertArbitaryProductLabel.Parameters.Add(new NpgsqlParameter("@arbitaryName", DbType.String));
@@ -2075,7 +2134,7 @@ namespace vgmdbDumper
             if (findUnscrapedProduct == null)
             {
                 findUnscrapedProduct = connection.CreateCommand();
-                findUnscrapedProduct.CommandText = "SELECT id FROM dump_vgmdb_products WHERE scraped=FALSE";
+                findUnscrapedProduct.CommandText = "SELECT id FROM dump_vgmdb.products WHERE scraped=FALSE";
             }
             NpgsqlDataReader ndr = findUnscrapedProduct.ExecuteReader();
             if (ndr.Read())
@@ -2096,7 +2155,7 @@ namespace vgmdbDumper
             if (insertAlbumWebsite == null)
             {
                 insertAlbumWebsite = connection.CreateCommand();
-                insertAlbumWebsite.CommandText = "INSERT INTO dump_vgmdb_album_websites (albumId,catalog,name,link) VALUES (@albumId,@catalog,@name,@link)";
+                insertAlbumWebsite.CommandText = "INSERT INTO dump_vgmdb.album_websites (albumId,catalog,name,link) VALUES (@albumId,@catalog,@name,@link)";
                 insertAlbumWebsite.Parameters.Add(new NpgsqlParameter("@albumId", DbType.Int32));
                 insertAlbumWebsite.Parameters.Add(new NpgsqlParameter("@catalog", DbType.String));
                 insertAlbumWebsite.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -2115,7 +2174,7 @@ namespace vgmdbDumper
             if (insertArtistWebsite == null)
             {
                 insertArtistWebsite = connection.CreateCommand();
-                insertArtistWebsite.CommandText = "INSERT INTO dump_vgmdb_artist_websites (artistId,catalog,name,link) VALUES (@artistId,@catalog,@name,@link)";
+                insertArtistWebsite.CommandText = "INSERT INTO dump_vgmdb.artist_websites (artistId,catalog,name,link) VALUES (@artistId,@catalog,@name,@link)";
                 insertArtistWebsite.Parameters.Add(new NpgsqlParameter("@artistId", DbType.Int32));
                 insertArtistWebsite.Parameters.Add(new NpgsqlParameter("@catalog", DbType.String));
                 insertArtistWebsite.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -2134,7 +2193,7 @@ namespace vgmdbDumper
             if (insertProductWebsite == null)
             {
                 insertProductWebsite = connection.CreateCommand();
-                insertProductWebsite.CommandText = "INSERT INTO dump_vgmdb_product_websites (productId,catalog,name,link) VALUES (@productId,@catalog,@name,@link)";
+                insertProductWebsite.CommandText = "INSERT INTO dump_vgmdb.product_websites (productId,catalog,name,link) VALUES (@productId,@catalog,@name,@link)";
                 insertProductWebsite.Parameters.Add(new NpgsqlParameter("@productId", DbType.Int32));
                 insertProductWebsite.Parameters.Add(new NpgsqlParameter("@catalog", DbType.String));
                 insertProductWebsite.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -2153,7 +2212,7 @@ namespace vgmdbDumper
             if (insertLabelWebsite == null)
             {
                 insertLabelWebsite = connection.CreateCommand();
-                insertLabelWebsite.CommandText = "INSERT INTO dump_vgmdb_label_websites (labelId,catalog,name,link) VALUES (@labelId,@catalog,@name,@link)";
+                insertLabelWebsite.CommandText = "INSERT INTO dump_vgmdb.label_websites (labelId,catalog,name,link) VALUES (@labelId,@catalog,@name,@link)";
                 insertLabelWebsite.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
                 insertLabelWebsite.Parameters.Add(new NpgsqlParameter("@catalog", DbType.String));
                 insertLabelWebsite.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -2172,7 +2231,7 @@ namespace vgmdbDumper
             if (getRegionId == null)
             {
                 getRegionId = connection.CreateCommand();
-                getRegionId.CommandText = "SELECT id FROM dump_vgmdb_product_release_regions WHERE name=@name";
+                getRegionId.CommandText = "SELECT id FROM dump_vgmdb.product_release_regions WHERE name=@name";
                 getRegionId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getRegionId.Parameters["@name"].Value = name;
@@ -2188,7 +2247,7 @@ namespace vgmdbDumper
                 if (insertRegion == null)
                 {
                     insertRegion = connection.CreateCommand();
-                    insertRegion.CommandText = "INSERT INTO dump_vgmdb_product_release_regions (name) VALUES (@name)";
+                    insertRegion.CommandText = "INSERT INTO dump_vgmdb.product_release_regions (name) VALUES (@name)";
                     insertRegion.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -2204,7 +2263,7 @@ namespace vgmdbDumper
             if (getPlatformId == null)
             {
                 getPlatformId = connection.CreateCommand();
-                getPlatformId.CommandText = "SELECT id FROM dump_vgmdb_product_release_platforms WHERE name=@name";
+                getPlatformId.CommandText = "SELECT id FROM dump_vgmdb.product_release_platforms WHERE name=@name";
                 getPlatformId.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
             getPlatformId.Parameters["@name"].Value = name;
@@ -2220,7 +2279,7 @@ namespace vgmdbDumper
                 if (insertPlatform == null)
                 {
                     insertPlatform = connection.CreateCommand();
-                    insertPlatform.CommandText = "INSERT INTO dump_vgmdb_product_release_platforms (name) VALUES (@name)";
+                    insertPlatform.CommandText = "INSERT INTO dump_vgmdb.product_release_platforms (name) VALUES (@name)";
                     insertPlatform.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 }
                 ndr.Close();
@@ -2236,7 +2295,7 @@ namespace vgmdbDumper
             if (testForReleaseTranslation == null)
             {
                 testForReleaseTranslation = connection.CreateCommand();
-                testForReleaseTranslation.CommandText = "SELECT dateAdded FROM dump_vgmdb_product_release_translations WHERE id=@id AND lang=@lang";
+                testForReleaseTranslation.CommandText = "SELECT dateAdded FROM dump_vgmdb.product_release_translations WHERE id=@id AND lang=@lang";
                 testForReleaseTranslation.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
                 testForReleaseTranslation.Parameters.Add(new NpgsqlParameter("@lang", DbType.String));
             }
@@ -2252,7 +2311,7 @@ namespace vgmdbDumper
             if (insertReleaseTranslation == null)
             {
                 insertReleaseTranslation = connection.CreateCommand();
-                insertReleaseTranslation.CommandText = "INSERT INTO dump_vgmdb_product_release_translations (id,lang,name) VALUES (@id,@lang,@name)";
+                insertReleaseTranslation.CommandText = "INSERT INTO dump_vgmdb.product_release_translations (id,lang,name) VALUES (@id,@lang,@name)";
                 insertReleaseTranslation.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
                 insertReleaseTranslation.Parameters.Add(new NpgsqlParameter("@lang", DbType.String));
                 insertReleaseTranslation.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
@@ -2269,7 +2328,7 @@ namespace vgmdbDumper
             if (insertRelease == null)
             {
                 insertRelease = connection.CreateCommand();
-                insertRelease.CommandText = "INSERT INTO dump_vgmdb_product_releases (id, platformId, regionId) VALUES (@id,@platformId,@regionId)";
+                insertRelease.CommandText = "INSERT INTO dump_vgmdb.product_releases (id, platformId, regionId) VALUES (@id,@platformId,@regionId)";
                 insertRelease.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
                 insertRelease.Parameters.Add(new NpgsqlParameter("@platformId", DbType.Int32));
                 insertRelease.Parameters.Add(new NpgsqlParameter("@regionId", DbType.Int32));
@@ -2292,7 +2351,7 @@ namespace vgmdbDumper
             if (insertProductLabel == null)
             {
                 insertProductLabel = connection.CreateCommand();
-                insertProductLabel.CommandText = "INSERT INTO dump_vgmdb_product_labels (productId,labelId) VALUES (@productId,@labelId)";
+                insertProductLabel.CommandText = "INSERT INTO dump_vgmdb.product_labels (productId,labelId) VALUES (@productId,@labelId)";
                 insertProductLabel.Parameters.Add(new NpgsqlParameter("@productId", DbType.Int32));
                 insertProductLabel.Parameters.Add(new NpgsqlParameter("@labelId", DbType.Int32));
             }
@@ -2307,7 +2366,7 @@ namespace vgmdbDumper
             if (findLabelIdByName == null)
             {
                 findLabelIdByName = connection.CreateCommand();
-                findLabelIdByName.CommandText = "SELECT id FROM dump_vgmdb_labels WHERE name=@name";
+                findLabelIdByName.CommandText = "SELECT id FROM dump_vgmdb.labels WHERE name=@name";
                 findLabelIdByName.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             }
 

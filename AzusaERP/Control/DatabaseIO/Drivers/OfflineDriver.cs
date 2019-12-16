@@ -29,7 +29,7 @@ using moe.yo3explorer.azusa.WarWalking.Entity;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
-    class OfflineDriver : IDatabaseDriver
+    class OfflineDriver : IDatabaseDriver, IStreamBlobOwner
     {
         public OfflineDriver()
         {
@@ -43,37 +43,38 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 rootDirectory.Create();
 
             azuStreamBlob = new AzusaStreamBlob(rootDirectory);
+            connectionBuilder = new SQLiteConnectionStringBuilder();
+            connectionBuilder.DataSource = ":memory:";
+
             connections = new Dictionary<string, SQLiteConnection>();
         }
 
         private DirectoryInfo rootDirectory;
         private AzusaStreamBlob azuStreamBlob;
+        private SQLiteConnectionStringBuilder connectionBuilder;
         private Dictionary<string, SQLiteConnection> connections;
 
         private SQLiteConnection GetConnectionForTable(string tableName)
         {
-            string[] colons = tableName.Split('_');
-            string prefix = colons[0];
-            if (prefix == "dump")
-                prefix = prefix += "_" + colons[1];
-
-            if (connections.ContainsKey(prefix))
-                return connections[prefix];
-
-            bool encryptionRequired = prefix.Equals("licensing");
-
-            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = Path.Combine(rootDirectory.FullName, prefix + ".db");
-            connectionStringBuilder.ReadOnly = !azuStreamBlob.CanWrite;
-            connectionStringBuilder.FailIfMissing = false;
-            if (encryptionRequired)
+            string[] args = tableName.Split('.');
+            if (!connections.ContainsKey(args[0]))
             {
-                connectionStringBuilder.Password = Environment.MachineName;
+                SQLiteConnection connection = new SQLiteConnection(connectionBuilder.ToString());
+                connection.Open();
+                bool passworded = args[0].Equals("licensing");
+                string sql = null;
+                if (!passworded)
+                    sql = String.Format("ATTACH DATABASE '{0}' AS {1}", Path.Combine(rootDirectory.FullName, args[0] + ".db"),
+                        args[0]);
+                else
+                    sql = String.Format("ATTACH DATABASE '{0}' AS {1} KEY '{2}'", Path.Combine(rootDirectory.FullName, args[0] + ".db"), args[0], Environment.MachineName);
+                SQLiteCommand command = connection.CreateCommand();
+                command.CommandText = sql;
+                command.ExecuteNonQuery();
+                connections[args[0]] = connection;
             }
-            SQLiteConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
-            connection.Open();
-            connections.Add(prefix, connection);
-            return connection;
+
+            return connections[args[0]];
         }
 
         public bool TransactionSupported => false;
@@ -103,9 +104,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (getAllManualGlucoseValuesCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dexcom_manualdata");
+                SQLiteConnection connection = GetConnectionForTable("dexcom.manualdata");
                 getAllManualGlucoseValuesCommand = connection.CreateCommand();
-                getAllManualGlucoseValuesCommand.CommandText = "SELECT * FROM dexcom_manualdata ORDER BY ts ASC";
+                getAllManualGlucoseValuesCommand.CommandText = "SELECT * FROM dexcom.manualdata ORDER BY ts ASC";
             }
             SQLiteDataReader dataReader = getAllManualGlucoseValuesCommand.ExecuteReader();
             while (dataReader.Read())
@@ -132,9 +133,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<DateTime> Dexcom_GetDates()
         {
-            SQLiteConnection connection = GetConnectionForTable("dexcom_history");
+            SQLiteConnection connection = GetConnectionForTable("dexcom.history");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT DISTINCT date FROM dexcom_history ORDER BY date ASC";
+            cmd.CommandText = "SELECT DISTINCT date FROM dexcom.history ORDER BY date ASC";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
                 yield return dataReader.GetDateTime(0);
@@ -144,9 +145,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
         {
-            SQLiteConnection connection = GetConnectionForTable("dexcom_history");
+            SQLiteConnection connection = GetConnectionForTable("dexcom.history");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM dexcom_history WHERE date=@date";
+            cmd.CommandText = "SELECT * FROM dexcom.history WHERE date=@date";
             cmd.Parameters.Add("@date", DbType.Date);
             cmd.Parameters["@date"].Value = day.Date;
             SQLiteDataReader dataReader = cmd.ExecuteReader();
@@ -220,8 +221,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (testForTimestamp == null)
             {
-                testForTimestamp = GetConnectionForTable("dexcom_history").CreateCommand();
-                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom_history WHERE date=@date AND time=@time";
+                testForTimestamp = GetConnectionForTable("dexcom.history").CreateCommand();
+                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom.history WHERE date=@date AND time=@time";
                 testForTimestamp.Parameters.Add("@date", DbType.Date);
                 testForTimestamp.Parameters.Add("@time", DbType.Time);
             }
@@ -237,10 +238,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public void Dispose()
         {
             azuStreamBlob.Dispose();
-            foreach (var sqLiteConnection in connections)
+            foreach (KeyValuePair<string, SQLiteConnection> sqLiteConnection in connections)
             {
                 sqLiteConnection.Value.Dispose();
             }
+            connections.Clear();
         }
 
         public void EndTransaction(bool sucessful)
@@ -255,11 +257,13 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public bool Sync_DoesTableExist(string tableName)
         {
+            string[] args = tableName.Split('.');
             SQLiteConnection connection = GetConnectionForTable(tableName);
+
             SQLiteCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT rootpage FROM sqlite_master WHERE tbl_name = @tblName;";
+            command.CommandText = String.Format("SELECT rootpage FROM {0}.sqlite_master WHERE tbl_name = @tblName;", args[0]);
             command.Parameters.Add("@tblName", DbType.String);
-            command.Parameters["@tblName"].Value = tableName;
+            command.Parameters["@tblName"].Value = args[1];
             SQLiteDataReader dataReader = command.ExecuteReader();
             bool result = dataReader.Read();
             dataReader.Close();
@@ -268,8 +272,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return result;
         }
 
+        
         public void Sync_CreateTable(string tableName, List<DatabaseColumn> columns)
         {
+            tableName = tableName.MakeFullyQualifiedTableName();
             StringBuilder sb = new StringBuilder();
             sb.AppendFormat("CREATE TABLE {0} (", tableName);
             for (int i = 0; i < columns.Count; i++)
@@ -322,6 +328,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public DateTime? Sync_GetLastSyncDateForTable(string tableName)
         {
+            tableName = tableName.MakeFullyQualifiedTableName();
             SQLiteConnection connection = GetConnectionForTable(tableName);
             SQLiteCommand cmd = connection.CreateCommand();
             cmd.CommandText = String.Format("SELECT MAX(dateAdded) FROM {0}", tableName);
@@ -351,6 +358,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader,
             SyncLogMessageCallback onMessage)
         {
+            tableName = tableName.MakeFullyQualifiedTableName();
             SQLiteConnection connection = GetConnectionForTable(tableName);
             SQLiteCommand cmd = connection.CreateCommand();
 
@@ -406,8 +414,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     {
                         cmd.Parameters[currentColumn.ParameterName].Value = DBNull.Value;
                         byte[] inBuffer = syncReader.GetByteArray(i);
-                        int keyA = Sync.DeriveKey(tableName);
-                        int keyB = Sync.DeriveKey(currentColumn.ColumnName);
+                        int keyA = azuStreamBlob.DeriveKey(tableName);
+                        int keyB = azuStreamBlob.DeriveKey(currentColumn.ColumnName);
                         if (!syncReader.IsDBNull(idColumn.Ordingal))
                         {
                             int keyC = syncReader.GetInt32(idColumn.Ordingal);
@@ -445,12 +453,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public LicenseState CheckLicenseStatus(byte[] uid)
         {
             string val = BitConverter.ToString(uid);
-            SQLiteConnection connection = GetConnectionForTable("licensing_fatclient_machines");
+            SQLiteConnection connection = GetConnectionForTable("licensing.fatclient_machines");
 
             if (checkLicense == null)
             {
                 checkLicense = connection.CreateCommand();
-                checkLicense.CommandText = "SELECT state FROM licensing_fatclient_machines WHERE uid=@uid";
+                checkLicense.CommandText = "SELECT state FROM licensing.fatclient_machines WHERE uid=@uid";
                 checkLicense.Parameters.Add("@uid", DbType.String);
             }
 
@@ -541,10 +549,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     {
                         byte[] buffer = syncReader.GetByteArray(column.Ordingal);
                         int rowId = syncReader.GetInt32(idColumn.Ordingal);
-                        int currentLen = azuStreamBlob.GetSize(Sync.DeriveKey(tableName), Sync.DeriveKey(column.ColumnName), rowId);
+                        int currentLen = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey(tableName), azuStreamBlob.DeriveKey(column.ColumnName), rowId);
                         if (buffer != null)
                             if (buffer.Length != currentLen)
-                                azuStreamBlob.Put(Sync.DeriveKey(tableName), Sync.DeriveKey(column.ColumnName), rowId, buffer);
+                                azuStreamBlob.Put(azuStreamBlob.DeriveKey(tableName), azuStreamBlob.DeriveKey(column.ColumnName), rowId, buffer);
                     }
                     else
                     {
@@ -581,9 +589,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Note> Notebook_GetAllNotes()
         {
-            SQLiteConnection connection = GetConnectionForTable("notebook_notes");
+            SQLiteConnection connection = GetConnectionForTable("notebook.notes");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook_notes";
+            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook.notes";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -601,11 +609,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         private SQLiteCommand createNote;
         public Note Notebook_CreateNote(string name, bool isCategory, int? parent)
         {
-            SQLiteConnection connection = GetConnectionForTable("notebook_notes");
+            SQLiteConnection connection = GetConnectionForTable("notebook.notes");
             if (createNote == null)
             {
                 createNote = connection.CreateCommand();
-                createNote.CommandText = "INSERT INTO notebook_notes (id,dateadded,iscategory,parent,name) VALUES (@id,@dateadded,@iscategory,@parent,@name)";
+                createNote.CommandText = "INSERT INTO notebook.notes (id,dateadded,iscategory,parent,name) VALUES (@id,@dateadded,@iscategory,@parent,@name)";
                 createNote.Parameters.Add("@id", DbType.Int32);
                 createNote.Parameters.Add("@dateadded", DbType.DateTime);
                 createNote.Parameters.Add("@iscategory", DbType.Boolean);
@@ -640,9 +648,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (notebookGetText == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("notebook_notes");
+                SQLiteConnection connection = GetConnectionForTable("notebook.notes");
                 notebookGetText = connection.CreateCommand();
-                notebookGetText.CommandText = "SELECT richtext FROM notebook_notes WHERE id=@id";
+                notebookGetText.CommandText = "SELECT richtext FROM notebook.notes WHERE id=@id";
                 notebookGetText.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -663,10 +671,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (updateNotebookNote == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("notebook_notes");
+                SQLiteConnection connection = GetConnectionForTable("notebook.notes");
                 updateNotebookNote = connection.CreateCommand();
                 updateNotebookNote.CommandText =
-                    "UPDATE notebook_notes SET richText=@richText, dateUpdated=@dateUpdated WHERE id=@id";
+                    "UPDATE notebook.notes SET richText=@richText, dateUpdated=@dateUpdated WHERE id=@id";
                 updateNotebookNote.Parameters.Add("@richText", DbType.String);
                 updateNotebookNote.Parameters.Add("@dateUpdated", DbType.DateTime);
                 updateNotebookNote.Parameters.Add("@id", DbType.Int32);
@@ -684,10 +692,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbSearchTrackTranslation == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_disc_track_translation");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_disc_track_translation");
                 vgmdbSearchTrackTranslation = connection.CreateCommand();
                 vgmdbSearchTrackTranslation.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_disc_track_translation WHERE name LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_disc_track_translation WHERE name LIKE @name";
                 vgmdbSearchTrackTranslation.Parameters.Add("@name", DbType.String);
             }
 
@@ -705,10 +713,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmFindAlbumsByArbituraryProducts == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_arbituaryproducts");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_arbituaryproducts");
                 vgmFindAlbumsByArbituraryProducts = connection.CreateCommand();
                 vgmFindAlbumsByArbituraryProducts.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_arbituaryproducts WHERE name LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_arbituaryproducts WHERE name LIKE @name";
                 vgmFindAlbumsByArbituraryProducts.Parameters.Add("@name", DbType.String);
             }
 
@@ -726,10 +734,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmFindAlbumsByAlbumTitle == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_titles");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_titles");
                 vgmFindAlbumsByAlbumTitle = connection.CreateCommand();
                 vgmFindAlbumsByAlbumTitle.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_titles WHERE title LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_titles WHERE title LIKE @name";
                 vgmFindAlbumsByAlbumTitle.Parameters.Add("@name", DbType.String);
             }
 
@@ -747,7 +755,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmFindAlbumForList == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_albums");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.albums");
                 vgmFindAlbumForList = connection.CreateCommand();
                 vgmFindAlbumForList.CommandText = Resources.VgmDbFindAlbumForList_Postgre;
                 vgmFindAlbumForList.Parameters.Add("@id", DbType.Int32);
@@ -783,7 +791,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Bitmap Vgmdb_GetAlbumCover(int entryId)
         {
-            byte[] blob = azuStreamBlob.Get(Sync.DeriveKey("dump_vgmdb_albums"), Sync.DeriveKey("picture_full"), entryId);
+            byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb_albums"), azuStreamBlob.DeriveKey("picture_full"), entryId);
 
             Bitmap result = null;
             if (blob != null)
@@ -803,14 +811,14 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbGetArbitraryProductNamesByAlbumId == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_arbituaryproducts");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_arbituaryproducts");
                 vgmdbGetArbitraryProductNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetArbitraryProductNamesByAlbumId.CommandText = "SELECT name FROM dump_vgmdb_album_arbituaryproducts WHERE albumid = @id";
+                vgmdbGetArbitraryProductNamesByAlbumId.CommandText = "SELECT name FROM dump_vgmdb.album_arbituaryproducts WHERE albumid = @id";
                 vgmdbGetArbitraryProductNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
 
                 vgmdbGetProductNamesByAlbumId = connection.CreateCommand();
                 vgmdbGetProductNamesByAlbumId.CommandText =
-                    "SELECT prod.name FROM dump_vgmdb_product_albums root JOIN dump_vgmdb_products prod ON root.productid = prod.id WHERE root.albumid = @id";
+                    "SELECT prod.name FROM dump_vgmdb_product_albums root JOIN dump_vgmdb.products prod ON root.productid = prod.id WHERE root.albumid = @id";
                 vgmdbGetProductNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -833,7 +841,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbGetArbitraryArtistNamesByAlbumId == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_artist_arbitrary");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_artist_arbitrary");
                 vgmdbGetArbitraryArtistNamesByAlbumId = connection.CreateCommand();
                 vgmdbGetArbitraryArtistNamesByAlbumId.CommandText = Resources.VgmdbGetArbitraryArtistsByAlbumId_Postgre;
                 vgmdbGetArbitraryArtistNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
@@ -862,9 +870,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindArtistsByName == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_artist");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.artist");
                 vgmdbFindArtistsByName = connection.CreateCommand();
-                vgmdbFindArtistsByName.CommandText = "SELECT id FROM dump_vgmdb_artist WHERE name LIKE @name";
+                vgmdbFindArtistsByName.CommandText = "SELECT id FROM dump_vgmdb.artist WHERE name LIKE @name";
                 vgmdbFindArtistsByName.Parameters.Add("@name", DbType.String);
             }
 
@@ -881,9 +889,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindAlbumIdsByArtistId == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_artists");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_artists");
                 vgmdbFindAlbumIdsByArtistId = connection.CreateCommand();
-                vgmdbFindAlbumIdsByArtistId.CommandText = "SELECT albumid FROM dump_vgmdb_album_artists WHERE artistid=@id";
+                vgmdbFindAlbumIdsByArtistId.CommandText = "SELECT albumid FROM dump_vgmdb.album_artists WHERE artistid=@id";
                 vgmdbFindAlbumIdsByArtistId.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -900,9 +908,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindCoversByAlbumId == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_cover");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_cover");
                 vgmdbFindCoversByAlbumId = connection.CreateCommand();
-                vgmdbFindCoversByAlbumId.CommandText = "SELECT scalerid FROM dump_vgmdb_album_cover WHERE albumid=@id";
+                vgmdbFindCoversByAlbumId.CommandText = "SELECT scalerid FROM dump_vgmdb.album_cover WHERE albumid=@id";
                 vgmdbFindCoversByAlbumId.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -911,7 +919,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
             {
                 int scalerId = dataReader.GetInt32(0);
-                byte[] blob = azuStreamBlob.Get(Sync.DeriveKey("dump_vgmdb_album_cover"),Sync.DeriveKey("buffer"),scalerId);
+                byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb_album_cover"),azuStreamBlob.DeriveKey("buffer"),scalerId);
                 if (blob != null)
                 {
                     if (blob.Length > 0)
@@ -931,9 +939,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindAlbumsBySkuPart == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_albums");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.albums");
                 vgmdbFindAlbumsBySkuPart = connection.CreateCommand();
-                vgmdbFindAlbumsBySkuPart.CommandText = "SELECT id FROM dump_vgmdb_albums WHERE catalog LIKE @key";
+                vgmdbFindAlbumsBySkuPart.CommandText = "SELECT id FROM dump_vgmdb.albums WHERE catalog LIKE @key";
                 vgmdbFindAlbumsBySkuPart.Parameters.Add("@key", DbType.String);
             }
 
@@ -949,7 +957,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindTrackDataByAlbum == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_disc_track_translation");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_disc_track_translation");
                 vgmdbFindTrackDataByAlbum = connection.CreateCommand();
                 vgmdbFindTrackDataByAlbum.CommandText = Resources.VgmdbGetTracksByAlbum_Postgre;
                 vgmdbFindTrackDataByAlbum.Parameters.Add("@id", DbType.Int32);
@@ -980,7 +988,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindArbituraryLabelsByAlbumId == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_label_arbiturary");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_label_arbiturary");
                 vgmdbFindArbituraryLabelsByAlbumId = connection.CreateCommand();
                 vgmdbFindArbituraryLabelsByAlbumId.CommandText = Resources.VgmdbFindArbituraryLabelNamesByAlbumId_Postgre;
                 vgmdbFindArbituraryLabelsByAlbumId.Parameters.Add("@id", DbType.Int32);
@@ -1009,7 +1017,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindRelatedAlbumsCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_relatedalbum");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_relatedalbum");
                 vgmdbFindRelatedAlbumsCommand = connection.CreateCommand();
                 vgmdbFindRelatedAlbumsCommand.CommandText = Resources.VgmdbGetRelatedAlbums_Postgre;
                 vgmdbFindRelatedAlbumsCommand.Parameters.Add("@albumid", DbType.Int32);
@@ -1031,7 +1039,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbGetReleaseEvent == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_releaseevent");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_releaseevent");
                 vgmdbGetReleaseEvent = connection.CreateCommand();
                 vgmdbGetReleaseEvent.CommandText = Resources.VgmDbGetReleaseEvent;
                 vgmdbGetReleaseEvent.Parameters.Add("@albumid", DbType.Int32);
@@ -1052,7 +1060,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbFindReprintCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_reprints");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_reprints");
                 vgmdbFindReprintCommand = connection.CreateCommand();
                 vgmdbFindReprintCommand.CommandText = Resources.VgmdbGetReprints_Postgre;
                 vgmdbFindReprintCommand.Parameters.Add("@albumid", DbType.Int32);
@@ -1074,9 +1082,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vgmdbGetWebsitesCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb_album_websites");
+                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_websites");
                 vgmdbGetWebsitesCommand = connection.CreateCommand();
-                vgmdbGetWebsitesCommand.CommandText = "SELECT link FROM dump_vgmdb_album_websites WHERE albumid=@albumid";
+                vgmdbGetWebsitesCommand.CommandText = "SELECT link FROM dump_vgmdb.album_websites WHERE albumid=@albumid";
                 vgmdbGetWebsitesCommand.Parameters.Add("@albumid", DbType.Int32);
             }
 
@@ -1098,10 +1106,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (psxdcSearchCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter_games");
+                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter.games");
                 psxdcSearchCommand = connection.CreateCommand();
                 psxdcSearchCommand.CommandText =
-                    "SELECT id, platform,sku,title,additionals FROM dump_psxdatacenter_games WHERE title LIKE @p1 OR commontitle LIKE @p1 OR sku LIKE @p2";
+                    "SELECT id, platform,sku,title,additionals FROM dump_psxdatacenter.games WHERE title LIKE @p1 OR commontitle LIKE @p1 OR sku LIKE @p2";
                 psxdcSearchCommand.Parameters.Add("@p1", DbType.String);
                 psxdcSearchCommand.Parameters.Add("@p2", DbType.String);
             }
@@ -1127,7 +1135,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (psxdatacenterGetGameCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter_games");
+                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter.games");
                 psxdatacenterGetGameCommand = connection.CreateCommand();
                 psxdatacenterGetGameCommand.CommandText = Resources.PsxDatacenterGetGame_Postgre;
                 psxdatacenterGetGameCommand.Parameters.Add("@id", DbType.Int32);
@@ -1151,7 +1159,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             result.DeveloperId = dataReader.GetString(7);
             result.PublisherId = dataReader.GetString(8);
             result.DateRelease = dataReader.GetDateTime(9);
-            result.Cover = azuStreamBlob.Get(Sync.DeriveKey("dump_psxdatacenter_games"), Sync.DeriveKey("cover"),previewId);
+            result.Cover = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter_games"), azuStreamBlob.DeriveKey("cover"),previewId);
             result.Description = dataReader.GetString(11);
             result.Barcode = dataReader.GetString(12);
             dataReader.Dispose();
@@ -1163,10 +1171,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (psxDatacenterGetScreenshots == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter_game_screenshots");
+                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter.game_screenshots");
                 psxDatacenterGetScreenshots = connection.CreateCommand();
                 psxDatacenterGetScreenshots.CommandText =
-                    "SELECT screenshot.scalerid FROM dump_psxdatacenter_game_screenshots root JOIN dump_psxdatacenter_screenshots screenshot ON root.screenshotid = screenshot.id WHERE root.gameid=@id";
+                    "SELECT screenshot.scalerid FROM dump_psxdatacenter.game_screenshots root JOIN dump_psxdatacenter.screenshots screenshot ON root.screenshotid = screenshot.id WHERE root.gameid=@id";
                 psxDatacenterGetScreenshots.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1175,8 +1183,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
             {
                 int scalerId = dataReader.GetInt32(0);
-                yield return azuStreamBlob.Get(Sync.DeriveKey("dump_psxdatacenter_screenshots"),
-                    Sync.DeriveKey("buffer"), scalerId);
+                yield return azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter_screenshots"),
+                    azuStreamBlob.DeriveKey("buffer"), scalerId);
             }
 
             dataReader.Dispose();
@@ -1213,11 +1221,15 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public void CreateIndex(SqlIndex index)
         {
+            if (index.TableName.ContainsDigits())
+            {
+                index.TableName = String.Format("\"{0}\"", index.TableName);
+            }
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("CREATE ");
             if (index.Unique)
                 stringBuilder.Append("UNIQUE ");
-            stringBuilder.AppendFormat("INDEX IF NOT EXISTS {0} ", index.IndexName);
+            stringBuilder.AppendFormat("INDEX IF NOT EXISTS {1}.{0} ", index.IndexName, index.SchemaName);
             stringBuilder.AppendFormat("ON {0} (", index.TableName);
             for (int i = 0; i < index.Columns.Length; i++)
             {
@@ -1227,7 +1239,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             stringBuilder.Append(")");
 
-            SQLiteConnection connection = GetConnectionForTable(index.TableName);
+            SQLiteConnection connection = GetConnectionForTable(String.Format("{0}.{1}",index.SchemaName,index.TableName));
             SQLiteCommand command = connection.CreateCommand();
             command.CommandText = stringBuilder.ToString();
             int result = command.ExecuteNonQuery();
@@ -1256,9 +1268,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (getFilesystemMetadataCommand == null)
             {
-                getFilesystemMetadataCommand = GetConnectionForTable("azusa_filesysteminfo").CreateCommand();
+                getFilesystemMetadataCommand = GetConnectionForTable("azusa.filesysteminfo").CreateCommand();
                 getFilesystemMetadataCommand.CommandText =
-                    "SELECT * FROM azusa_filesysteminfo " +
+                    "SELECT * FROM azusa.filesysteminfo " +
                     "WHERE mediaid = @mediaid " +
                     "AND isdirectory = @isdirectory " +
                     "ORDER BY parent ASC";
@@ -1284,8 +1296,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!dataReader.IsDBNull(7))
                 {
                     //child.Header = dataReader.GetByteArray(7);
-                    int key1 = Sync.DeriveKey("azusa_filesysteminfo");
-                    int key2 = Sync.DeriveKey("head");
+                    int key1 = azuStreamBlob.DeriveKey("azusa.filesysteminfo");
+                    int key2 = azuStreamBlob.DeriveKey("head");
                     int key2b = (int)(child.Id << 32);
                     int key3 = (int) (child.Id & 0xffff0000);
                     child.Header = azuStreamBlob.Get(key1, key2 + key2b, key3);
@@ -1302,7 +1314,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vndbSearchCommand == null)
             {
-                vndbSearchCommand = GetConnectionForTable("dump_vndb_release").CreateCommand();
+                vndbSearchCommand = GetConnectionForTable("dump_vndb.release").CreateCommand();
                 vndbSearchCommand.CommandText = Resources.VndbSearch_Postgre;
                 vndbSearchCommand.Parameters.Add("@query", DbType.String);
             }
@@ -1328,8 +1340,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (getVnByReleaseCommand == null)
             {
-                getVnByReleaseCommand = GetConnectionForTable("dump_vndb_release_vns").CreateCommand();
-                getVnByReleaseCommand.CommandText = "SELECT * FROM dump_vndb_release_vns root WHERE rid=@id";
+                getVnByReleaseCommand = GetConnectionForTable("dump_vndb.release_vns").CreateCommand();
+                getVnByReleaseCommand.CommandText = "SELECT * FROM dump_vndb.release_vns root WHERE rid=@id";
                 getVnByReleaseCommand.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1357,11 +1369,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         private SQLiteCommand vndbGetReleaseProducersById;
         public VndbRelease Vndb_GetReleaseById(int releaseResultRid)
         {
-            SQLiteConnection connection = GetConnectionForTable("dump_vndb_release");
+            SQLiteConnection connection = GetConnectionForTable("dump_vndb.release");
             if (vndbGetReleaseByIdCommand == null)
             {
                 vndbGetReleaseByIdCommand = connection.CreateCommand();
-                vndbGetReleaseByIdCommand.CommandText = "SELECT * FROM dump_vndb_release WHERE id=@id";
+                vndbGetReleaseByIdCommand.CommandText = "SELECT * FROM dump_vndb.release WHERE id=@id";
                 vndbGetReleaseByIdCommand.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1476,11 +1488,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         private SQLiteCommand vndbGetVnLanguages;
         public VndbVn Vndb_GetVnById(int vnResultVnid)
         {
-            SQLiteConnection connection = GetConnectionForTable("dump_vndb_vn");
+            SQLiteConnection connection = GetConnectionForTable("dump_vndb.vn");
             if (vndbGetVn == null)
             {
                 vndbGetVn = connection.CreateCommand();
-                vndbGetVn.CommandText = "SELECT * FROM dump_vndb_vn WHERE id=@id";
+                vndbGetVn.CommandText = "SELECT * FROM dump_vndb.vn WHERE id=@id";
                 vndbGetVn.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1508,7 +1520,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!dataReader.IsDBNull(9))
                 result.WikipediaLink = dataReader.GetString(9);
 
-            byte[] coverBuffer = azuStreamBlob.Get(Sync.DeriveKey("dump_vndb_vn"), Sync.DeriveKey("image"), dataReader.GetInt32(0));
+            byte[] coverBuffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb_vn"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
             if (coverBuffer != null && coverBuffer.Length > 0)
             {
                 result.Image = (Bitmap)Image.FromStream(new MemoryStream(coverBuffer));
@@ -1582,7 +1594,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
                 if (!dataReader.IsDBNull(0))
                 {
-                    byte[] buffer = azuStreamBlob.Get(Sync.DeriveKey("dump_vndb_vn_screens"), Sync.DeriveKey("image"), dataReader.GetInt32(0));
+                    byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb_vn_screens"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
                     if (buffer != null && buffer.Length > 0)
                         result.Screens.Add(Image.FromStream(new MemoryStream(buffer)));
                 }
@@ -1616,7 +1628,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (myFigureCollectionSearchCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_myfigurecollection_figures");
+                SQLiteConnection connection = GetConnectionForTable("dump_myfigurecollection.figures");
                 myFigureCollectionSearchCommand = connection.CreateCommand();
                 myFigureCollectionSearchCommand.CommandText = Resources.MyFigureCollectionSearch_Postgre;
                 myFigureCollectionSearchCommand.Parameters.Add("@query", DbType.String);
@@ -1646,7 +1658,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!dataReader.IsDBNull(6))
                     child.Price = dataReader.GetDouble(6);
 
-                child.Thumbnail = azuStreamBlob.Get(Sync.DeriveKey("dump_myfigurecollection_figurephotos"), Sync.DeriveKey("thumbnail"), child.ID);
+                child.Thumbnail = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_myfigurecollection_figurephotos"), azuStreamBlob.DeriveKey("thumbnail"), child.ID);
                 yield return child;
             }
             dataReader.Dispose();
@@ -1655,8 +1667,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public Image MyFigureCollection_GetPhoto(int wrappedFigureId)
         {
             byte[] buffer = azuStreamBlob.Get(
-                Sync.DeriveKey("dump_myfigurecollection_figurephotos"),
-                Sync.DeriveKey("image"), 
+                azuStreamBlob.DeriveKey("dump_myfigurecollection_figurephotos"),
+                azuStreamBlob.DeriveKey("image"), 
                 wrappedFigureId);
             return Image.FromStream(new MemoryStream(buffer));
         }
@@ -1667,7 +1679,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             text = "%" + text + "%";
             if (vocadbSearchCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vocadb_albums");
+                SQLiteConnection connection = GetConnectionForTable("dump_vocadb.albums");
                 vocadbSearchCommand = connection.CreateCommand();
                 vocadbSearchCommand.CommandText = Resources.Vocadb_Search_Postgre;
                 vocadbSearchCommand.Parameters.Add("@query", DbType.String);
@@ -1692,7 +1704,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Image Vocadb_GetAlbumCover(int id)
         {
-            byte[] buffer = azuStreamBlob.Get(Sync.DeriveKey("dump_vocadb_albums"), Sync.DeriveKey("cover"), id);
+            byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vocadb_albums"), azuStreamBlob.DeriveKey("cover"), id);
             if (buffer == null || buffer.Length == 0)
                 return null;
             Image image = Image.FromStream(new MemoryStream(buffer));
@@ -1704,7 +1716,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vocadbFindAlbumNamesBySongNamesCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vocadb_albumtracks");
+                SQLiteConnection connection = GetConnectionForTable("dump_vocadb.albumtracks");
                 vocadbFindAlbumNamesBySongNamesCommand = connection.CreateCommand();
                 vocadbFindAlbumNamesBySongNamesCommand.CommandText = Resources.Vocadb_FindSongRelatedAlbum;
                 vocadbFindAlbumNamesBySongNamesCommand.Parameters.Add("@query", DbType.String);
@@ -1723,10 +1735,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (vocadbGetTracksByAlbumCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_vocadb_albumtracks");
+                SQLiteConnection connection = GetConnectionForTable("dump_vocadb.albumtracks");
                 vocadbGetTracksByAlbumCommand = connection.CreateCommand();
                 vocadbGetTracksByAlbumCommand.CommandText =
-                    "SELECT * FROM dump_vocadb_albumtracks WHERE albumid = @id ORDER BY albumid ASC, discnumber ASC, tracknumber ASC";
+                    "SELECT * FROM dump_vocadb.albumtracks WHERE albumid = @id ORDER BY albumid ASC, discnumber ASC, tracknumber ASC";
                 vocadbGetTracksByAlbumCommand.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1758,9 +1770,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             long day = DateTime.Now.Ticks / TicksPerDay;
             int day32 = (int) day;
-            if (azuStreamBlob.TestFor(Sync.DeriveKey(fastbooru), Sync.DeriveKey(fastbooru), day32))
+            if (azuStreamBlob.TestFor(azuStreamBlob.DeriveKey(fastbooru), azuStreamBlob.DeriveKey(fastbooru), day32))
             {
-                byte[] cacheBuffer = azuStreamBlob.Get(Sync.DeriveKey(fastbooru), Sync.DeriveKey(fastbooru), day32);
+                byte[] cacheBuffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey(fastbooru), azuStreamBlob.DeriveKey(fastbooru), day32);
                 BinaryReader cacheBr = new BinaryReader(new MemoryStream(cacheBuffer));
                 while (cacheBr.ReadByte() == 1)
                 {
@@ -1776,7 +1788,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             
             if (getAllTagsCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_gb_posttags");
+                SQLiteConnection connection = GetConnectionForTable("dump_gb.posttags");
                 getAllTagsCommand = connection.CreateCommand();
                 getAllTagsCommand.CommandText = Resources.Gelbooru_GetTags_Postgre;
             }
@@ -1809,7 +1821,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (azuStreamBlob.CanWrite)
             {
                 MemoryStream ms = (MemoryStream) cacheGen.BaseStream;
-                azuStreamBlob.Put(Sync.DeriveKey(fastbooru), Sync.DeriveKey(fastbooru), day32, ms.ToArray());
+                azuStreamBlob.Put(azuStreamBlob.DeriveKey(fastbooru), azuStreamBlob.DeriveKey(fastbooru), day32, ms.ToArray());
             }
             cacheGen.Dispose();
         }
@@ -1819,10 +1831,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (gelbooruGetPostsByTagCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("dump_gb_posttags");
+                SQLiteConnection connection = GetConnectionForTable("dump_gb.posttags");
                 gelbooruGetPostsByTagCommand = connection.CreateCommand();
                 gelbooruGetPostsByTagCommand.CommandText =
-                    "SELECT DISTINCT postid FROM dump_gb_posttags WHERE tagid = @tagid";
+                    "SELECT DISTINCT postid FROM dump_gb.posttags WHERE tagid = @tagid";
                 gelbooruGetPostsByTagCommand.Parameters.Add("@tagid", DbType.Int32);
             }
 
@@ -1845,6 +1857,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
+        public void CreateSchema(string schemaName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName)
+        {
+            throw new NotImplementedException();
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();
@@ -1852,9 +1874,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Country> GetAllCountries()
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_countries");
+            SQLiteConnection connection = GetConnectionForTable("azusa.countries");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_countries";
+            cmd.CommandText = "SELECT * FROM azusa.countries";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1883,9 +1905,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Platform> GetAllPlatforms()
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_platforms");
+            SQLiteConnection connection = GetConnectionForTable("azusa.platforms");
             SQLiteCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM azusa_platforms";
+            command.CommandText = "SELECT * FROM azusa.platforms";
             SQLiteDataReader dataReader = command.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1904,9 +1926,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Shelf> GetAllShelves()
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_shelves");
+            SQLiteConnection connection = GetConnectionForTable("azusa.shelves");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_shelves";
+            cmd.CommandText = "SELECT * FROM azusa.shelves";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1926,9 +1948,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Shop> GetAllShops()
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_shops");
+            SQLiteConnection connection = GetConnectionForTable("azusa.shops");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_shops";
+            cmd.CommandText = "SELECT * FROM azusa.shops";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1946,7 +1968,17 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             cmd.Dispose();
         }
 
+        public List<string> GetAllPublicTableNames()
+        {
+            throw new NotImplementedException();
+        }
+
         public List<string> GetAllTableNames()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<string> GetAllSchemas()
         {
             throw new NotImplementedException();
         }
@@ -1981,9 +2013,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (getMediaByIdCommand == null)
             {
-                SQLiteConnection connection = GetConnectionForTable("azusa_media");
+                SQLiteConnection connection = GetConnectionForTable("azusa.media");
                 getMediaByIdCommand = connection.CreateCommand();
-                getMediaByIdCommand.CommandText = "SELECT * FROM azusa_media WHERE id=@id";
+                getMediaByIdCommand.CommandText = "SELECT * FROM azusa.media WHERE id=@id";
                 getMediaByIdCommand.Parameters.Add(new SQLiteParameter("@id", DbType.Int32));
             }
 
@@ -2027,12 +2059,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(12))
                 m.PlaylistContent = ndr.GetString(12);
 
-            m.CdTextContent = azuStreamBlob.Get(Sync.DeriveKey("azusa_media"), Sync.DeriveKey("cdtext"), m.Id);
+            m.CdTextContent = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.media"), azuStreamBlob.DeriveKey("cdtext"), m.Id);
 
             if (!ndr.IsDBNull(14))
                 m.LogfileContent = ndr.GetString(14);
 
-            m.MdsContent = azuStreamBlob.Get(Sync.DeriveKey("azusa_media"), Sync.DeriveKey("mediadescriptorsidecar"), m.Id);
+            m.MdsContent = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.media"), azuStreamBlob.DeriveKey("mediadescriptorsidecar"), m.Id);
             m.isSealed = ndr.GetBoolean(16);
 
             if (!ndr.IsDBNull(17))
@@ -2047,7 +2079,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<MediaInProduct> GetMediaByProduct(Product prod)
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_media");
+            SQLiteConnection connection = GetConnectionForTable("azusa.media");
             SQLiteCommand cmd = connection.CreateCommand();
             cmd.CommandText = Resources.GetMediaByProduct_Postgre;
             cmd.Parameters.Add("@productId", DbType.Int32);
@@ -2067,9 +2099,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<MediaType> GetMediaTypes()
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_mediaTypes");
+            SQLiteConnection connection = GetConnectionForTable("azusa.mediaTypes");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_mediaTypes";
+            cmd.CommandText = "SELECT * FROM azusa.mediaTypes";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -2080,7 +2112,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 mt.GraphData = dataReader.GetBoolean(3);
                 mt.DateAdded = dataReader.GetDateTime(4);
                 mt.IgnoreForStatistics = dataReader.GetBoolean(6);
-                mt.Icon = azuStreamBlob.Get(Sync.DeriveKey("azusa_mediaTypes"), Sync.DeriveKey("icon"), mt.Id);
+                mt.Icon = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.mediatypes"), azuStreamBlob.DeriveKey("icon"), mt.Id);
                 yield return mt;
             }
             dataReader.Dispose();
@@ -2089,9 +2121,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Product GetProductById(int id)
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_products");
+            SQLiteConnection connection = GetConnectionForTable("azusa.products");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_products WHERE id = @id";
+            cmd.CommandText = "SELECT * FROM azusa.products WHERE id = @id";
             cmd.Parameters.Add("@id", DbType.Int32);
             cmd.Parameters["@id"].Value = id;
             SQLiteDataReader ndr = cmd.ExecuteReader();
@@ -2102,7 +2134,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 result.Id = ndr.GetInt32(0);
                 result.InShelf = ndr.GetInt32(1);
                 result.Name = ndr.GetString(2);
-                result.Picture = azuStreamBlob.Get(Sync.DeriveKey("azusa_products"), Sync.DeriveKey("picture"), result.Id);
+                result.Picture = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("picture"), result.Id);
 
                 if (!ndr.IsDBNull(4))
                     result.Price = ndr.GetDouble(4);
@@ -2122,7 +2154,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!ndr.IsDBNull(9))
                     result.CountryOfOriginId = ndr.GetInt32(9);
 
-                result.Screenshot = azuStreamBlob.Get(Sync.DeriveKey("azusa_products"), Sync.DeriveKey("screenshot"), result.Id);
+                result.Screenshot = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("screenshot"), result.Id);
 
                 if (!ndr.IsDBNull(11))
                     result.DateAdded = ndr.GetDateTime(11);
@@ -2141,7 +2173,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<ProductInShelf> GetProductsInShelf(Shelf shelf)
         {
-            SQLiteConnection connection = GetConnectionForTable("azusa_products");
+            SQLiteConnection connection = GetConnectionForTable("azusa.products");
             SQLiteCommand cmd = connection.CreateCommand();
             cmd.CommandText = Resources.GetProductsInShelf_Postgre;
             cmd.Parameters.Add("@shelf", DbType.Int32);
@@ -2157,8 +2189,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!dataReader.IsDBNull(3))
                     product.BoughtOn = dataReader.GetDateTime(3);
 
-                product.ScreenshotSize = azuStreamBlob.GetSize(Sync.DeriveKey("azusa_products"), Sync.DeriveKey("screenshot"), product.Id);
-                product.CoverSize = azuStreamBlob.GetSize(Sync.DeriveKey("azusa_products"), Sync.DeriveKey("picture"), product.Id);
+                product.ScreenshotSize = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("screenshot"), product.Id);
+                product.CoverSize = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("picture"), product.Id);
 
                 if (!dataReader.IsDBNull(6))
                     product.NSFW = dataReader.GetBoolean(6);
@@ -2230,9 +2262,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public int? SedgeTree_GetLatestVersion()
         {
-            SQLiteConnection connection = GetConnectionForTable("sedgetree_versioning");
+            SQLiteConnection connection = GetConnectionForTable("sedgetree.versioning");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT MAX(id) FROM sedgetree_versioning";
+            cmd.CommandText = "SELECT MAX(id) FROM sedgetree.versioning";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             int? result = null;
             if (dataReader.Read())
@@ -2337,9 +2369,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Tour> WarWalking_GetAllTours()
         {
-            SQLiteConnection connection = GetConnectionForTable("warwalking_tours");
+            SQLiteConnection connection = GetConnectionForTable("warwalking.tours");
             SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM warwalking_tours";
+            cmd.CommandText = "SELECT * FROM warwalking.tours";
             SQLiteDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -2383,6 +2415,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public void WarWalking_UpdateDiscovery(Discovery discovery)
         {
             throw new NotImplementedException();
+        }
+
+        public AzusaStreamBlob GetStreamBlob()
+        {
+            return azuStreamBlob;
         }
     }
 }

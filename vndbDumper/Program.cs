@@ -232,28 +232,28 @@ namespace vndbDumper
         private void PrepareStatements()
         {
             updateScreenImage = connection.CreateCommand();
-            updateScreenImage.CommandText = "UPDATE dump_vndb_vn_screens SET image = @image WHERE screenid = @screenid";
+            updateScreenImage.CommandText = "UPDATE dump_vndb.vn_screens SET image = @image WHERE screenid = @screenid";
             updateScreenImage.Parameters.Add(new NpgsqlParameter("@image", NpgsqlDbType.Bytea));
             updateScreenImage.Parameters.Add(new NpgsqlParameter("@screenid", DbType.Int32));
 
             findMissingScreen = connection.CreateCommand();
-            findMissingScreen.CommandText = "SELECT screenid, imageUrl FROM dump_vndb_vn_screens WHERE image IS NULL LIMIT 1";
+            findMissingScreen.CommandText = "SELECT screenid, imageUrl FROM dump_vndb.vn_screens WHERE image IS NULL LIMIT 1";
 
             testForRelease = connection.CreateCommand();
-            testForRelease.CommandText = "SELECT dateadded FROM dump_vndb_release WHERE id=@id";
+            testForRelease.CommandText = "SELECT dateadded FROM dump_vndb.release WHERE id=@id";
             testForRelease.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             testForCharacterVn = connection.CreateCommand();
-            testForCharacterVn.CommandText = "SELECT dateadded FROM dump_vndb_character_vns WHERE cid=@cid AND vnid=@vnid";
+            testForCharacterVn.CommandText = "SELECT dateadded FROM dump_vndb.character_vns WHERE cid=@cid AND vnid=@vnid";
             testForCharacterVn.Parameters.Add(new NpgsqlParameter("@cid", DbType.Int32));
             testForCharacterVn.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
 
             testForCharacter = connection.CreateCommand();
-            testForCharacter.CommandText = "SELECT dateadded FROM dump_vndb_character WHERE id=@id";
+            testForCharacter.CommandText = "SELECT dateadded FROM dump_vndb.character WHERE id=@id";
             testForCharacter.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertCharacterVoiced = connection.CreateCommand();
-            insertCharacterVoiced.CommandText = "INSERT INTO dump_vndb_character_voiced" +
+            insertCharacterVoiced.CommandText = "INSERT INTO dump_vndb.character_voiced" +
                 "(cid, id, aid, vid, note) VALUES " +
                 "(@cid, @id, @aid, @vid, @note)";
             insertCharacterVoiced.Parameters.Add(new NpgsqlParameter("@cid", DbType.Int32));
@@ -263,7 +263,7 @@ namespace vndbDumper
             insertCharacterVoiced.Parameters.Add(new NpgsqlParameter("@note", DbType.String));
 
             insertCharacterVn = connection.CreateCommand();
-            insertCharacterVn.CommandText = "INSERT INTO dump_vndb_character_vns " +
+            insertCharacterVn.CommandText = "INSERT INTO dump_vndb.character_vns " +
                 "(cid, vnid, rid, spoilerlevel, role) " +
                 "VALUES " +
                 "(@cid, @vnid, @rid, @spoilerlevel, @role)";
@@ -274,7 +274,7 @@ namespace vndbDumper
             insertCharacterVn.Parameters.Add(new NpgsqlParameter("@role", DbType.String));
 
             insertCharacterTrait = connection.CreateCommand();
-            insertCharacterTrait.CommandText = "INSERT INTO dump_vndb_character_traits " +
+            insertCharacterTrait.CommandText = "INSERT INTO dump_vndb.character_traits " +
                 "(cid, tid, spoilerlevel) VALUES " +
                 "(@cid, @tid, @spoilerlevel)";
             insertCharacterTrait.Parameters.Add(new NpgsqlParameter("@cid", DbType.Int32));
@@ -282,7 +282,7 @@ namespace vndbDumper
             insertCharacterTrait.Parameters.Add(new NpgsqlParameter("@spoilerlevel", DbType.Int32));
 
             insertCharacterInstance = connection.CreateCommand();
-            insertCharacterInstance.CommandText = "INSERT INTO dump_vndb_character_instances " +
+            insertCharacterInstance.CommandText = "INSERT INTO dump_vndb.character_instances " +
                 "(cid, id, spoiler, name, original) " +
                 "VALUES " +
                 "(@cid, @id, @spoiler, @name, @original)";
@@ -293,7 +293,7 @@ namespace vndbDumper
             insertCharacterInstance.Parameters.Add(new NpgsqlParameter("@original", DbType.String));
 
             insertCharacter = connection.CreateCommand();
-            insertCharacter.CommandText = "INSERT INTO dump_vndb_character " +
+            insertCharacter.CommandText = "INSERT INTO dump_vndb.character " +
                 "(id, name, original, gender, bloodt, birthday, aliases, description, image, bust, waist, hip, height, weight) " +
                 "VALUES " +
                 "(@id, @name, @original, @gender, @bloodt, @birthday, @aliases, @description, @image, @bust, @waist, @hip, @height, @weight)";
@@ -313,7 +313,7 @@ namespace vndbDumper
             insertCharacter.Parameters.Add(new NpgsqlParameter("@weight", DbType.Int32));
 
             insertReleaseVn = connection.CreateCommand();
-            insertReleaseVn.CommandText = "INSERT INTO dump_vndb_release_vns " +
+            insertReleaseVn.CommandText = "INSERT INTO dump_vndb.release_vns " +
                 "(rid, vnid, title, original) " +
                 "VALUES" +
                 "(@rid, @vnid, @title, @original)";
@@ -323,7 +323,7 @@ namespace vndbDumper
             insertReleaseVn.Parameters.Add(new NpgsqlParameter("@original", DbType.String));
 
             insertReleaseProducer = connection.CreateCommand();
-            insertReleaseProducer.CommandText = "INSERT INTO dump_vndb_release_producers " +
+            insertReleaseProducer.CommandText = "INSERT INTO dump_vndb.release_producers " +
                 "(rid, pid, developer, publisher, name, original, type) " +
                 "VALUES" +
                 "(@rid, @pid, @developer, @publisher, @name, @original, @type)";
@@ -336,26 +336,26 @@ namespace vndbDumper
             insertReleaseProducer.Parameters.Add(new NpgsqlParameter("@type", DbType.String));
 
             insertReleasePlatform = connection.CreateCommand();
-            insertReleasePlatform.CommandText = "INSERT INTO dump_vndb_release_platforms " +
+            insertReleasePlatform.CommandText = "INSERT INTO dump_vndb.release_platforms " +
                 "(rid, platform) VALUES (@rid, @platform)";
             insertReleasePlatform.Parameters.Add(new NpgsqlParameter("@rid", DbType.Int32));
             insertReleasePlatform.Parameters.Add(new NpgsqlParameter("@platform", DbType.String));
 
             insertReleaseMedia = connection.CreateCommand();
-            insertReleaseMedia.CommandText = "INSERT INTO dump_vndb_release_media " +
+            insertReleaseMedia.CommandText = "INSERT INTO dump_vndb.release_media " +
                 "(rid, medium, qty) VALUES (@rid, @medium, @qty)";
             insertReleaseMedia.Parameters.Add(new NpgsqlParameter("@rid", DbType.Int32));
             insertReleaseMedia.Parameters.Add(new NpgsqlParameter("@medium", DbType.String));
             insertReleaseMedia.Parameters.Add(new NpgsqlParameter("@qty", DbType.Int32));
 
             insertReleaseLanguage = connection.CreateCommand();
-            insertReleaseLanguage.CommandText = "INSERT INTO dump_vndb_release_languages " +
+            insertReleaseLanguage.CommandText = "INSERT INTO dump_vndb.release_languages " +
                 "(rid, lang) VALUES (@rid, @lang)";
             insertReleaseLanguage.Parameters.Add(new NpgsqlParameter("@rid", DbType.Int32));
             insertReleaseLanguage.Parameters.Add(new NpgsqlParameter("@lang", DbType.String));
 
             insertRelease = connection.CreateCommand();
-            insertRelease.CommandText = "INSERT INTO dump_vndb_release " +
+            insertRelease.CommandText = "INSERT INTO dump_vndb.release " +
                 "(id, title, original, released, type, patch, freeware, doujin, website, notes, minage, gtin, catalog, resolution, voiced, animation_story, animation_ero) " +
                 "VALUES " +
                 "(@id, @title, @original, @released, @type, @patch, @freeware, @doujin, @website, @notes, @minage, @gtin, @catalog, @resolution, @voiced, @animation_story, @animation_ero)";
@@ -378,7 +378,7 @@ namespace vndbDumper
             insertRelease.Parameters.Add(new NpgsqlParameter("@animation_ero", DbType.Int32));
 
             scrapeVn = connection.CreateCommand();
-            scrapeVn.CommandText = "UPDATE dump_vndb_vn SET scraped = TRUE, title = @title, original = @original, released = @released, " +
+            scrapeVn.CommandText = "UPDATE dump_vndb.vn SET scraped = TRUE, title = @title, original = @original, released = @released, " +
                 "aliases = @aliases, length = @length, description = @description, wikipedia = @wikipedia, encubed = @encubed, " +
                 "renai = @renai, image = @image, image_nsfw = @image_nsfw, " +
                 "popularity = @popularity, rating = @rating, votecount = @votecount " +
@@ -400,7 +400,7 @@ namespace vndbDumper
             scrapeVn.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertVnStaff = connection.CreateCommand();
-            insertVnStaff.CommandText = "INSERT INTO dump_vndb_vn_staff " +
+            insertVnStaff.CommandText = "INSERT INTO dump_vndb.vn_staff " +
                 "(vnid, sid, aid, name, original, role, note) " +
                 "VALUES " +
                 "(@vnid, @sid, @aid, @name, @original, @role, @note)";
@@ -413,7 +413,7 @@ namespace vndbDumper
             insertVnStaff.Parameters.Add(new NpgsqlParameter("@note", DbType.String));
 
             insertVnScreen = connection.CreateCommand();
-            insertVnScreen.CommandText = "INSERT INTO dump_vndb_vn_screens " +
+            insertVnScreen.CommandText = "INSERT INTO dump_vndb.vn_screens " +
                 "(imageurl, rid, nsfw, height, width, vnid) " +
                 "VALUES " +
                 "(@imageurl, @rid, @nsfw, @height, @width, @vnid)";
@@ -425,7 +425,7 @@ namespace vndbDumper
             insertVnScreen.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             
             insertVnTag = connection.CreateCommand();
-            insertVnTag.CommandText = "INSERT INTO dump_vndb_vn_tag " +
+            insertVnTag.CommandText = "INSERT INTO dump_vndb.vn_tag " +
                 "(srcid, tagid, score, spoilerlevel) " +
                 "VALUES " +
                 "(@srcid, @tagid, @score, @spoilerlevel)";
@@ -435,7 +435,7 @@ namespace vndbDumper
             insertVnTag.Parameters.Add(new NpgsqlParameter("@spoilerlevel", DbType.Int32));
 
             insertRelation = connection.CreateCommand();
-            insertRelation.CommandText = "INSERT INTO dump_vndb_vn_relation " +
+            insertRelation.CommandText = "INSERT INTO dump_vndb.vn_relation " +
                 "(srcid,id,relation,title,original,official) " +
                 "VALUES " +
                 "(@srcid,@id,@relation,@title,@original,@official)";
@@ -447,7 +447,7 @@ namespace vndbDumper
             insertRelation.Parameters.Add(new NpgsqlParameter("@official", DbType.Boolean));
 
             insertAnime = connection.CreateCommand();
-            insertAnime.CommandText = "INSERT INTO dump_vndb_vn_anime (vnid, id, ann_id, nfo_id, title_romaji, title_kanji, year, type) VALUES (@vnid,@id,@ann_id,@nfo_id,@title_romaji,@title_kanji,@year,@type)";
+            insertAnime.CommandText = "INSERT INTO dump_vndb.vn_anime (vnid, id, ann_id, nfo_id, title_romaji, title_kanji, year, type) VALUES (@vnid,@id,@ann_id,@nfo_id,@title_romaji,@title_kanji,@year,@type)";
             insertAnime.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             insertAnime.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertAnime.Parameters.Add(new NpgsqlParameter("@ann_id", DbType.Int32));
@@ -458,33 +458,33 @@ namespace vndbDumper
             insertAnime.Parameters.Add(new NpgsqlParameter("@type", DbType.String));
 
             insertVnPlatform = connection.CreateCommand();
-            insertVnPlatform.CommandText = "INSERT INTO dump_vndb_vn_platforms (vnid,platform) VALUES (@vnid,@platform)";
+            insertVnPlatform.CommandText = "INSERT INTO dump_vndb.vn_platforms (vnid,platform) VALUES (@vnid,@platform)";
             insertVnPlatform.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             insertVnPlatform.Parameters.Add(new NpgsqlParameter("@platform", DbType.String));
 
             insertVnLanguage = connection.CreateCommand();
-            insertVnLanguage.CommandText = "INSERT INTO dump_vndb_vn_languages (vnid,language,orig_lang) VALUES (@vnid,@language,@orig_lang)";
+            insertVnLanguage.CommandText = "INSERT INTO dump_vndb.vn_languages (vnid,language,orig_lang) VALUES (@vnid,@language,@orig_lang)";
             insertVnLanguage.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             insertVnLanguage.Parameters.Add(new NpgsqlParameter("@language", DbType.String));
             insertVnLanguage.Parameters.Add(new NpgsqlParameter("@orig_lang", DbType.Boolean));
 
             findUnscrapedVn = connection.CreateCommand();
-            findUnscrapedVn.CommandText = "SELECT id FROM dump_vndb_vn WHERE scraped = FALSE LIMIT 1";
+            findUnscrapedVn.CommandText = "SELECT id FROM dump_vndb.vn WHERE scraped = FALSE LIMIT 1";
 
             testForVn = connection.CreateCommand();
-            testForVn.CommandText = "SELECT id FROM dump_vndb_vn WHERE id=@id";
+            testForVn.CommandText = "SELECT id FROM dump_vndb.vn WHERE id=@id";
             testForVn.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertVn = connection.CreateCommand();
-            insertVn.CommandText = "INSERT INTO dump_vndb_vn (id) VALUES (@id)";
+            insertVn.CommandText = "INSERT INTO dump_vndb.vn (id) VALUES (@id)";
             insertVn.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             testForTagId = connection.CreateCommand();
-            testForTagId.CommandText = "SELECT meta FROM dump_vndb_tags WHERE id=@id";
+            testForTagId.CommandText = "SELECT meta FROM dump_vndb.tags WHERE id=@id";
             testForTagId.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertTag = connection.CreateCommand();
-            insertTag.CommandText = "INSERT INTO dump_vndb_tags (id,name,description,meta,vns,cat) VALUES (@id,@name,@desc,@meta,@vns,@cat)";
+            insertTag.CommandText = "INSERT INTO dump_vndb.tags (id,name,description,meta,vns,cat) VALUES (@id,@name,@desc,@meta,@vns,@cat)";
             insertTag.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertTag.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             insertTag.Parameters.Add(new NpgsqlParameter("@desc", DbType.String));
@@ -493,21 +493,21 @@ namespace vndbDumper
             insertTag.Parameters.Add(new NpgsqlParameter("@cat", DbType.String));
 
             insertTagAlias = connection.CreateCommand();
-            insertTagAlias.CommandText = "INSERT INTO dump_vndb_tags_aliases (tagid,name) VALUES (@tagid,@name)";
+            insertTagAlias.CommandText = "INSERT INTO dump_vndb.tags_aliases (tagid,name) VALUES (@tagid,@name)";
             insertTagAlias.Parameters.Add(new NpgsqlParameter("@tagid", DbType.Int32));
             insertTagAlias.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
 
             insertTagParent = connection.CreateCommand();
-            insertTagParent.CommandText = "INSERT INTO dump_vndb_tags_parents (child,parent) VALUES (@child,@parent)";
+            insertTagParent.CommandText = "INSERT INTO dump_vndb.tags_parents (child,parent) VALUES (@child,@parent)";
             insertTagParent.Parameters.Add(new NpgsqlParameter("@child", DbType.Int32));
             insertTagParent.Parameters.Add(new NpgsqlParameter("@parent", DbType.Int32));
 
             testForTrait = connection.CreateCommand();
-            testForTrait.CommandText = "SELECT meta FROM dump_vndb_traits WHERE id=@id";
+            testForTrait.CommandText = "SELECT meta FROM dump_vndb.traits WHERE id=@id";
             testForTrait.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
 
             insertTrait = connection.CreateCommand();
-            insertTrait.CommandText = "INSERT INTO dump_vndb_traits (id,name,description,meta,chars) VALUES (@id,@name,@desc,@meta,@chars)";
+            insertTrait.CommandText = "INSERT INTO dump_vndb.traits (id,name,description,meta,chars) VALUES (@id,@name,@desc,@meta,@chars)";
             insertTrait.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertTrait.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
             insertTrait.Parameters.Add(new NpgsqlParameter("@desc", DbType.String));
@@ -515,22 +515,22 @@ namespace vndbDumper
             insertTrait.Parameters.Add(new NpgsqlParameter("@chars", DbType.Int32));
 
             insertTraitAlias = connection.CreateCommand();
-            insertTraitAlias.CommandText = "INSERT INTO dump_vndb_traits_aliases (id,alias) VALUES (@id,@alias)";
+            insertTraitAlias.CommandText = "INSERT INTO dump_vndb.traits_aliases (id,alias) VALUES (@id,@alias)";
             insertTraitAlias.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             insertTraitAlias.Parameters.Add(new NpgsqlParameter("@alias", DbType.String));
 
             insertTraitParent = connection.CreateCommand();
-            insertTraitParent.CommandText = "INSERT INTO dump_vndb_traits_parents (child,parent) VALUES (@child,@parent)";
+            insertTraitParent.CommandText = "INSERT INTO dump_vndb.traits_parents (child,parent) VALUES (@child,@parent)";
             insertTraitParent.Parameters.Add(new NpgsqlParameter("@child", DbType.Int32));
             insertTraitParent.Parameters.Add(new NpgsqlParameter("@parent", DbType.Int32));
 
             testForVote = connection.CreateCommand();
-            testForVote.CommandText = "SELECT vote FROM dump_vndb_votes WHERE vnid=@vnid AND userid=@userid";
+            testForVote.CommandText = "SELECT vote FROM dump_vndb.votes WHERE vnid=@vnid AND userid=@userid";
             testForVote.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             testForVote.Parameters.Add(new NpgsqlParameter("@userid", DbType.Int32));
 
             insertVote = connection.CreateCommand();
-            insertVote.CommandText = "INSERT INTO dump_vndb_votes (vnid,userid,vote,dateutime) VALUES (@vnid,@userid,@vote,@utime)";
+            insertVote.CommandText = "INSERT INTO dump_vndb.votes (vnid,userid,vote,dateutime) VALUES (@vnid,@userid,@vote,@utime)";
             insertVote.Parameters.Add(new NpgsqlParameter("@vnid", DbType.Int32));
             insertVote.Parameters.Add(new NpgsqlParameter("@userid", DbType.Int32));
             insertVote.Parameters.Add(new NpgsqlParameter("@vote", DbType.Int16));

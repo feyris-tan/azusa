@@ -11,6 +11,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         [XmlAttribute] public DateTime Timestamp { get; set; }
 
         public string[] Columns { get; set; }
+        [XmlAttribute] public string SchemaName { get; set; }
 
         protected bool Equals(SqlIndex other)
         {

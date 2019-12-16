@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using AzusaERP;
@@ -46,7 +48,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             ncsb.Password = iniSection["password"];
             ncsb.Port = Convert.ToUInt16(iniSection["port"]);
             ncsb.Username = iniSection["username"];
-            ncsb.SearchPath = "public";
 
             connection = new NpgsqlConnection(ncsb.ToString());
             connection.Open();
@@ -60,7 +61,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public int? SedgeTree_GetLatestVersion()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT MAX(id) FROM sedgetree_versioning";
+            cmd.CommandText = "SELECT MAX(id) FROM sedgetree.versioning";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             int? result = null;
             if (dataReader.Read())
@@ -95,7 +96,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Tour> WarWalking_GetAllTours()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM warwalking_tours";
+            cmd.CommandText = "SELECT * FROM warwalking.tours";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -178,7 +179,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
         }
 
-        public List<string> GetAllTableNames()
+        public List<string> GetAllPublicTableNames()
         {
             List<string> result = new List<string>();
 
@@ -193,10 +194,41 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return result;
         }
 
+        public List<string> GetAllTableNames()
+        {
+            List<string> result = new List<string>();
+
+            NpgsqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT table_schema || '.' || table_name FROM information_schema.tables";
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(reader.GetString(0));
+            reader.Dispose();
+            cmd.Dispose();
+
+            return result;
+        }
+
+        public List<string> GetAllSchemas()
+        {
+            List<string> result = new List<string>();
+
+            NpgsqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT table_schema FROM information_schema.tables";
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(reader.GetString(0));
+            reader.Dispose();
+            cmd.Dispose();
+
+            return result;
+        }
+
+
         public bool Statistics_TestForDate(DateTime today)
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT \"totalProducts\" FROM azusa_statistics WHERE date=@date";
+            cmd.CommandText = "SELECT \"totalProducts\" FROM azusa.statistics WHERE date=@date";
             cmd.Parameters.Add("@date", NpgsqlDbType.Date);
             cmd.Parameters["@date"].Value = today.Date;
             NpgsqlDataReader reader = cmd.ExecuteReader();
@@ -221,12 +253,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public int Statistics_GetTotalProducts()
         {
-            return SelectCountStarFrom("azusa_products");
+            return SelectCountStarFrom("azusa.products");
         }
 
         public int Statistics_GetTotalMedia()
         {
-            return SelectCountStarFrom("azusa_media");
+            return SelectCountStarFrom("azusa.media");
         }
 
         public int Statistics_GetTotalMissingCovers()
@@ -282,7 +314,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             NpgsqlCommand cmd = connection.CreateCommand();
             cmd.CommandText =
-                "INSERT INTO azusa_statistics\r\n       (date, \"totalProducts\",\"totalMedia\",\"missingCover\",\"missingGraph\",undumped,\"missingScreenshots\")\r\nVALUES (@date,@totalProducts, @totalMedia, @missingCover, @missingGraph,@undumped,@missingScreenshots)";
+                "INSERT INTO azusa.statistics\r\n       (date, \"totalProducts\",\"totalMedia\",\"missingCover\",\"missingGraph\",undumped,\"missingScreenshots\")\r\nVALUES (@date,@totalProducts, @totalMedia, @missingCover, @missingGraph,@undumped,@missingScreenshots)";
             cmd.Parameters.Add("@date", NpgsqlDbType.Date);
             cmd.Parameters.Add("@totalProducts", NpgsqlDbType.Integer);
             cmd.Parameters.Add("@totalMedia", NpgsqlDbType.Integer);
@@ -303,7 +335,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Shop> GetAllShops()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_shops";
+            cmd.CommandText = "SELECT * FROM azusa.shops";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -324,7 +356,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Shelf> GetAllShelves()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_shelves";
+            cmd.CommandText = "SELECT * FROM azusa.shelves";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -377,7 +409,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public int CreateProductAndReturnId(Shelf shelf, string name)
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO azusa_products (inshelf,name,consistent,complete) VALUES (@inShelf,@name,FALSE,FALSE) RETURNING id";
+            cmd.CommandText = "INSERT INTO azusa.products (inshelf,name,consistent,complete) VALUES (@inShelf,@name,FALSE,FALSE) RETURNING id";
             cmd.Parameters.Add("@inShelf", NpgsqlDbType.Integer);
             cmd.Parameters.Add("@name", NpgsqlDbType.Varchar);
             cmd.Parameters["@inShelf"].Value = shelf.Id;
@@ -393,7 +425,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public Product GetProductById(int id)
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_products WHERE id = @id";
+            cmd.CommandText = "SELECT * FROM azusa.products WHERE id = @id";
             cmd.Parameters.Add("@id", NpgsqlDbType.Integer);
             cmd.Parameters["@id"].Value = id;
             NpgsqlDataReader ndr = cmd.ExecuteReader();
@@ -444,7 +476,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public void UpdateProduct(Product product)
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "UPDATE azusa_products SET name=@name, price=@price, \"boughtOn\"=@boughtOn, sku=@sku, platform=@platform, " +
+            cmd.CommandText = "UPDATE azusa.products SET name=@name, price=@price, \"boughtOn\"=@boughtOn, sku=@sku, platform=@platform, " +
                               "supplier=@supplier, " +
                               "\"countryOfOrigin\"=@countryOfOrigin, consistent=@consistent, nsfw=@nsfw, complete=@complete, " +
                               "dateupdated=@dateUpdated " +
@@ -484,7 +516,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (setCoverCommand == null)
             {
                 setCoverCommand = connection.CreateCommand();
-                setCoverCommand.CommandText = "UPDATE azusa_products SET picture = @picture WHERE id=@id";
+                setCoverCommand.CommandText = "UPDATE azusa.products SET picture = @picture WHERE id=@id";
                 setCoverCommand.Parameters.Add("@picture", NpgsqlDbType.Bytea);
                 setCoverCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
@@ -505,7 +537,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (setScreenshotCommand == null)
             {
                 setScreenshotCommand = connection.CreateCommand();
-                setScreenshotCommand.CommandText = "UPDATE azusa_products SET screenshot = @screenshot WHERE id=@id";
+                setScreenshotCommand.CommandText = "UPDATE azusa.products SET screenshot = @screenshot WHERE id=@id";
                 setScreenshotCommand.Parameters.Add("@screenshot", NpgsqlDbType.Bytea);
                 setScreenshotCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
@@ -519,7 +551,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Platform> GetAllPlatforms()
         {
             NpgsqlCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM azusa_platforms";
+            command.CommandText = "SELECT * FROM azusa.platforms";
             NpgsqlDataReader dataReader = command.ExecuteReader();
             while (dataReader.Read())
             {
@@ -539,7 +571,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<MediaType> GetMediaTypes()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_mediaTypes";
+            cmd.CommandText = "SELECT * FROM azusa.mediaTypes";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -584,7 +616,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (getMediaByIdCommand == null)
             {
                 getMediaByIdCommand = connection.CreateCommand();
-                getMediaByIdCommand.CommandText = "SELECT * FROM azusa_media WHERE id=@id";
+                getMediaByIdCommand.CommandText = "SELECT * FROM azusa.media WHERE id=@id";
                 getMediaByIdCommand.Parameters.Add(new NpgsqlParameter("@id", DbType.Int32));
             }
 
@@ -653,7 +685,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (updateMediaCommand == null)
             {
                 updateMediaCommand = connection.CreateCommand();
-                updateMediaCommand.CommandText = "UPDATE azusa_media " +
+                updateMediaCommand.CommandText = "UPDATE azusa.media " +
                                                  "SET name=@name, mediaTypeId=@mediaTypeId, sku=@sku," +
                                                  "    dumpstoragespace=@dumpstoragespace, dumppath=@dumppath," +
                                                  "    metafile=@metafile, graphdata=@graphdata," +
@@ -752,7 +784,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             int mediaType = GetFirstMediaTypeId();
 
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO azusa_media (relatedProduct,name,issealed,mediaTypeId) VALUES (@productId,@name,FALSE,@mediaTypeId) RETURNING id";
+            cmd.CommandText = "INSERT INTO azusa.media (relatedProduct,name,issealed,mediaTypeId) VALUES (@productId,@name,FALSE,@mediaTypeId) RETURNING id";
             cmd.Parameters.Add("@productId", NpgsqlDbType.Integer);
             cmd.Parameters.Add("@name", NpgsqlDbType.Varchar);
             cmd.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -770,7 +802,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public int GetFirstMediaTypeId()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT id FROM azusa_mediatypes ORDER BY id ASC LIMIT 1";
+            cmd.CommandText = "SELECT id FROM azusa.mediatypes ORDER BY id ASC LIMIT 1";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             dataReader.Read();
             int result = dataReader.GetInt32(0);
@@ -802,7 +834,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Country> GetAllCountries()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM azusa_countries";
+            cmd.CommandText = "SELECT * FROM azusa.countries";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -832,7 +864,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<DateTime> Dexcom_GetDates()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT DISTINCT date FROM dexcom_history ORDER BY date ASC";
+            cmd.CommandText = "SELECT DISTINCT date FROM dexcom.history ORDER BY date ASC";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -852,7 +884,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 dexcomInsertTimestamp = connection.CreateCommand();
                 dexcomInsertTimestamp.CommandText =
-                    "INSERT INTO dexcom_history " +
+                    "INSERT INTO dexcom.history " +
                     "(date, time, filtered, unfiltered, rssi, glucose, trend, \"sessionState\", \"meterGlucose\", \"eventType\", carbs, insulin, \"eventSubType\", \"specialGlucoseValue\") " +
                     "VALUES " +
                     "(@date, @time, @filtered, @unfiltered, @rssi, @glucose, @trend, @sessionState, @meterGlucose, @eventType, @carbs, " +
@@ -953,7 +985,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (testForTimestamp == null)
             {
                 testForTimestamp = connection.CreateCommand();
-                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom_history WHERE date=@date AND time=@time";
+                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom.history WHERE date=@date AND time=@time";
                 testForTimestamp.Parameters.Add("@date", NpgsqlDbType.Date);
                 testForTimestamp.Parameters.Add("@time", NpgsqlDbType.Time);
             }
@@ -969,7 +1001,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM dexcom_history WHERE date=@date";
+            cmd.CommandText = "SELECT * FROM dexcom.history WHERE date=@date";
             cmd.Parameters.Add("@date", NpgsqlDbType.Date);
             cmd.Parameters["@date"].Value = day.Date;
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
@@ -1064,7 +1096,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (getAllManualCluseValesCommand == null)
             {
                 getAllManualCluseValesCommand = connection.CreateCommand();
-                getAllManualCluseValesCommand.CommandText = "SELECT * FROM dexcom_manualdata";
+                getAllManualCluseValesCommand.CommandText = "SELECT * FROM dexcom.manualdata";
             }
 
             NpgsqlDataReader dataReader = getAllManualCluseValesCommand.ExecuteReader();
@@ -1097,7 +1129,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 manualGlucoseValueTestForTimestampCommand = connection.CreateCommand();
                 manualGlucoseValueTestForTimestampCommand.CommandText =
-                    "SELECT pid FROM dexcom_manualdata WHERE ts=@ts";
+                    "SELECT pid FROM dexcom.manualdata WHERE ts=@ts";
                 manualGlucoseValueTestForTimestampCommand.Parameters.Add("@ts", NpgsqlDbType.Timestamp);
             }
 
@@ -1156,16 +1188,19 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         private NpgsqlCommand defineTableCommand;
         public List<DatabaseColumn> Sync_DefineTable(string tableName)
         {
+            string[] args = tableName.Split('.');
             if (defineTableCommand == null)
             {
                 defineTableCommand = connection.CreateCommand();
                 defineTableCommand.CommandText =
                     "SELECT table_name, column_name, udt_name\r\nFROM information_schema.columns\r\n" +
-                    "WHERE table_schema = current_schema()\r\n AND table_name = @tableName";
+                    "WHERE table_schema = @tableSchema\r\n AND table_name = @tableName";
                 defineTableCommand.Parameters.Add("@tableName", NpgsqlDbType.Varchar);
+                defineTableCommand.Parameters.Add("@tableSchema", NpgsqlDbType.Varchar);
             }
 
-            defineTableCommand.Parameters["@tableName"].Value = tableName;
+            defineTableCommand.Parameters["@tableSchema"].Value = args[0];
+            defineTableCommand.Parameters["@tableName"].Value = args[1];
             NpgsqlDataReader ndr = defineTableCommand.ExecuteReader();
             List<DatabaseColumn> columns = new List<DatabaseColumn>();
             int ordinal = 0;
@@ -1212,6 +1247,62 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     return DbType.StringFixedLength;
                 case "inet":
                     return DbType.AnsiString;
+                case "oid":
+                    return DbType.Int64;
+                case "_text":
+                    return DbType.String;
+                case "name":
+                    return DbType.AnsiStringFixedLength;
+                case "timestamptz":
+                    return DbType.DateTimeOffset;
+                case "regproc":
+                    return DbType.AnsiString;
+                case "char":
+                    return DbType.StringFixedLength;
+                case "pg_node_tree":
+                    return DbType.String;
+                case "_aclitem":
+                    return DbType.String;
+                case "anyarray":
+                    return DbType.Object;
+                case "_name":
+                    return DbType.String;
+                case "float4":
+                    return DbType.Double;
+                case "xid":
+                    return DbType.Int64;
+                case "_int2":
+                    return DbType.Int16;
+                case "_oid":
+                    return DbType.Int64;
+                case "int2vector":
+                    return DbType.Object;
+                case "oidvector":
+                    return DbType.Object;
+                case "_regtype":
+                    return DbType.Object;
+                case "_char":
+                    return DbType.StringFixedLength;
+                case "pg_lsn":
+                    return DbType.Object;
+                case "regtype":
+                    return DbType.Object;
+                case "interval":
+                    return DbType.Object;
+                case "numeric":
+                    return DbType.VarNumeric;
+                case "_float4":
+                    return DbType.Double;
+                case "pg_ndistinct":
+                    return DbType.Object;
+                case "pg_dependencies":
+                    return DbType.Object;
+                case "pg_mcv_list":
+                    return DbType.Object;
+                case "_bool":
+                    return DbType.Boolean;
+                case "_float8":
+                    return DbType.Double;
                 default:
                     throw new NotImplementedException(udtName);
             }
@@ -1234,17 +1325,18 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public DbDataReader Sync_GetSyncReader(string tableName, DateTime? latestSynced)
         {
+            tableName = tableName.MakeFullyQualifiedTableName();
             NpgsqlCommand cmd;
             if (latestSynced == null)
             {
                 cmd = connection.CreateCommand();
-                cmd.CommandText = String.Format("SELECT * FROM \"{0}\"", tableName);
+                cmd.CommandText = String.Format("SELECT * FROM {0}", tableName);
                 return cmd.ExecuteReader();
             }
             else
             {
                 cmd = connection.CreateCommand();
-                cmd.CommandText = String.Format("SELECT * FROM \"{0}\" WHERE dateAdded > @dateAdded", tableName);
+                cmd.CommandText = String.Format("SELECT * FROM {0} WHERE dateAdded > @dateAdded", tableName);
                 cmd.Parameters.Add("@dateAdded", NpgsqlDbType.Timestamp);
                 cmd.Parameters["@dateAdded"].Value = latestSynced.Value;
                 return cmd.ExecuteReader();
@@ -1270,7 +1362,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (checkLicense == null)
             {
                 checkLicense = connection.CreateCommand();
-                checkLicense.CommandText = "SELECT state FROM licensing_fatclient_machines WHERE uid=@uid";
+                checkLicense.CommandText = "SELECT state FROM licensing.fatclient_machines WHERE uid=@uid";
                 checkLicense.Parameters.Add("@uid", NpgsqlDbType.Varchar);
             }
 
@@ -1298,7 +1390,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 {
                     insertProbableLicense = connection.CreateCommand();
                     insertProbableLicense.CommandText = 
-                        "INSERT INTO licensing_fatclient_machines " +
+                        "INSERT INTO licensing.fatclient_machines " +
                         "(uid,machinename,state,osversion,amd64cpu,amd64task,cpus,systemdir,pagesize," +
                         " userdomainname,username,clrversion,path,debuggee) " +
                         "VALUES " +
@@ -1362,7 +1454,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<Note> Notebook_GetAllNotes()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook_notes";
+            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook.notes";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1412,7 +1504,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (notebookGetText == null)
             {
                 notebookGetText = connection.CreateCommand();
-                notebookGetText.CommandText = "SELECT richtext FROM notebook_notes WHERE id=@id";
+                notebookGetText.CommandText = "SELECT richtext FROM notebook.notes WHERE id=@id";
                 notebookGetText.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -1936,7 +2028,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public IEnumerable<SqlIndex> GetSqlIndexes()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM pg_indexes WHERE schemaname = 'public'";
+            cmd.CommandText = "SELECT * FROM pg_catalog.pg_indexes WHERE schemaname != 'pg_catalog'";
             NpgsqlDataReader dataReader = cmd.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1944,6 +2036,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 child.Timestamp = DateTime.Now;
                 child.TableName = dataReader.GetString(1);
                 child.IndexName = dataReader.GetString(2);
+                child.SchemaName = dataReader.GetString(0);
 
                 string definition = dataReader.GetString(4);
                 definition = definition.Replace("\"", "");
@@ -1976,7 +2069,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (forgetFilesystemCommand == null)
             {
                 forgetFilesystemCommand = connection.CreateCommand();
-                forgetFilesystemCommand.CommandText = "DELETE FROM azusa_filesysteminfo WHERE mediaId=@mediaId";
+                forgetFilesystemCommand.CommandText = "DELETE FROM azusa.filesysteminfo WHERE mediaId=@mediaId";
                 forgetFilesystemCommand.Parameters.Add("@mediaId", NpgsqlDbType.Integer);
             }
 
@@ -1991,7 +2084,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 addFilesystemInfoCommand = connection.CreateCommand();
                 addFilesystemInfoCommand.CommandText =
-                    "INSERT INTO azusa_filesysteminfo " +
+                    "INSERT INTO azusa.filesysteminfo " +
                     "(mediaid,isdirectory,fullname,size,modified,head,parent) " +
                     "VALUES " +
                     "(@mediaid,@isDir,@fullname,@size,@modified,@head,@parent) " +
@@ -2041,7 +2134,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 getFilesystemMetadataCommand = connection.CreateCommand();
                 getFilesystemMetadataCommand.CommandText =
-                    "SELECT * FROM azusa_filesysteminfo " +
+                    "SELECT * FROM azusa.filesysteminfo " +
                     "WHERE mediaid = @mediaid " +
                     "AND isdirectory = @isdirectory " +
                     "ORDER BY parent ASC";
@@ -2599,7 +2692,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (dexcomGetLatestGlucose == null)
             {
                 dexcomGetLatestGlucose = connection.CreateCommand();
-                dexcomGetLatestGlucose.CommandText = "SELECT * FROM dexcom_history WHERE glucose IS NOT NULL ORDER BY date DESC, time DESC";
+                dexcomGetLatestGlucose.CommandText = "SELECT * FROM dexcom.history WHERE glucose IS NOT NULL ORDER BY date DESC, time DESC";
             }
 
             NpgsqlDataReader dataReader = dexcomGetLatestGlucose.ExecuteReader();
@@ -2628,7 +2721,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 dexcomGetGlucoseEntriesAfterCommand = connection.CreateCommand();
                 dexcomGetGlucoseEntriesAfterCommand.CommandText =
-                    "SELECT * FROM dexcom_history WHERE glucose IS NOT NULL AND date>=@scope";
+                    "SELECT * FROM dexcom.history WHERE glucose IS NOT NULL AND date>=@scope";
                 dexcomGetGlucoseEntriesAfterCommand.Parameters.Add("@scope", NpgsqlDbType.Date);
             }
 
@@ -2657,6 +2750,49 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             dataReader.Dispose();
         }
 
+        private void AssertNoEvilString(string schemaName)
+        {
+            bool[] hits = new bool[10];
+            hits[0] = schemaName.Contains("'");
+            hits[1] = schemaName.Contains("\"");
+            hits[2] = schemaName.Contains("`");
+            hits[3] = schemaName.Contains("´");
+            hits[4] = schemaName.Contains("$");
+            hits[5] = schemaName.Contains("@");
+            if (hits.Contains(true))
+                throw new ArgumentException("No sir, I don't like SQL-Injections.");
+        }
+
+        public void CreateSchema(string schemaName)
+        {
+            AssertNoEvilString(schemaName);
+
+            NpgsqlCommand command = connection.CreateCommand();
+            command.CommandText = String.Format("CREATE SCHEMA IF NOT EXISTS {0}", schemaName);
+            Console.WriteLine(command.CommandText);
+            command.ExecuteNonQuery();
+            command.Dispose();
+        }
+
+        public void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName)
+        {
+            AssertNoEvilString(oldSchemaName);
+            AssertNoEvilString(oldTableName);
+            AssertNoEvilString(schemaName);
+            AssertNoEvilString(newTableName);
+
+            NpgsqlCommand command1 = connection.CreateCommand();
+            command1.CommandText = String.Format("ALTER TABLE \"{0}\".\"{1}\" SET SCHEMA \"{2}\"", oldSchemaName, oldTableName, schemaName);
+            Console.WriteLine(command1.CommandText);
+            command1.ExecuteNonQuery();
+            command1.Dispose();
+            NpgsqlCommand command2 = connection.CreateCommand();
+            command2.CommandText = String.Format("ALTER TABLE \"{0}\".\"{1}\" RENAME TO \"{2}\"", schemaName, oldTableName, newTableName);
+            Console.WriteLine(command2.CommandText);
+            command2.ExecuteNonQuery();
+            command2.Dispose();
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();
@@ -2675,7 +2811,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (activateLicenseCommand == null)
             {
                 activateLicenseCommand = connection.CreateCommand();
-                activateLicenseCommand.CommandText = "UPDATE licensing_fatclient_machines SET state = 1 WHERE uid = @uid";
+                activateLicenseCommand.CommandText = "UPDATE licensing.fatclient_machines SET state = 1 WHERE uid = @uid";
                 activateLicenseCommand.Parameters.Add("@uid", NpgsqlDbType.Varchar);
             }
 

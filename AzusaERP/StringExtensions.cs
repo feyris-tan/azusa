@@ -30,5 +30,28 @@ namespace moe.yo3explorer.azusa
             input = input.Replace('*', '＊');
             return input;
         }
+
+        public static bool ContainsDigits(this string input)
+        {
+            foreach (char c in input)
+            {
+                if (Char.IsDigit(c))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static string MakeFullyQualifiedTableName(this string tableName)
+        {
+            string[] args = tableName.Split('.');
+            if (args[1].ContainsDigits())
+            {
+                args[1] = String.Format("\"{0}\"", args[1]);
+                tableName = String.Join(".", args);
+            }
+
+            return tableName;
+        }
     }
 }

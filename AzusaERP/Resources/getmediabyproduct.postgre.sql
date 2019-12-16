@@ -1,4 +1,4 @@
 ﻿SELECT id, name, mediaTypeId
-FROM azusa_media 
+FROM azusa.media 
 WHERE relatedproduct=@productId 
 ORDER BY id ASC

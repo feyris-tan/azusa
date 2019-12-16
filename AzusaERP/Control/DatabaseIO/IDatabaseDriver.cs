@@ -40,7 +40,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void SedgeTree_ErasePhoto(string personId);
         void SedgeTree_InsertPhoto(byte[] data, string personId);
         bool ConnectionIsValid();
+        List<string> GetAllPublicTableNames();
         List<string> GetAllTableNames();
+        List<string> GetAllSchemas();
         bool Statistics_TestForDate(DateTime today);
         int Statistics_GetTotalProducts();
         int Statistics_GetTotalMedia();
@@ -148,5 +150,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         IEnumerable<int> Gelbooru_GetPostsByTag(int tagId);
         DexTimelineEntry Dexcom_GetLatestGlucoseEntry();
         IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope);
+        void CreateSchema(string schemaName);
+        void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName);
     }
 }

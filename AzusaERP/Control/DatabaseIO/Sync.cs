@@ -18,14 +18,14 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         public void Execute()
         {
             List<string> tableNames = source.GetAllTableNames();
-            tableNames = tableNames.OrderByDescending(x => x).ToList();
+            tableNames = tableNames.OrderBy(x => x).ToList();
 
             foreach (string tableName in tableNames)
             {
-                if (tableName.ToLowerInvariant().Equals("hibernate_sequences"))
+                List<DatabaseColumn> columns = source.Sync_DefineTable(tableName);
+                if (!columns.Any(x => x.ColumnName.ToLowerInvariant().Equals("dateadded")))
                     continue;
 
-                List<DatabaseColumn> columns = source.Sync_DefineTable(tableName);
                 foreach (DatabaseColumn column in columns)
                 {
                     if (IsNumericString(column.ColumnName))
@@ -74,6 +74,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
                         }
                     }
                 }
+            }
+            IStreamBlobOwner streamBlobOwner = target as IStreamBlobOwner;
+            if (streamBlobOwner != null)
+            {
+                streamBlobOwner.GetStreamBlob().Flush();
             }
 
             List<SqlIndex> sourceIndexes = source.GetSqlIndexes().ToList();
@@ -124,50 +129,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         }
 
         private Random rng;
-
-        public static int DeriveKey(string name)
-        {
-            name = name.ToLowerInvariant();
-            switch (name)
-            {
-                case "dump_vndb_vn": return 1;
-                case "image": return 2;
-                case "dump_vndb_vn_screens": return 3;
-                case "dump_vndb_character": return 4;
-                case "mailarchive_mails": return 5;
-                case "salt": return 6;
-                case "data": return 7;
-                case "sedgetree_versioning": return 8;
-                case "dump_vgmdb_artist": return 9;
-                case "picture_full": return 10;
-                case "dump_vgmdb_products": return 11;
-                case "dump_vgmdb_albums": return 12;
-                case "web_users": return 13;
-                case "profilepic": return 14;
-                case "dump_vgmdb_album_cover": return 15;
-                case "buffer": return 16;
-                case "azusa_products": return 17;
-                case "picture": return 18;
-                case "screenshot": return 19;
-                case "azusa_mediatypes": return 20;
-                case "icon": return 21;
-                case "azusa_media": return 22;
-                case "cdtext": return 23;
-                case "mediadescriptorsidecar": return 24;
-                case "dump_psxdatacenter_screenshots": return 25;
-                case "dump_psxdatacenter_games": return 26;
-                case "cover": return 27;
-                case "azusa_filesysteminfo": return 28;
-                case "head": return 29;
-                case "dump_myfigurecollection_figurephotos": return 30;
-                case "thumbnail": return 31;
-                case "dump_vocadb_artist": return 32;
-                case "dump_vocadb_albums": return 33;
-                case "fastbooru": return 34;
-                default: throw new NotImplementedException(name);
-            }
-        }
-
+        
         private bool IsNumericString(string s)
         {
             foreach (char chara in s)

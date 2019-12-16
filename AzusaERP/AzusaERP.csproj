@@ -220,6 +220,8 @@
     <Compile Include="Control\DatabaseIO\DbDataReaderExtensions.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\OfflineDriver.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\PostgresDriver.cs" />
+    <Compile Include="Control\DatabaseIO\IStreamBlobOwner.cs" />
+    <Compile Include="Control\DatabaseIO\Migrations\Migration1to2.cs" />
     <Compile Include="Control\DatabaseIO\SqlIndex.cs" />
     <Compile Include="Control\DatabaseIO\Sync.cs" />
     <Compile Include="Control\DatabaseIO\SyncException.cs" />

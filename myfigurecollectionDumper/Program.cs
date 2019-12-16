@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AzusaERP;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -146,7 +141,7 @@ namespace myfigurecollectionDumper
             {
                 getImageUrls = connection.CreateCommand();
                 getImageUrls.CommandText =
-                    "SELECT thumbnailurl, fullurl FROM dump_myfigurecollection_figures WHERE id=@id";
+                    "SELECT thumbnailurl, fullurl FROM dump_myfigurecollection.figures WHERE id=@id";
                 getImageUrls.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -170,7 +165,7 @@ namespace myfigurecollectionDumper
             {
                 insertPhotos = connection.CreateCommand();
                 insertPhotos.CommandText =
-                    "INSERT INTO dump_myfigurecollection_figurephotos (id,image,thumbnail) VALUES (@id,@image,@thumbnail)";
+                    "INSERT INTO dump_myfigurecollection.figurephotos (id,image,thumbnail) VALUES (@id,@image,@thumbnail)";
                 insertPhotos.Parameters.Add("@id", NpgsqlDbType.Integer);
                 insertPhotos.Parameters.Add("@image", NpgsqlDbType.Bytea);
                 insertPhotos.Parameters.Add("@thumbnail", NpgsqlDbType.Bytea);
@@ -196,7 +191,7 @@ namespace myfigurecollectionDumper
             {
                 markFigureAsScraped = connection.CreateCommand();
                 markFigureAsScraped.CommandText =
-                    "UPDATE dump_myfigurecollection_figures SET scraped = TRUE WHERE id=@id";
+                    "UPDATE dump_myfigurecollection.figures SET scraped = TRUE WHERE id=@id";
                 markFigureAsScraped.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -213,7 +208,7 @@ namespace myfigurecollectionDumper
             if (findUnscrapedFigure == null)
             {
                 findUnscrapedFigure = connection.CreateCommand();
-                findUnscrapedFigure.CommandText = "SELECT id FROM dump_myfigurecollection_figures WHERE scraped=FALSE AND enabled=TRUE";
+                findUnscrapedFigure.CommandText = "SELECT id FROM dump_myfigurecollection.figures WHERE scraped=FALSE AND enabled=TRUE";
             }
 
             NpgsqlDataReader dataReader = findUnscrapedFigure.ExecuteReader();
@@ -231,7 +226,7 @@ namespace myfigurecollectionDumper
             {
                 writeDisabledFigureRow = connection.CreateCommand();
                 writeDisabledFigureRow.CommandText =
-                    "INSERT INTO dump_myfigurecollection_figures (id,enabled) VALUES (@id,FALSE)";
+                    "INSERT INTO dump_myfigurecollection.figures (id,enabled) VALUES (@id,FALSE)";
                 writeDisabledFigureRow.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -246,7 +241,7 @@ namespace myfigurecollectionDumper
             {
                 handleFigure = connection.CreateCommand();
                 handleFigure.CommandText =
-                    "INSERT INTO dump_myfigurecollection_figures" +
+                    "INSERT INTO dump_myfigurecollection.figures" +
                     "(id,thumbnailurl,fullurl,rootid,categoryid,barcode,name,release_date,price) " +
                     "VALUES" +
                     "(@id,@thumbnailUrl,@fullUrl,@rootid,@categoryId,@barcode,@name,@releaseDate,@price)";
@@ -307,7 +302,7 @@ namespace myfigurecollectionDumper
             if (findCategoryId == null)
             {
                 findCategoryId = connection.CreateCommand();
-                findCategoryId.CommandText = "SELECT id FROM dump_myfigurecollection_categories WHERE name=@name";
+                findCategoryId.CommandText = "SELECT id FROM dump_myfigurecollection.categories WHERE name=@name";
                 findCategoryId.Parameters.Add("@name", NpgsqlDbType.Varchar);
             }
 
@@ -325,7 +320,7 @@ namespace myfigurecollectionDumper
             {
                 insertCategory = connection.CreateCommand();
                 insertCategory.CommandText =
-                    "INSERT INTO dump_myfigurecollection_categories (originalid,name,color) VALUES (@oid,@name,@color) RETURNING id";
+                    "INSERT INTO dump_myfigurecollection.categories (originalid,name,color) VALUES (@oid,@name,@color) RETURNING id";
                 insertCategory.Parameters.Add("@oid", NpgsqlDbType.Integer);
                 insertCategory.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 insertCategory.Parameters.Add("@color", NpgsqlDbType.Varchar);
@@ -348,7 +343,7 @@ namespace myfigurecollectionDumper
             if (findRootId == null)
             {
                 findRootId = connection.CreateCommand();
-                findRootId.CommandText = "SELECT id FROM dump_myfigurecollection_roots WHERE name=@name";
+                findRootId.CommandText = "SELECT id FROM dump_myfigurecollection.roots WHERE name=@name";
                 findRootId.Parameters.Add("@name", NpgsqlDbType.Varchar);
             }
 
@@ -366,7 +361,7 @@ namespace myfigurecollectionDumper
             {
                 insertRoot = connection.CreateCommand();
                 insertRoot.CommandText =
-                    "INSERT INTO dump_myfigurecollection_roots (name,originalid) VALUES (@name,@oid) RETURNING id";
+                    "INSERT INTO dump_myfigurecollection.roots (name,originalid) VALUES (@name,@oid) RETURNING id";
                 insertRoot.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 insertRoot.Parameters.Add("@oid", NpgsqlDbType.Integer);
             }
@@ -386,7 +381,7 @@ namespace myfigurecollectionDumper
             {
                 testForFigure = connection.CreateCommand();
                 testForFigure.CommandText =
-                    "SELECT dateAdded FROM dump_myfigurecollection_figures WHERE id=@id";
+                    "SELECT dateAdded FROM dump_myfigurecollection.figures WHERE id=@id";
                 testForFigure.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -404,7 +399,7 @@ namespace myfigurecollectionDumper
             {
                 insertNumKnownFigures = connection.CreateCommand();
                 insertNumKnownFigures.CommandText =
-                    "INSERT INTO dump_myfigurecollection_0statistics (numfigures) VALUES (@numfigures)";
+                    "INSERT INTO dump_myfigurecollection.\"0statistics\" (numfigures) VALUES (@numfigures)";
                 insertNumKnownFigures.Parameters.Add("@numfigures", NpgsqlDbType.Integer);
             }
 
@@ -418,7 +413,7 @@ namespace myfigurecollectionDumper
             if (getNumKnownFigures == null)
             {
                 getNumKnownFigures = connection.CreateCommand();
-                getNumKnownFigures.CommandText = "SELECT MAX(numfigures) FROM dump_myfigurecollection_0statistics";
+                getNumKnownFigures.CommandText = "SELECT MAX(numfigures) FROM dump_myfigurecollection.\"0statistics\"";
             }
 
             NpgsqlDataReader reader = getNumKnownFigures.ExecuteReader();
@@ -442,7 +437,7 @@ namespace myfigurecollectionDumper
             if (setMetadata == null)
             {
                 setMetadata = connection.CreateCommand();
-                setMetadata.CommandText = "INSERT INTO dump_myfigurecollection_0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
+                setMetadata.CommandText = "INSERT INTO dump_myfigurecollection.\"0dumpmeta\" (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -464,7 +459,7 @@ namespace myfigurecollectionDumper
             if (setMetadata == null)
             {
                 setMetadata = connection.CreateCommand();
-                setMetadata.CommandText = "INSERT INTO dump_myfigurecollection_0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
+                setMetadata.CommandText = "INSERT INTO dump_myfigurecollection.0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -485,7 +480,7 @@ namespace myfigurecollectionDumper
             {
                 testForDumpMetadataWithoutDate = connection.CreateCommand();
                 testForDumpMetadataWithoutDate.CommandText =
-                    "SELECT id FROM dump_myfigurecollection_0dumpmeta WHERE key1=@key1 AND key2=@key2";
+                    "SELECT id FROM dump_myfigurecollection.0dumpmeta WHERE key1=@key1 AND key2=@key2";
                 testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
             }
@@ -507,7 +502,7 @@ namespace myfigurecollectionDumper
             {
                 testForDumpMetadata = connection.CreateCommand();
                 testForDumpMetadata.CommandText =
-                    "SELECT id FROM dump_myfigurecollection_0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
+                    "SELECT id FROM dump_myfigurecollection.0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -534,7 +529,7 @@ namespace myfigurecollectionDumper
             {
                 testForDumpMetadata = connection.CreateCommand();
                 testForDumpMetadata.CommandText =
-                    "SELECT id FROM dump_myfigurecollection_0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
+                    "SELECT id FROM dump_myfigurecollection.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));

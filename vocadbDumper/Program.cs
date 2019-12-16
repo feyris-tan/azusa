@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using AzusaERP;
 using IO.Swagger.Model;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Npgsql;
 using NpgsqlTypes;
 using vgmdbDumper;
@@ -176,7 +171,7 @@ namespace vocadbDumper
                 if (setImage == null)
                 {
                     setImage = connection.CreateCommand();
-                    setImage.CommandText = "UPDATE dump_vocadb_artist SET image=@image WHERE id=@id";
+                    setImage.CommandText = "UPDATE dump_vocadb.artist SET image=@image WHERE id=@id";
                     setImage.Parameters.Add("@image", NpgsqlDbType.Bytea);
                     setImage.Parameters.Add("@id", NpgsqlDbType.Integer);
                 }
@@ -199,7 +194,7 @@ namespace vocadbDumper
             if (markArtistAsScraped == null)
             {
                 markArtistAsScraped = connection.CreateCommand();
-                markArtistAsScraped.CommandText = "UPDATE dump_vocadb_artist SET scraped = TRUE WHERE id=@id";
+                markArtistAsScraped.CommandText = "UPDATE dump_vocadb.artist SET scraped = TRUE WHERE id=@id";
                 markArtistAsScraped.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -213,7 +208,7 @@ namespace vocadbDumper
             if (findUnscrapedArtist == null)
             {
                 findUnscrapedArtist = connection.CreateCommand();
-                findUnscrapedArtist.CommandText = "SELECT id FROM dump_vocadb_artist WHERE scraped = FALSE";
+                findUnscrapedArtist.CommandText = "SELECT id FROM dump_vocadb.artist WHERE scraped = FALSE";
             }
 
             NpgsqlDataReader dataReader = findUnscrapedArtist.ExecuteReader();
@@ -233,7 +228,7 @@ namespace vocadbDumper
             if (insertArtist == null)
             {
                 insertArtist = connection.CreateCommand();
-                insertArtist.CommandText = "INSERT INTO dump_vocadb_artist " +
+                insertArtist.CommandText = "INSERT INTO dump_vocadb.artist " +
                                            "(id,additionalnames,artisttype,deleted,name,picturemime,status,version) " +
                                            "VALUES " +
                                            "(@id,@an,@at,@deleted,@name,@pmime,@status,@version)";
@@ -267,7 +262,7 @@ namespace vocadbDumper
             if (testForArtist == null)
             {
                 testForArtist = connection.CreateCommand();
-                testForArtist.CommandText = "SELECT dateAdded FROM dump_vocadb_artist WHERE id=@id";
+                testForArtist.CommandText = "SELECT dateAdded FROM dump_vocadb.artist WHERE id=@id";
                 testForArtist.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -294,7 +289,7 @@ namespace vocadbDumper
                 if (insertSongArtist == null)
                     {
                         insertSongArtist = connection.CreateCommand();
-                        insertSongArtist.CommandText = "INSERT INTO dump_vocadb_songartists " +
+                        insertSongArtist.CommandText = "INSERT INTO dump_vocadb.songartists " +
                                                        "(id,trackid,artistid,categories,effectiveroles,iscustomname,issupport,name,roles) " +
                                                        "VALUES " +
                                                        "(@id,@ti,@ai,@categories,@er,@icn,@is,@name,@roles)";
@@ -324,7 +319,7 @@ namespace vocadbDumper
             if (insertSong == null)
             {
                 insertSong = connection.CreateCommand();
-                insertSong.CommandText = "INSERT INTO dump_vocadb_songs " +
+                insertSong.CommandText = "INSERT INTO dump_vocadb.songs " +
                                          "(id,artiststring,createdate,defaultname,defaultnamelanguage,favoritedtimes,lengthseconds," +
                                          " name,publishdate,pvservices,ratingscore,songtype,status,version) " +
                                          "VALUES " +
@@ -373,7 +368,7 @@ namespace vocadbDumper
             if (testForSongIdCommand == null)
             {
                 testForSongIdCommand = connection.CreateCommand();
-                testForSongIdCommand.CommandText = "SELECT dateAdded FROM dump_vocadb_songs WHERE id=@id";
+                testForSongIdCommand.CommandText = "SELECT dateAdded FROM dump_vocadb.songs WHERE id=@id";
                 testForSongIdCommand.Parameters.Add("@id", NpgsqlDbType.Bigint);
             }
 
@@ -392,7 +387,7 @@ namespace vocadbDumper
                 if (insertTrackListEntry == null)
                 {
                     insertTrackListEntry = connection.CreateCommand();
-                    insertTrackListEntry.CommandText = "INSERT INTO dump_vocadb_albumtracks" +
+                    insertTrackListEntry.CommandText = "INSERT INTO dump_vocadb.albumtracks" +
                                                        "(id,name,discNumber,songId,tracknumber,albumid)" +
                                                        "VALUES" +
                                                        "(@id,@name,@dn,@si,@tn,@aid)";
@@ -430,7 +425,7 @@ namespace vocadbDumper
             if (findUnscrapedTracklistCommand == null)
             {
                 findUnscrapedTracklistCommand = connection.CreateCommand();
-                findUnscrapedTracklistCommand.CommandText = "SELECT id FROM dump_vocadb_albums WHERE scrapedtracks = FALSE";
+                findUnscrapedTracklistCommand.CommandText = "SELECT id FROM dump_vocadb.albums WHERE scrapedtracks = FALSE";
             }
 
             NpgsqlDataReader dataReader = findUnscrapedTracklistCommand.ExecuteReader();
@@ -447,7 +442,7 @@ namespace vocadbDumper
             if (markTracklistAsScraped == null)
             {
                 markTracklistAsScraped = connection.CreateCommand();
-                markTracklistAsScraped.CommandText = "UPDATE dump_vocadb_albums SET scrapedtracks = TRUE WHERE id = @id";
+                markTracklistAsScraped.CommandText = "UPDATE dump_vocadb.albums SET scrapedtracks = TRUE WHERE id = @id";
                 markTracklistAsScraped.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -472,7 +467,7 @@ namespace vocadbDumper
             if (testForAlbumCoverCommand == null)
             {
                 testForAlbumCoverCommand = connection.CreateCommand();
-                testForAlbumCoverCommand.CommandText = "SELECT LENGTH(cover) FROM dump_vocadb_albums WHERE id=@id";
+                testForAlbumCoverCommand.CommandText = "SELECT LENGTH(cover) FROM dump_vocadb.albums WHERE id=@id";
                 testForAlbumCoverCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -496,7 +491,7 @@ namespace vocadbDumper
             if (testForAlbumCommand == null)
             {
                 testForAlbumCommand = connection.CreateCommand();
-                testForAlbumCommand.CommandText = "SELECT dateAdded FROM dump_vocadb_albums WHERE id=@id";
+                testForAlbumCommand.CommandText = "SELECT dateAdded FROM dump_vocadb.albums WHERE id=@id";
                 testForAlbumCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -513,7 +508,7 @@ namespace vocadbDumper
             if (setAlbumCover == null)
             {
                 setAlbumCover = connection.CreateCommand();
-                setAlbumCover.CommandText = "UPDATE dump_vocadb_albums SET cover=@cover, scrapedcover = TRUE WHERE id=@id";
+                setAlbumCover.CommandText = "UPDATE dump_vocadb.albums SET cover=@cover, scrapedcover = TRUE WHERE id=@id";
                 setAlbumCover.Parameters.Add("@cover", NpgsqlDbType.Bytea);
                 setAlbumCover.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
@@ -540,7 +535,7 @@ namespace vocadbDumper
             {
                 insertAlbumCommand = connection.CreateCommand();
                 insertAlbumCommand.CommandText =
-                    "INSERT INTO dump_vocadb_albums " +
+                    "INSERT INTO dump_vocadb.albums " +
                     "(id, name, artiststring, createdate, defaultnamelanguage, disctype, ratingaverage, ratingcount, releasedate, status, version, defaultname, catalognumber) " +
                     "VALUES " +
                     "(@id, @name, @as, @cd, @dnl, @dt, @ra, @rc, @rd, @status, @version,@defaultname,@cn)";
@@ -601,7 +596,7 @@ namespace vocadbDumper
             if (checkBanEvasionCommand == null)
             {
                 checkBanEvasionCommand = connection.CreateCommand();
-                checkBanEvasionCommand.CommandText = "SELECT requests FROM dump_vocadb_0banevasion WHERE id = @id";
+                checkBanEvasionCommand.CommandText = "SELECT requests FROM dump_vocadb.\"0banevasion\" WHERE id = @id";
                 checkBanEvasionCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -621,7 +616,7 @@ namespace vocadbDumper
                 if (insertBanEvasionLine == null)
                 {
                     insertBanEvasionLine = connection.CreateCommand();
-                    insertBanEvasionLine.CommandText = "INSERT INTO dump_vocadb_0banevasion (id,requests) VALUES (@id,0)";
+                    insertBanEvasionLine.CommandText = "INSERT INTO dump_vocadb.\"0banevasion\" (id,requests) VALUES (@id,0)";
                     insertBanEvasionLine.Parameters.Add("@id", NpgsqlDbType.Integer);
                 }
 
@@ -639,7 +634,7 @@ namespace vocadbDumper
             {
                 updateBanEvasionLine = connection.CreateCommand();
                 updateBanEvasionLine.CommandText =
-                    "UPDATE dump_vocadb_0banevasion SET requests = requests + 1 WHERE id = @id";
+                    "UPDATE dump_vocadb.\"0banevasion\" SET requests = requests + 1 WHERE id = @id";
                 updateBanEvasionLine.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -655,7 +650,7 @@ namespace vocadbDumper
             if (setMetadata == null)
             {
                 setMetadata = connection.CreateCommand();
-                setMetadata.CommandText = "INSERT INTO dump_vocadb_0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
+                setMetadata.CommandText = "INSERT INTO dump_vocadb.\"0dumpmeta\" (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -676,7 +671,7 @@ namespace vocadbDumper
             if (setMetadata == null)
             {
                 setMetadata = connection.CreateCommand();
-                setMetadata.CommandText = "INSERT INTO dump_vocadb_0dumpmeta (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
+                setMetadata.CommandText = "INSERT INTO dump_vocadb.\"0dumpmeta\" (key1,key2,keyutime) VALUES (@key1,@key2,@keyutime)";
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 setMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -698,7 +693,7 @@ namespace vocadbDumper
             {
                 testForDumpMetadataWithoutDate = connection.CreateCommand();
                 testForDumpMetadataWithoutDate.CommandText =
-                    "SELECT id FROM dump_vocadb_0dumpmeta WHERE key1=@key1 AND key2=@key2";
+                    "SELECT id FROM dump_vocadb.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2";
                 testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadataWithoutDate.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
             }
@@ -721,7 +716,7 @@ namespace vocadbDumper
             {
                 testForDumpMetadata = connection.CreateCommand();
                 testForDumpMetadata.CommandText =
-                    "SELECT id FROM dump_vocadb_0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
+                    "SELECT id FROM dump_vocadb.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
@@ -746,7 +741,7 @@ namespace vocadbDumper
             {
                 testForDumpMetadata = connection.CreateCommand();
                 testForDumpMetadata.CommandText =
-                    "SELECT id FROM dump_vocadb_0dumpmeta WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
+                    "SELECT id FROM dump_vocadb.\"0dumpmeta\" WHERE key1=@key1 AND key2=@key2 AND keyutime=@keyutime";
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key1", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@key2", DbType.String));
                 testForDumpMetadata.Parameters.Add(new NpgsqlParameter("@keyutime", DbType.Int64));
