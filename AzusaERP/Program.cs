@@ -84,7 +84,21 @@ namespace moe.yo3explorer.azusa
 
         private bool PrepareRun()
         {
+            //Lade Konfigurationsdatei
             context = AzusaContext.GetInstance();
+            FileInfo exePath = new FileInfo(Assembly.GetEntryAssembly().Location);
+            FileInfo iniPath = new FileInfo(Path.Combine(exePath.Directory.FullName, "azusa.ini"));
+            if (!iniPath.Exists)
+            {
+                throw new StartupFailedException(StartupFailReason.AzusaIniNotFound);
+            }
+
+            context.Ini = new Ini("azusa.ini");
+            IniSection azusaIniSection = context.Ini["azusa"];
+            if (azusaIniSection.ContainsKey("chdir"))
+                if (!string.IsNullOrEmpty(azusaIniSection["chdir"]))
+                    Environment.CurrentDirectory = azusaIniSection["chdir"];
+
             CreateSplashThread();
 
             context.Splash.SetLabel("Lade Icon...");
@@ -94,22 +108,12 @@ namespace moe.yo3explorer.azusa
 
             context.Splash.SetLabel("Starte Webserver...");
             context.WebServer = new WebServer();
-
-            context.Splash.SetLabel("Lade Konfigurationsdatei...");
-            FileInfo exePath = new FileInfo(Assembly.GetEntryAssembly().Location);
-            FileInfo iniPath = new FileInfo(Path.Combine(exePath.Directory.FullName, "azusa.ini"));
-            if (!iniPath.Exists)
-            {
-                throw new StartupFailedException(StartupFailReason.AzusaIniNotFound);
-            }
-
-            context.Ini = new Ini("azusa.ini");
-
+            
             context.Splash.SetLabel("Überprüfe Verfügbarkeit der Online-Datenbank...");
             bool available = false;
             try
             {
-                if (Convert.ToInt32(context.Ini["azusa"]["forceOffline"]) == 0)
+                if (Convert.ToInt32(azusaIniSection["forceOffline"]) == 0)
                 {
                     Ping ping = new Ping();
                     PingReply pong = ping.Send(context.Ini["postgresql"]["server"]);
