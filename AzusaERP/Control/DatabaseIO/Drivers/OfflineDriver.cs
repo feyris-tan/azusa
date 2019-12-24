@@ -1882,6 +1882,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return connections;
         }
 
+        public string GetConnectionString()
+        {
+            return null;
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();

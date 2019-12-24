@@ -27,6 +27,7 @@ using moe.yo3explorer.azusa.VnDb.Entity;
 using moe.yo3explorer.azusa.VocaDB.Entity;
 using moe.yo3explorer.azusa.WarWalking.Entity;
 using Npgsql;
+using Npgsql.Logging;
 using NpgsqlTypes;
 using Country = moe.yo3explorer.azusa.MediaLibrary.Entity.Country;
 
@@ -39,6 +40,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public PostgresDriver()
         {
+            NpgsqlLogManager.Provider = new PostgresLogProvider();
+            
             IniSection iniSection = AzusaContext.GetInstance().Ini["postgresql"];
             NpgsqlConnectionStringBuilder ncsb = new NpgsqlConnectionStringBuilder();
             ncsb.ApplicationName = "Azusa";
@@ -2806,6 +2809,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public object GetConnectionObject()
         {
             return connection;
+        }
+
+        public string GetConnectionString()
+        {
+            return connection.ConnectionString;
         }
 
         public LicenseState CheckLicenseStatus()

@@ -156,5 +156,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         bool IsAllowedSyncSource();
         bool IsAllowedSyncTarget();
         object GetConnectionObject();
+        string GetConnectionString();
     }
 }
