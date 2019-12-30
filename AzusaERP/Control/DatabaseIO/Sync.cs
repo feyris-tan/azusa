@@ -24,7 +24,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
             {
                 List<DatabaseColumn> columns = source.Sync_DefineTable(tableName);
                 if (!columns.Any(x => x.ColumnName.ToLowerInvariant().Equals("dateadded")))
+                {
+                    Console.WriteLine("DateAdded column is missing in {0}!", tableName);
                     continue;
+                }
 
                 foreach (DatabaseColumn column in columns)
                 {
