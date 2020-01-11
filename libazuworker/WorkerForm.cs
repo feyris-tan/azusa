@@ -18,6 +18,7 @@ namespace libazuworker
             InitializeComponent();
             this.worker = worker;
             this.worker.SetWorkerForm(this);
+            this.label1.Text = "";
         }
 
         private AzusaWorker worker;
@@ -81,18 +82,60 @@ namespace libazuworker
 
         private void SetCurrentStepProgress(int value, int maximum)
         {
-            currentStepProgressBar.Value = value;
             currentStepProgressBar.Maximum = maximum;
+            if (value <= maximum)
+            {
+                currentStepProgressBar.Value = value;
+            }
         }
 
         public void InvokeSetCurrentStepProgress(int value, int maximum = 100)
         {
+            if (!Visible)
+                return;
+
             Invoke((MethodInvoker) delegate { SetCurrentStepProgress(value, maximum); });
         }
 
         public void InvokeClose()
         {
+            Invoke((MethodInvoker) delegate
+            {
+                while (currentStepProgressBar.Maximum > currentStepProgressBar.Value)
+                {
+                    currentStepProgressBar.PerformStep();
+                    Thread.Sleep(1);
+                }
+                while (totalProgressBar.Maximum > totalProgressBar.Value)
+                {
+                    totalProgressBar.PerformStep();
+                    Thread.Sleep(10);
+                }
+            });
             Invoke((MethodInvoker) delegate { Close(); });
+        }
+
+        public void InvokeNextStepWithoutText()
+        {
+            Invoke((MethodInvoker)delegate { totalProgressBar.Value++; });
+        }
+
+        public void InvokeSetText(string text)
+        {
+            if (Visible)
+            {
+                Invoke((MethodInvoker) delegate { label1.Text = text; });
+            }
+        }
+
+        public void InvokeSetText(string text, params object[] args)
+        {
+            InvokeSetText(String.Format(text, args));
+        }
+
+        public bool LooksFinished
+        {
+            get { return totalProgressBar.Value >= totalProgressBar.Maximum; }
         }
     }
 }

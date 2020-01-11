@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,6 +16,7 @@ using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
 using moe.yo3explorer.azusa.DexcomHistory.Entity;
+using moe.yo3explorer.azusa.Dumping.Entity;
 using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.MyFigureCollection.Entity;
@@ -226,7 +228,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             return result;
         }
-
 
         public bool Statistics_TestForDate(DateTime today)
         {
@@ -677,9 +678,17 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(18))
                 m.FauxHash = ndr.GetInt64(18);
 
+            if (!ndr.IsDBNull(19))
+                m.DiscId = ndr.GetInt64(19);
 
             ndr.Dispose();
             return m;
+        }
+
+        private void ClearAllParameters(NpgsqlCommand updateMediaCommand)
+        {
+            foreach (NpgsqlParameter parameter in updateMediaCommand.Parameters)
+                parameter.Value = DBNull.Value;
         }
 
         private NpgsqlCommand updateMediaCommand;
@@ -698,7 +707,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                                                  "    cdtext=@cdtext, logfile=@logfile," +
                                                  "    mediadescriptorsidecar=@mediadescriptorsidecar," +
                                                  "    issealed=@issealed, dateupdated=@dateupdated," +
-                                                 "    fauxhash=@fauxhash " +
+                                                 "    fauxhash=@fauxhash, discid=@discid " +
                                                  "WHERE id=@id";
                 updateMediaCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -716,8 +725,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 updateMediaCommand.Parameters.Add("@issealed", NpgsqlDbType.Boolean);
                 updateMediaCommand.Parameters.Add("@dateupdated", NpgsqlDbType.Timestamp);
                 updateMediaCommand.Parameters.Add("@fauxhash", NpgsqlDbType.Bigint);
+                updateMediaCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
                 updateMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
+
+            ClearAllParameters(updateMediaCommand);
 
             updateMediaCommand.Parameters["@name"].Value = media.Name;
             updateMediaCommand.Parameters["@mediaTypeId"].Value = media.MediaTypeId;
@@ -725,57 +737,41 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (media.DumpStorageSpaceId != 0)
                 updateMediaCommand.Parameters["@dumpstoragespace"].Value = media.DumpStorageSpaceId;
-            else
-                updateMediaCommand.Parameters["@dumpstoragespace"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.DumpStorageSpacePath))
                 updateMediaCommand.Parameters["@dumppath"].Value = media.DumpStorageSpacePath;
-            else
-                updateMediaCommand.Parameters["@dumppath"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.MetaFileContent))
                 updateMediaCommand.Parameters["@metafile"].Value = media.MetaFileContent;
-            else
-                updateMediaCommand.Parameters["@metafile"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.GraphDataContent))
                 updateMediaCommand.Parameters["@graphdata"].Value = media.GraphDataContent;
-            else
-                updateMediaCommand.Parameters["@graphdata"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.CueSheetContent))
                 updateMediaCommand.Parameters["@untouchedcuesheet"].Value = media.CueSheetContent;
-            else
-                updateMediaCommand.Parameters["@untouchedcuesheet"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.ChecksumContent))
                 updateMediaCommand.Parameters["@untouchedchecksum"].Value = media.ChecksumContent;
-            else
-                updateMediaCommand.Parameters["@untouchedchecksum"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.PlaylistContent))
                 updateMediaCommand.Parameters["@untouchedplaylist"].Value = media.PlaylistContent;
-            else
-                updateMediaCommand.Parameters["@untouchedplaylist"].Value = DBNull.Value;
 
             if (media.CdTextContent != null)
                 updateMediaCommand.Parameters["@cdtext"].Value = media.CdTextContent;
-            else
-                updateMediaCommand.Parameters["@cdtext"].Value = DBNull.Value;
 
             if (!string.IsNullOrEmpty(media.LogfileContent))
                 updateMediaCommand.Parameters["@logfile"].Value = media.LogfileContent;
-            else
-                updateMediaCommand.Parameters["@logfile"].Value = DBNull.Value;
 
             if (media.MdsContent != null)
                 updateMediaCommand.Parameters["@mediadescriptorsidecar"].Value = media.MdsContent;
-            else
-                updateMediaCommand.Parameters["@mediadescriptorsidecar"].Value = DBNull.Value;
-
+            
             updateMediaCommand.Parameters["@issealed"].Value = media.isSealed;
             updateMediaCommand.Parameters["@dateupdated"].Value = DateTime.Now;
             updateMediaCommand.Parameters["@fauxhash"].Value = media.FauxHash;
+
+            if (media.DiscId.HasValue)
+                updateMediaCommand.Parameters["@discid"].Value = media.DiscId.Value;
+
             updateMediaCommand.Parameters["@id"].Value = media.Id;
             int result = updateMediaCommand.ExecuteNonQuery();
             if (result != 1)
@@ -2816,11 +2812,143 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return connection.ConnectionString;
         }
 
-        public LicenseState CheckLicenseStatus()
+        private NpgsqlCommand insertDiscArchivatorDiscCommand;
+        public void InsertDiscArchivatorDisc(long discid, string path, string name)
         {
-            throw new NotImplementedException();
+            if (insertDiscArchivatorDiscCommand == null)
+            {
+                insertDiscArchivatorDiscCommand = connection.CreateCommand();
+                insertDiscArchivatorDiscCommand.CommandText =
+                    "INSERT INTO discarchivator.discs (discid,path,name) VALUES (@discid,@path,@name)";
+                insertDiscArchivatorDiscCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+                insertDiscArchivatorDiscCommand.Parameters.Add("@path", NpgsqlDbType.Text);
+                insertDiscArchivatorDiscCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
+            }
+
+            insertDiscArchivatorDiscCommand.Parameters["@discid"].Value = discid;
+            insertDiscArchivatorDiscCommand.Parameters["@path"].Value = path;
+            insertDiscArchivatorDiscCommand.Parameters["@name"].Value = name;
+            insertDiscArchivatorDiscCommand.ExecuteNonQuery();
         }
 
+        private NpgsqlCommand getDiscArchivatorDiscCommand;
+        public DiscStatus GetDiscArchivatorDisc(long discid)
+        {
+            if (getDiscArchivatorDiscCommand == null)
+            {
+                getDiscArchivatorDiscCommand = connection.CreateCommand();
+                getDiscArchivatorDiscCommand.CommandText = "SELECT * FROM discarchivator.discs WHERE discid=@discid";
+                getDiscArchivatorDiscCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+            }
+
+            getDiscArchivatorDiscCommand.Parameters["@discid"].Value = discid;
+
+            DiscStatus discStatus = null;
+            NpgsqlDataReader dataReader = getDiscArchivatorDiscCommand.ExecuteReader();
+            if (dataReader.Read())
+            {
+                discStatus = ReadDiscStatusRow(dataReader);
+            }
+            dataReader.Close();
+            return discStatus;
+        }
+
+        private static DiscStatus ReadDiscStatusRow(NpgsqlDataReader dataReader)
+        {
+            DiscStatus discStatus;
+            discStatus = new DiscStatus();
+            discStatus.DiscId = dataReader.GetInt64(0);
+            discStatus.DateAdded = dataReader.GetDateTime(1);
+            discStatus.PgSerial = dataReader.GetInt32(2);
+            discStatus.Path = new DirectoryInfo(dataReader.GetString(3));
+            discStatus.Dumped = dataReader.GetBoolean(4);
+            discStatus.Ripped = dataReader.GetBoolean(5);
+            discStatus.Name = dataReader.GetString(6);
+            discStatus.Completed = dataReader.GetBoolean(7);
+            discStatus.AzusaLinked = dataReader.GetBoolean(8);
+            return discStatus;
+        }
+
+        private NpgsqlCommand setDiscArchivatorPropertyCommand;
+        public void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value)
+        {
+            if (setDiscArchivatorPropertyCommand == null)
+            {
+                setDiscArchivatorPropertyCommand = connection.CreateCommand();
+                setDiscArchivatorPropertyCommand.CommandText = "UPDATE discarchivator.discs " +
+                                                               "SET dumped = @dumped, " +
+                                                               "    ripped = @ripped, " +
+                                                               "    completed = @completed " +
+                                                               "WHERE discid=@discid";
+                setDiscArchivatorPropertyCommand.Parameters.Add("@dumped", NpgsqlDbType.Boolean);
+                setDiscArchivatorPropertyCommand.Parameters.Add("@ripped", NpgsqlDbType.Boolean);
+                setDiscArchivatorPropertyCommand.Parameters.Add("@completed", NpgsqlDbType.Boolean);
+                setDiscArchivatorPropertyCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+            }
+
+            setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = false;
+            setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = false;
+            setDiscArchivatorPropertyCommand.Parameters["@completed"].Value = false;
+            setDiscArchivatorPropertyCommand.Parameters["@discid"].Value = discid;
+            switch (property)
+            {
+                case DiscStatusProperty.Completed:
+                    setDiscArchivatorPropertyCommand.Parameters["@completed"].Value = true;
+                    setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = true;
+                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
+                    break;
+                case DiscStatusProperty.Dumped:
+                    setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = true;
+                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
+                    break;
+                case DiscStatusProperty.Ripped:
+                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            setDiscArchivatorPropertyCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand setDiscArchivatorAzusaLinkCommand;
+        public void SetDiscArchivatorAzusaLink(long discid, int mediumId)
+        {
+            Media media = GetMediaById(mediumId);
+            media.DiscId = discid;
+            UpdateMedia(media);
+
+            if (setDiscArchivatorAzusaLinkCommand == null)
+            {
+                setDiscArchivatorAzusaLinkCommand = new NpgsqlCommand();
+                setDiscArchivatorAzusaLinkCommand.CommandText =
+                    "UPDATE discarchivator.discs SET azusalinked = TRUE WHERE discid=@discid";
+                setDiscArchivatorAzusaLinkCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+            }
+
+            setDiscArchivatorAzusaLinkCommand.Parameters["@discid"].Value = discid;
+            int result = setDiscArchivatorAzusaLinkCommand.ExecuteNonQuery();
+            if (result != 1)
+                throw new Exception("unexpected update result");
+        }
+
+        private NpgsqlCommand getDiscArchivatorEntiresCommand;
+        public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
+        {
+            if (getDiscArchivatorEntiresCommand == null)
+            {
+                getDiscArchivatorEntiresCommand = connection.CreateCommand();
+                getDiscArchivatorEntiresCommand.CommandText = "SELECT * FROM discarchivator.discs";
+            }
+
+            NpgsqlDataReader dataReader = getDiscArchivatorEntiresCommand.ExecuteReader();
+            while (dataReader.Read())
+            {
+                yield return ReadDiscStatusRow(dataReader);
+            }
+            dataReader.Close();
+        }
+        
         public void Dispose()
         {
             throw new NotImplementedException();

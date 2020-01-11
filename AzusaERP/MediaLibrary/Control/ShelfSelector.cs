@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
@@ -49,7 +50,20 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
 
         public Shelf SelectedShelf
         {
-            get { return (Shelf) comboBox1.SelectedItem; }
+            get
+            {
+                return (Shelf) comboBox1.SelectedItem;
+            }
         }
+
+        private void comboBox1_SelectedValueChanged(object sender, System.EventArgs e)
+        {
+            OnShelfSelectionChanged?.Invoke(SelectedShelf);
+        }
+
+        public event ShelfSelection OnShelfSelectionChanged;
     }
+
+    public delegate void ShelfSelection(Shelf ssea);
+
 }

@@ -37,7 +37,7 @@ namespace libgrabsiteclient
                 
                 CancellationToken ct1 = new CancellationToken(false);
                 webSocket = new ClientWebSocket();
-                webSocket.ConnectAsync(new Uri("ws://172.20.20.31:29000"), ct1).Wait();
+                webSocket.ConnectAsync(new Uri("ws://127.0.0.1:29000"), ct1).Wait();
                 webSocket.SendAsync(helloMessageSegment, WebSocketMessageType.Text, true, ct1);
             }
 

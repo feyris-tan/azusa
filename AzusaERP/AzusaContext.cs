@@ -117,14 +117,12 @@ namespace moe.yo3explorer.azusa
         
         public Ini Ini { get; set; }
         public Splash Splash { get; set; }
-        public bool OfflineMode { get; set; }
         public MainForm MainForm { get; set; }
         public IDatabaseDriver DatabaseDriver { get; set; }
         public ulong NumOperations { get; set; }
         public CultureInfo CultureInfo { get; private set; }
         public bool TabletMode { get; set; }
         public IAzusaModule CurrentOnScreenModule { get; set; }
-        public bool IsOnline { get; set; }
         public Random RandomNumberGenerator { get; private set; }
         public WebServer WebServer { get; set; }
         public Icon Icon { get; set; }

@@ -57,10 +57,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.label4 = new System.Windows.Forms.Label();
             this.productISBN = new System.Windows.Forms.TextBox();
             this.productSave = new System.Windows.Forms.Button();
-            this.productCost = new CurrencyConverterTextBox();
+            this.productCost = new moe.yo3explorer.azusa.MediaLibrary.Control.CurrencyConverterTextBox();
             this.productNSFW = new System.Windows.Forms.CheckBox();
             this.productTabCover = new System.Windows.Forms.TabPage();
-            this.productCover = new PictureDrop();
+            this.productCover = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabMedia = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.productMediaListView = new System.Windows.Forms.ListView();
@@ -68,7 +68,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.productAddMediaButton = new System.Windows.Forms.Button();
             this.productTabScreenshots = new System.Windows.Forms.TabPage();
-            this.productScreenshot = new PictureDrop();
+            this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabLinks = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
@@ -116,14 +116,14 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaTabChecksum = new System.Windows.Forms.TabPage();
             this.mediaChecksum = new System.Windows.Forms.TextBox();
             this.mediaTabCdText = new System.Windows.Forms.TabPage();
-            this.mediaCdText = new BinaryFileDropper();
+            this.mediaCdText = new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper();
             this.mediaTabOgPlaylist = new System.Windows.Forms.TabPage();
             this.mediaOriginalPlaylist = new System.Windows.Forms.TextBox();
             this.mediaTabLogfile = new System.Windows.Forms.TabPage();
             this.mediaLogfile = new System.Windows.Forms.TextBox();
             this.mediaTabMds = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
-            this.mediaMds = new BinaryFileDropper();
+            this.mediaMds = new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper();
             this.mdsPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.mediaTabFilesystem = new System.Windows.Forms.TabPage();
             this.mediaFilesystemTreeView = new System.Windows.Forms.TreeView();
@@ -1268,7 +1268,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaMds.Name = "mediaMds";
             this.mediaMds.Size = new System.Drawing.Size(181, 109);
             this.mediaMds.TabIndex = 0;
-            this.mediaMds.DataChanged += new BinaryFileDropper.DataChangeDelegate(this.mediaMds_DataChanged);
+            this.mediaMds.DataChanged += new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper.DataChangeDelegate(this.mediaMds_DataChanged);
             // 
             // mdsPropertyGrid
             // 
@@ -1505,8 +1505,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             // dumpOpenFileDialog
             // 
-            this.dumpOpenFileDialog.Filter = "Mediendatei (*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs)|*.gz;*" +
-    ".mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs";
+            this.dumpOpenFileDialog.Filter = "Mediendatei (*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs;*.nsp)|" +
+    "*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs;*.nsp";
             // 
             // filesystemIsoParseOpenFileDialog
             // 

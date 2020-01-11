@@ -7,6 +7,7 @@ using moe.yo3explorer.azusa.Control.Licensing;
 using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.DexcomHistory.Entity;
+using moe.yo3explorer.azusa.Dumping.Entity;
 using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.MyFigureCollection.Entity;
@@ -157,5 +158,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         bool IsAllowedSyncTarget();
         object GetConnectionObject();
         string GetConnectionString();
+
+        void InsertDiscArchivatorDisc(long discid, string path, string name);
+        DiscStatus GetDiscArchivatorDisc(long discid);
+        void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value);
+        void SetDiscArchivatorAzusaLink(long discid, int mediumId);
+        IEnumerable<DiscStatus> GetDiscArchivatorEntries();
     }
 }

@@ -15,6 +15,7 @@ using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
 using moe.yo3explorer.azusa.DexcomHistory.Entity;
+using moe.yo3explorer.azusa.Dumping.Entity;
 using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.MyFigureCollection.Entity;
@@ -1885,6 +1886,31 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public string GetConnectionString()
         {
             return null;
+        }
+
+        public void InsertDiscArchivatorDisc(long discid, string path, string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DiscStatus GetDiscArchivatorDisc(long discid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDiscArchivatorAzusaLink(long discid, int mediumId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
+        {
+            throw new NotImplementedException();
         }
 
         public LicenseState CheckLicenseStatus()

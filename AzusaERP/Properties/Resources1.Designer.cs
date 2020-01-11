@@ -63,6 +63,26 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap accept {
+            get {
+                object obj = ResourceManager.GetObject("accept", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap add {
+            get {
+                object obj = ResourceManager.GetObject("add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Find_VS {
             get {
                 object obj = ResourceManager.GetObject("Find_VS", resourceCulture);
@@ -73,11 +93,11 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT tag,
         ///       (SELECT COUNT(*)
-        ///        FROM dump_gb_posttags posttag
-        ///                 LEFT JOIN dump_gb_posts post ON post.id = posttag.postid
+        ///        FROM dump_gb.posttags posttag
+        ///                 LEFT JOIN dump_gb.posts post ON post.id = posttag.postid
         ///        WHERE posttag.tagid = root.id AND post.downloaded AND post.rating != &apos;e&apos;)  AS numImages,
         ///       id
-        ///FROM dump_gb_tags root
+        ///FROM dump_gb.tags root
         ///WHERE LENGTH(tag) &gt; 1
         ///ORDER BY tag ASC ähnelt.
         /// </summary>
@@ -89,8 +109,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT DISTINCT t.tag, 1, pt.tagid
-        ///FROM dump_gb_posttags pt
-        ///LEFT JOIN dump_gb_tags t ON t.id; ähnelt.
+        ///FROM dump_gb.posttags pt
+        ///LEFT JOIN dump_gb.tags t ON t.id; ähnelt.
         /// </summary>
         internal static string Gelbooru_GetTags_SQLite {
             get {
@@ -100,7 +120,7 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT id, name, mediaTypeId
-        ///FROM azusa_media 
+        ///FROM azusa.media 
         ///WHERE relatedproduct=@productId 
         ///ORDER BY id ASC ähnelt.
         /// </summary>
@@ -118,9 +138,9 @@ namespace moe.yo3explorer.azusa.Properties {
         ///	   LENGTH(prod.screenshot) AS screenshotSize,
         ///	   LENGTH(prod.picture) AS pictureSize,
         ///	   prod.nsfw,
-        ///	   (SELECT media.mediaTypeId FROM azusa_media media WHERE media.relatedProduct = prod.id ORDER BY media.id ASC LIMIT 1) AS mediaTypeId,
-        ///	   (SELECT COUNT(*) FROM azusa_media WHERE azusa_media.relatedProduct = prod.id) AS numDiscs,
-        ///	   (SELECT COUNT(*) FROM azusa_media WHERE azusa_media.relatedProduct = prod.id AND((dumppath IS NU [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///	   (SELECT media.mediaTypeId FROM azusa.media media WHERE media.relatedProduct = prod.id ORDER BY media.id ASC LIMIT 1) AS mediaTypeId,
+        ///	   (SELECT COUNT(*) FROM azusa.media WHERE azusa.media.relatedProduct = prod.id) AS numDiscs,
+        ///	   (SELECT COUNT(*) FROM azusa.media WHERE azusa.media.relatedProduct = prod.id AND((dumppath IS NU [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string GetProductsInShelf_Postgre {
             get {
@@ -130,8 +150,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die select count(*)
-        ///from azusa_products product
-        ///join azusa_shelves shelf on shelf.id = product.inshelf 
+        ///from azusa.products product
+        ///join azusa.shelves shelf on shelf.id = product.inshelf 
         ///where 
         ///	((product.picture) IS NULL 
         ///     and (product.consistent = FALSE) 
@@ -146,10 +166,10 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die select COUNT(*)
-        ///from azusa_media media 
-        ///join azusa_products product on media.relatedProduct = product.id
-        ///join azusa_shelves shelf on product.inshelf = shelf.id
-        ///join azusa_mediatypes mediaType on media.mediatypeid = mediaType.id
+        ///from azusa.media media 
+        ///join azusa.products product on media.relatedProduct = product.id
+        ///join azusa.shelves shelf on product.inshelf = shelf.id
+        ///join azusa.mediatypes mediaType on media.mediatypeid = mediaType.id
         ///where (
         ///		((media.graphdata) IS NULL or (media.graphdata = &apos;&apos;))
         ///	and (product.consistent = FALSE) 
@@ -167,8 +187,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die select COUNT(*)
-        ///from azusa_products products
-        ///join azusa_shelves shelves on products.inshelf = shelves.id
+        ///from azusa.products products
+        ///join azusa.shelves shelves on products.inshelf = shelves.id
         ///where shelves.&quot;screenshotRequired&quot; = TRUE
         ///and (products.screenshot IS NULL or LENGTH(products.screenshot) = 0) ähnelt.
         /// </summary>
@@ -180,15 +200,15 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die select count(*) 
-        ///from azusa_media media 
-        ///left join azusa_products products on media.relatedproduct = products.id 
-        ///left join azusa_platforms platforms on products.platform = platforms.id 
-        ///left join azusa_shelves shelves on products.inShelf = shelves.id 
-        ///left join azusa_mediatypes on media.mediaTypeId = azusa_mediatypes.id 
+        ///from azusa.media media 
+        ///left join azusa.products products on media.relatedproduct = products.id 
+        ///left join azusa.platforms platforms on products.platform = platforms.id 
+        ///left join azusa.shelves shelves on products.inShelf = shelves.id 
+        ///left join azusa.mediatypes on media.mediaTypeId = azusa.mediatypes.id 
         ///where (media.dumppath IS NULL or media.dumppath = &apos;&apos;) 
         ///  and products.consistent = FALSE
         ///  and products.name IS NOT NULL
-        ///  and azusa_mediatypes.&quot;ignoreForStatistics&quot; = FALSE ähnelt.
+        ///  and azusa.mediatypes.&quot;ignoreForStatistics&quot; = FALSE ähnelt.
         /// </summary>
         internal static string GetTotalUndumpedMedia_Postgre {
             get {
@@ -218,10 +238,10 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT figure.id, root.name, category.name, figure.barcode, figure.name, figure.release_date, figure.price, figurephoto.thumbnail
-        ///FROM dump_myfigurecollection_figures figure
-        ///LEFT JOIN dump_myfigurecollection_roots root ON figure.rootid = root.id
-        ///LEFT JOIN dump_myfigurecollection_categories category ON figure.categoryid = category.id
-        ///LEFT JOIN dump_myfigurecollection_figurephotos figurephoto ON figure.id = figurephoto.id
+        ///FROM dump_myfigurecollection.figures figure
+        ///LEFT JOIN dump_myfigurecollection.roots root ON figure.rootid = root.id
+        ///LEFT JOIN dump_myfigurecollection.categories category ON figure.categoryid = category.id
+        ///LEFT JOIN dump_myfigurecollection.figurephotos figurephoto ON figure.id = figurephoto.id
         ///WHERE (figure.name LIKE @query
         ///OR figure.barcode LIKE @query)
         ///AND figure.enabled  [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
@@ -265,10 +285,10 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT game.platform, game.sku,game.title,game.languages,game.commontitle,game.region, genre.name, 
         ///	   developer.name, publisher.name, game.daterelease, game.cover, game.description, game.barcode
-        ///FROM dump_psxdatacenter_games game
-        ///JOIN dump_psxdatacenter_genres genre ON game.genreid = genre.id
-        ///JOIN dump_psxdatacenter_companies developer ON game.developerid = developer.id
-        ///JOIN dump_psxdatacenter_companies publisher ON game.publisherid = publisher.id
+        ///FROM dump_psxdatacenter.games game
+        ///JOIN dump_psxdatacenter.genres genre ON game.genreid = genre.id
+        ///JOIN dump_psxdatacenter.companies developer ON game.developerid = developer.id
+        ///JOIN dump_psxdatacenter.companies publisher ON game.publisherid = publisher.id
         ///WHERE game.id=@id ähnelt.
         /// </summary>
         internal static string PsxDatacenterGetGame_Postgre {
@@ -301,9 +321,9 @@ namespace moe.yo3explorer.azusa.Properties {
         ///    publisher.name
         ///
         ///FROM dump_vgmdb_albums root
-        ///LEFT JOIN dump_vgmdb_album_types type ON root.typeid = type.id
-        ///LEFT JOIN dump_vgmdb_album_classification classification ON root.classificationid = classification.id
-        ///LEFT JOIN dump_vgmdb_album_mediaformat mediaformat ON root.mediaformatid = mediaformat.id
+        ///LEFT JOIN dump_vgmdb.album_types type ON root.typeid = type.id
+        ///LEFT JOIN dump_vgmdb.album_classification classification ON root.classificationid = classification.id
+        ///LEFT JOIN dump_vgmdb.album_mediaformat mediaformat ON root.mediaformatid = mediaformat.id
         ///LEFT JOIN dump_ [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string VgmDbFindAlbumForList_Postgre {
@@ -314,8 +334,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT root.name, role.name
-        ///FROM dump_vgmdb_album_label_arbiturary root
-        ///JOIN dump_vgmdb_album_label_roles role ON root.roleid = role.id
+        ///FROM dump_vgmdb.album_label_arbiturary root
+        ///JOIN dump_vgmdb.album_label_roles role ON root.roleid = role.id
         ///WHERE root.albumid=@id ähnelt.
         /// </summary>
         internal static string VgmdbFindArbituraryLabelNamesByAlbumId_Postgre {
@@ -326,9 +346,9 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT label.name, role.name
-        ///FROM dump_vgmdb_album_labels root
-        ///JOIN dump_vgmdb_labels label ON root.labelid = label.id
-        ///JOIN dump_vgmdb_album_label_roles role ON root.roleid = role.id
+        ///FROM dump_vgmdb.album_labels root
+        ///JOIN dump_vgmdb.labels label ON root.labelid = label.id
+        ///JOIN dump_vgmdb.album_label_roles role ON root.roleid = role.id
         ///WHERE albumid=@id ähnelt.
         /// </summary>
         internal static string VgmdbFindLabelsByAlbumId_Postgre {
@@ -339,8 +359,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT root.name, type.name
-        ///FROM dump_vgmdb_album_artist_arbitrary root
-        ///JOIN dump_vgmdb_album_artist_type type ON root.artisttypeid = type.id
+        ///FROM dump_vgmdb.album_artist_arbitrary root
+        ///JOIN dump_vgmdb.album_artist_type type ON root.artisttypeid = type.id
         ///WHERE albumid = @id; ähnelt.
         /// </summary>
         internal static string VgmdbGetArbitraryArtistsByAlbumId_Postgre {
@@ -351,9 +371,9 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT artist.name, type.name
-        ///FROM dump_vgmdb_album_artists root
-        ///LEFT JOIN dump_vgmdb_artist artist ON root.artistid = artist.id
-        ///LEFT JOIN dump_vgmdb_album_artist_type type ON root.artisttypeid = type.id
+        ///FROM dump_vgmdb.album_artists root
+        ///LEFT JOIN dump_vgmdb.artist artist ON root.artistid = artist.id
+        ///LEFT JOIN dump_vgmdb.album_artist_type type ON root.artisttypeid = type.id
         ///WHERE root.albumid = @id; ähnelt.
         /// </summary>
         internal static string VgmdbGetArtistNamesByAlbumId_Postgre {
@@ -365,8 +385,8 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT  album.catalog, 
         ///		album.name
-        ///FROM dump_vgmdb_album_relatedalbum root
-        ///JOIN dump_vgmdb_albums album ON root.relatedalbumid = album.id
+        ///FROM dump_vgmdb.album_relatedalbum root
+        ///JOIN dump_vgmdb.albums album ON root.relatedalbumid = album.id
         ///WHERE root.albumid = @albumid ähnelt.
         /// </summary>
         internal static string VgmdbGetRelatedAlbums_Postgre {
@@ -377,8 +397,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT event.name
-        ///FROM dump_vgmdb_album_releaseevent root
-        ///JOIN dump_vgmdb_events event ON root.eventid = event.id
+        ///FROM dump_vgmdb.album_releaseevent root
+        ///JOIN dump_vgmdb.events event ON root.eventid = event.id
         ///WHERE root.albumid = @albumid ähnelt.
         /// </summary>
         internal static string VgmDbGetReleaseEvent {
@@ -390,8 +410,8 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT albums.catalog,
         ///       albums.name
-        ///FROM dump_vgmdb_album_reprints root
-        ///JOIN dump_vgmdb_albums albums ON root.reprintid = albums.id
+        ///FROM dump_vgmdb.album_reprints root
+        ///JOIN dump_vgmdb.albums albums ON root.reprintid = albums.id
         ///WHERE root.albumid = @albumid ähnelt.
         /// </summary>
         internal static string VgmdbGetReprints_Postgre {
@@ -402,9 +422,9 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT disc.name, disc.discindex, root.trackindex, root.name, track.tracklength, root.lang
-        ///FROM dump_vgmdb_album_disc_track_translation root
-        ///JOIN dump_vgmdb_album_discs disc ON disc.albumid = root.albumid AND disc.discindex = root.discindex
-        ///JOIN dump_vgmdb_album_disc_tracks track ON track.albumid = root.albumid AND track.discindex = root.discindex AND track.trackindex = root.trackindex
+        ///FROM dump_vgmdb.album_disc_track_translation root
+        ///JOIN dump_vgmdb.album_discs disc ON disc.albumid = root.albumid AND disc.discindex = root.discindex
+        ///JOIN dump_vgmdb.album_disc_tracks track ON track.albumid = root.albumid AND track.discindex = root.discindex AND track.trackindex = root.trackindex
         ///WHERE root.albumid = @id
         ///ORDER BY root.albumid ASC, root.lang ASC, root.discindex ASC, root.trackindex ASC ähnelt.
         /// </summary>
@@ -416,8 +436,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT DISTINCT root.rid, release.title, release.gtin, release.catalog
-        ///FROM dump_vndb_release_vns root
-        ///JOIN dump_vndb_release release ON root.rid = release.id
+        ///FROM dump_vndb.release_vns root
+        ///JOIN dump_vndb.release release ON root.rid = release.id
         ///WHERE root.title LIKE @query
         ///   OR root.original LIKE @query
         ///   OR release.title LIKE @query
@@ -433,8 +453,8 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT album.name
-        ///FROM dump_vocadb_albumtracks root
-        ///JOIN dump_vocadb_albums album ON root.albumid = album.id
+        ///FROM dump_vocadb.albumtracks root
+        ///JOIN dump_vocadb.albums album ON root.albumid = album.id
         ///WHERE lower(root.name) like lower(@query) ähnelt.
         /// </summary>
         internal static string Vocadb_FindSongRelatedAlbum {
@@ -445,7 +465,7 @@ namespace moe.yo3explorer.azusa.Properties {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die SELECT id, name, artiststring, disctype, releasedate, catalognumber
-        ///FROM dump_vocadb_albums
+        ///FROM dump_vocadb.albums
         ///WHERE LOWER(name) LIKE LOWER(@query)
         ///OR LOWER(artiststring) LIKE LOWER(@query)
         ///OR LOWER(catalognumber) LIKE LOWER(@query) ähnelt.

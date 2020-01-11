@@ -47,6 +47,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
                 DateTime? latestInsert = target.Sync_GetLastSyncDateForTable(tableName);
                 bool partialUpdatesPossible = columns.Any(x => x.ColumnName.ToLowerInvariant().Equals("dateupdated"));
                 DateTime? latestUpdate = null;
+
                 if (partialUpdatesPossible)
                 {
                     //Delta 2

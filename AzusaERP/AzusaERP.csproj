@@ -261,6 +261,8 @@
       <DependentUpon>Galleria.cs</DependentUpon>
     </Compile>
     <Compile Include="Control\Galleria\GalleriaModel.cs" />
+    <Compile Include="Dumping\Entity\DiscStatus.cs" />
+    <Compile Include="Dumping\Entity\DiscStatusProperty.cs" />
     <Compile Include="Gelbooru\Boundary\GelboooruControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -308,6 +310,12 @@
     </Compile>
     <Compile Include="MediaLibrary\Boundary\MediaLibraryControl.Designer.cs">
       <DependentUpon>MediaLibraryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MediaLibrary\Boundary\MediaPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MediaLibrary\Boundary\MediaPickerForm.Designer.cs">
+      <DependentUpon>MediaPickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaLibrary\Boundary\MediaService.cs" />
     <Compile Include="MediaLibrary\Boundary\MediaTypeService.cs" />
@@ -394,6 +402,8 @@
     </Compile>
     <Compile Include="PsxDatacenter\Entity\PsxDatacenterGame.cs" />
     <Compile Include="PsxDatacenter\Entity\PsxDatacenterPreview.cs" />
+    <None Include="Resources\add.png" />
+    <None Include="Resources\accept.png" />
     <Content Include="Resources\Gelbooru.GetTags.Postgre.sql" />
     <Content Include="Resources\Gelbooru.GetTags.SQLite.sql" />
     <None Include="packages.config" />
@@ -536,6 +546,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Boundary\MediaLibraryControl.resx">
       <DependentUpon>MediaLibraryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MediaLibrary\Boundary\MediaPickerForm.resx">
+      <DependentUpon>MediaPickerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Control\BinaryFileDropper.resx">
       <DependentUpon>BinaryFileDropper.cs</DependentUpon>
