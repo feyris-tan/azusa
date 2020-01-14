@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,11 +8,13 @@ using Npgsql.Logging;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
+    [DebuggerStepThrough]
     class PostgresLogProvider : INpgsqlLoggingProvider
     {
         private Dictionary<string, NpgsqlLogger> loggers;
         private Queue<PostgresLogEvent> logEvents;
 
+        [DebuggerStepThrough]
         public NpgsqlLogger CreateLogger(string name)
         {
             if (loggers == null)
@@ -24,6 +27,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return loggers[name];
         }
 
+        [DebuggerStepThrough]
         private void PerformAddEvent(PostgresLogEvent theEvent)
         {
             if (logEvents == null)
@@ -31,8 +35,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             logEvents.Enqueue(theEvent);
         }
         delegate void AddEvent(PostgresLogEvent theEvent);
+
+        [DebuggerStepThrough]
         class PostgresLogger : NpgsqlLogger
         {
+            [DebuggerStepThrough]
             public PostgresLogger(string name,AddEvent addEvent)
             {
                 this.name = name;
@@ -42,11 +49,13 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             private string name;
             private AddEvent addEvent;
 
+            [DebuggerStepThrough]
             public override bool IsEnabled(NpgsqlLogLevel level)
             {
                 return true;
             }
 
+            [DebuggerStepThrough]
             public override void Log(NpgsqlLogLevel level, int connectorId, string msg, Exception exception = null)
             {
                 PostgresLogEvent theEvent = new PostgresLogEvent(DateTime.Now, name, level, connectorId, msg, exception);
@@ -55,8 +64,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         [Serializable]
+        [DebuggerStepThrough]
         class PostgresLogEvent
         {
+            [DebuggerStepThrough]
             public PostgresLogEvent(DateTime now, string name, NpgsqlLogLevel level, int connectorId, string msg,
                 Exception exception)
             {

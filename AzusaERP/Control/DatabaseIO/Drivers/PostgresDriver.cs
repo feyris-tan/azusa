@@ -733,7 +733,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             updateMediaCommand.Parameters["@name"].Value = media.Name;
             updateMediaCommand.Parameters["@mediaTypeId"].Value = media.MediaTypeId;
-            updateMediaCommand.Parameters["@sku"].Value = media.SKU;
+
+            if (!string.IsNullOrEmpty(media.SKU))
+                updateMediaCommand.Parameters["@sku"].Value = media.SKU;
+            else
+                updateMediaCommand.Parameters["@sku"].Value = DBNull.Value;
 
             if (media.DumpStorageSpaceId != 0)
                 updateMediaCommand.Parameters["@dumpstoragespace"].Value = media.DumpStorageSpaceId;
@@ -2938,7 +2942,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (getDiscArchivatorEntiresCommand == null)
             {
                 getDiscArchivatorEntiresCommand = connection.CreateCommand();
-                getDiscArchivatorEntiresCommand.CommandText = "SELECT * FROM discarchivator.discs";
+                getDiscArchivatorEntiresCommand.CommandText = "SELECT * FROM discarchivator.discs ORDER BY pgserial";
             }
 
             NpgsqlDataReader dataReader = getDiscArchivatorEntiresCommand.ExecuteReader();

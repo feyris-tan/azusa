@@ -101,8 +101,14 @@ namespace libazuworker
         {
             Invoke((MethodInvoker) delegate
             {
+                while (currentStepProgressBar.Maximum > 9000)
+                {
+                    currentStepProgressBar.Value /= 10;
+                    currentStepProgressBar.Maximum /= 10;
+                }
                 while (currentStepProgressBar.Maximum > currentStepProgressBar.Value)
                 {
+                    currentStepProgressBar.Maximum--;
                     currentStepProgressBar.PerformStep();
                     Thread.Sleep(1);
                 }

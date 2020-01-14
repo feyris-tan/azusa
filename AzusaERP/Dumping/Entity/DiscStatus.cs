@@ -18,5 +18,10 @@ namespace moe.yo3explorer.azusa.Dumping.Entity
         public string Name { get; set; }
         public bool Completed { get; set; }
         public bool AzusaLinked { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

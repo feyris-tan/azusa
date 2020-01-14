@@ -32,5 +32,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
                 Text = value;
             }
         }
+
+        public override string ToString()
+        {
+            return MediaName;
+        }
     }
 }

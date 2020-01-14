@@ -59,5 +59,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 
             this.SubItems.Add(Errors());
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

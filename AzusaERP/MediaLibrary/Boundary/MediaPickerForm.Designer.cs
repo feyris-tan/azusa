@@ -125,6 +125,7 @@
             this.productAddButton.Size = new System.Drawing.Size(26, 23);
             this.productAddButton.TabIndex = 5;
             this.productAddButton.UseVisualStyleBackColor = true;
+            this.productAddButton.Click += new System.EventHandler(this.productAddButton_Click);
             // 
             // addMediaButton
             // 
