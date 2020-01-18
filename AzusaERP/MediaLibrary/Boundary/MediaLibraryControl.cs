@@ -286,7 +286,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mediaOriginalPlaylist.Enabled = enabled;
             mediaLogfile.Enabled = enabled;
             mediaMds.Enabled = enabled;
-            mdsPropertyGrid.Enabled = enabled;
             mediaMoreOptionsButton.Enabled = enabled;
             mediaSave.Enabled = enabled;
             imageParsenToolStripMenuItem.Enabled = enabled;
@@ -408,7 +407,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             {
                 if (newData.Length > 0)
                 {
-                    mdsPropertyGrid.SelectedObject = moe.yo3explorer.azusa.mds.MdsFile.Load(mediaMds.Data);
+                    //TODO: implement new MDS Parser
                 }
             }
         }

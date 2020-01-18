@@ -681,6 +681,15 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(19))
                 m.DiscId = ndr.GetInt64(19);
 
+            if (!ndr.IsDBNull(20))
+                m.CICM = ndr.GetString(20);
+
+            if (!ndr.IsDBNull(21))
+                m.MHddLog = ndr.GetByteArray(21);
+
+            if (!ndr.IsDBNull(22))
+                m.ScsiInfo = ndr.GetString(22);
+
             ndr.Dispose();
             return m;
         }
@@ -707,7 +716,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                                                  "    cdtext=@cdtext, logfile=@logfile," +
                                                  "    mediadescriptorsidecar=@mediadescriptorsidecar," +
                                                  "    issealed=@issealed, dateupdated=@dateupdated," +
-                                                 "    fauxhash=@fauxhash, discid=@discid " +
+                                                 "    fauxhash=@fauxhash, discid=@discid," +
+                                                 "    cicm=@cicm, mhddlog=@mhddlog, scsiinfo=@scsiinfo " +
                                                  "WHERE id=@id";
                 updateMediaCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -726,6 +736,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 updateMediaCommand.Parameters.Add("@dateupdated", NpgsqlDbType.Timestamp);
                 updateMediaCommand.Parameters.Add("@fauxhash", NpgsqlDbType.Bigint);
                 updateMediaCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+                updateMediaCommand.Parameters.Add("@cicm", NpgsqlDbType.Text);
+                updateMediaCommand.Parameters.Add("@mhddlog", NpgsqlDbType.Bytea);
+                updateMediaCommand.Parameters.Add("@scsiinfo", NpgsqlDbType.Text);
                 updateMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -775,6 +788,15 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (media.DiscId.HasValue)
                 updateMediaCommand.Parameters["@discid"].Value = media.DiscId.Value;
+
+            if (!string.IsNullOrEmpty(media.CICM))
+                updateMediaCommand.Parameters["@cicm"].Value = media.CICM;
+
+            if (media.MHddLog != null)
+                updateMediaCommand.Parameters["@mhddlog"].Value = media.MHddLog;
+
+            if (!string.IsNullOrEmpty(media.ScsiInfo))
+                updateMediaCommand.Parameters["@scsiinfo"].Value = media.ScsiInfo;
 
             updateMediaCommand.Parameters["@id"].Value = media.Id;
             int result = updateMediaCommand.ExecuteNonQuery();
@@ -2924,13 +2946,18 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (setDiscArchivatorAzusaLinkCommand == null)
             {
-                setDiscArchivatorAzusaLinkCommand = new NpgsqlCommand();
+                setDiscArchivatorAzusaLinkCommand = connection.CreateCommand();
                 setDiscArchivatorAzusaLinkCommand.CommandText =
-                    "UPDATE discarchivator.discs SET azusalinked = TRUE WHERE discid=@discid";
+                    "UPDATE discarchivator.discs " +
+                    "SET azusalinked = TRUE, " +
+                    "    linkdate = @linkdate " +
+                    "WHERE discid=@discid";
                 setDiscArchivatorAzusaLinkCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
+                setDiscArchivatorAzusaLinkCommand.Parameters.Add("@linkdate", NpgsqlDbType.Timestamp);
             }
 
             setDiscArchivatorAzusaLinkCommand.Parameters["@discid"].Value = discid;
+            setDiscArchivatorAzusaLinkCommand.Parameters["@linkdate"].Value = DateTime.Now;
             int result = setDiscArchivatorAzusaLinkCommand.ExecuteNonQuery();
             if (result != 1)
                 throw new Exception("unexpected update result");

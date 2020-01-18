@@ -632,10 +632,6 @@
       <Project>{adbcc6d3-351a-4dc7-9b06-36ffde893a53}</Project>
       <Name>libazusamcast</Name>
     </ProjectReference>
-    <ProjectReference Include="..\libazusaMDS\libazusaMDS.csproj">
-      <Project>{a911ab61-3b13-4b85-bc90-6333b3d75d05}</Project>
-      <Name>libazusaMDS</Name>
-    </ProjectReference>
     <ProjectReference Include="..\libazusax360\libazusax360.csproj">
       <Project>{59f605ad-6133-4d0b-8b23-a0b93f286dd7}</Project>
       <Name>libazusax360</Name>

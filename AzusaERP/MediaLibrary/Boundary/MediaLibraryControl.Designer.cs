@@ -124,7 +124,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaTabMds = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
             this.mediaMds = new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper();
-            this.mdsPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.mediaTabFilesystem = new System.Windows.Forms.TabPage();
             this.mediaFilesystemTreeView = new System.Windows.Forms.TreeView();
             this.filesystemContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -1249,11 +1248,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel9.Controls.Add(this.mediaMds, 0, 0);
-            this.tableLayoutPanel9.Controls.Add(this.mdsPropertyGrid, 0, 1);
             this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel9.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel9.Name = "tableLayoutPanel9";
-            this.tableLayoutPanel9.RowCount = 2;
+            this.tableLayoutPanel9.RowCount = 1;
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 66.47399F));
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.52601F));
             this.tableLayoutPanel9.Size = new System.Drawing.Size(187, 173);
@@ -1266,17 +1264,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaMds.Enabled = false;
             this.mediaMds.Location = new System.Drawing.Point(3, 3);
             this.mediaMds.Name = "mediaMds";
-            this.mediaMds.Size = new System.Drawing.Size(181, 109);
+            this.mediaMds.Size = new System.Drawing.Size(181, 167);
             this.mediaMds.TabIndex = 0;
             this.mediaMds.DataChanged += new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper.DataChangeDelegate(this.mediaMds_DataChanged);
-            // 
-            // mdsPropertyGrid
-            // 
-            this.mdsPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mdsPropertyGrid.Location = new System.Drawing.Point(3, 118);
-            this.mdsPropertyGrid.Name = "mdsPropertyGrid";
-            this.mdsPropertyGrid.Size = new System.Drawing.Size(181, 52);
-            this.mdsPropertyGrid.TabIndex = 1;
             // 
             // mediaTabFilesystem
             // 
@@ -1678,7 +1668,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.TabPage mediaTabMds;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
         private Control.BinaryFileDropper mediaMds;
-        private System.Windows.Forms.PropertyGrid mdsPropertyGrid;
         private System.Windows.Forms.Button mediaMoreOptionsButton;
         private System.Windows.Forms.ContextMenuStrip mediaMoreOptions;
         private System.Windows.Forms.ToolStripMenuItem setMetadataAndDump;

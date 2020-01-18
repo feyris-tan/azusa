@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
+using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 {
@@ -25,6 +27,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public DateTime DateUpdated { get; set; }
         public long FauxHash { get; set; }
         public long? DiscId { get; set; }
+        public string CICM { get; set; }
+        public byte[] MHddLog { get; set; }
+        public string ScsiInfo { get; set; }
 
         public void SetDumpFile(FileInfo fi)
         {
@@ -45,7 +50,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 
             //FauxHash setzen
             byte[] buffer = new byte[512];
-            FileStream fs = fi.OpenRead();
+            string filename = fi.FullName;
+            FileStream fs = File.OpenRead(filename);
             int headerLen = fs.Read(buffer, 0, 512);
             fs.Dispose();
 
@@ -57,6 +63,11 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
             }
 
             FauxHash = result;
+        }
+
+        public void SetFilesystemMetadata(Stream inputStream)
+        {
+            FilesystemMetadataGatherer.Gather(this, inputStream);
         }
     }
 }

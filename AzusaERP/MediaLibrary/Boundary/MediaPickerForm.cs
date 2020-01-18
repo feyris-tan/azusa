@@ -18,6 +18,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private Entity.ProductInShelf selectedProduct;
         private Entity.MediaInProduct selectedMedia;
         private IDatabaseDriver dbDriver;
+        private int numMediaInProduct;
 
         public MediaPickerForm()
         {
@@ -66,6 +67,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 foreach (MediaInProduct mediaInProduct in mediaInProducts)
                     mediaComboBox.Items.Add(mediaInProduct);
                 mediaComboBox.SelectedIndex = 0;
+                numMediaInProduct = mediaComboBox.Items.Count;
             }
         }
 
@@ -80,6 +82,21 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             get => selectedMedia;
         }
 
+        public ProductInShelf SelectedProduct
+        {
+            get => selectedProduct;
+        }
+
+        public Shelf SelectedShelf
+        {
+            get => selectedShelf;
+        }
+
+        public int NumMediaInProduct
+        {
+            get => numMediaInProduct;
+        }
+
         private void confirm_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
@@ -89,12 +106,14 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private void productAddButton_Click(object sender, EventArgs e)
         {
             string prompt = TextInputForm.Prompt("Name des neuen Produkts?");
+            if (string.IsNullOrEmpty(prompt))
+                return;
             int newProductId = dbDriver.CreateProductAndReturnId(selectedShelf, prompt);
             int mediaId = dbDriver.CreateMediaAndReturnId(newProductId, "Disc 1");
             ShelfSelector1_OnShelfSelectionChanged(selectedShelf);
             foreach (ProductInShelf item in productComboBox.Items)
             {
-                if (item.Id == mediaId)
+                if (item.Id == newProductId)
                 {
                     productComboBox.SelectedItem = item;
                     break;
