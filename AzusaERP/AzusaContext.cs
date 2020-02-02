@@ -130,6 +130,7 @@ namespace moe.yo3explorer.azusa
         public byte[] LicenseSeed { get; private set; }
         public List<AzusaPlugin> Plugins { get; private set; }
         public Queue<AzusaPlugin> PluginLoadQueue { get; private set; }
+        public bool CatchModuleExceptions => true;
     }
 
 }

@@ -215,6 +215,10 @@
   <ItemGroup>
     <Compile Include="AzusaContext.cs" />
     <Compile Include="AzusaPlugin.cs" />
+    <Compile Include="BandcampImporter\ArbitraryStreamFileAbstraction.cs" />
+    <Compile Include="BandcampImporter\BandcampAlbumEntry.cs" />
+    <Compile Include="BandcampImporter\BandcampImportWorker.cs" />
+    <Compile Include="BandcampImporter\BrokenImportRepairWorker.cs" />
     <Compile Include="Control\DatabaseIO\DatabaseColumn.cs" />
     <Compile Include="Control\DatabaseIO\DatabaseConnectionException.cs" />
     <Compile Include="Control\DatabaseIO\DbDataReaderExtensions.cs" />
@@ -303,6 +307,12 @@
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BandcampImporter\BandcampImportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BandcampImporter\BandcampImportForm.Designer.cs">
+      <DependentUpon>BandcampImportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaLibrary\Boundary\CountryService.cs" />
     <Compile Include="MediaLibrary\Boundary\MediaLibraryControl.cs">
@@ -544,6 +554,9 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="BandcampImporter\BandcampImportForm.resx">
+      <DependentUpon>BandcampImportForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Boundary\MediaLibraryControl.resx">
       <DependentUpon>MediaLibraryControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -639,6 +652,10 @@
     <ProjectReference Include="..\libazustreamblob\libazustreamblob.csproj">
       <Project>{01ce14e8-ffa2-4be2-bd31-3696edde77f8}</Project>
       <Name>libazustreamblob</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libazuworker\libazuworker.csproj">
+      <Project>{28df4b21-81b0-49a2-acee-450a07c6fd52}</Project>
+      <Name>libazuworker</Name>
     </ProjectReference>
     <ProjectReference Include="..\libini\libini.csproj">
       <Project>{a6e030af-0153-43f5-bd58-43594cefe7f4}</Project>

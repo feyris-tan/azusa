@@ -34,6 +34,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MediaLibraryControl));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.neuesProduktToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.batchImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bandcampKollektionImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.defekteM3UDateienReparierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.productsListView = new System.Windows.Forms.ListView();
@@ -150,6 +153,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.metafilesAutomatischErgänzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -202,7 +206,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.neuesProduktToolStripMenuItem});
+            this.neuesProduktToolStripMenuItem,
+            this.batchImportToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(866, 24);
@@ -215,6 +220,30 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.neuesProduktToolStripMenuItem.Size = new System.Drawing.Size(97, 20);
             this.neuesProduktToolStripMenuItem.Text = "Neues Produkt";
             this.neuesProduktToolStripMenuItem.Click += new System.EventHandler(this.neuesProduktToolStripMenuItem_Click);
+            // 
+            // batchImportToolStripMenuItem
+            // 
+            this.batchImportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bandcampKollektionImportierenToolStripMenuItem,
+            this.defekteM3UDateienReparierenToolStripMenuItem,
+            this.metafilesAutomatischErgänzenToolStripMenuItem});
+            this.batchImportToolStripMenuItem.Name = "batchImportToolStripMenuItem";
+            this.batchImportToolStripMenuItem.Size = new System.Drawing.Size(90, 20);
+            this.batchImportToolStripMenuItem.Text = "Batch-Import";
+            // 
+            // bandcampKollektionImportierenToolStripMenuItem
+            // 
+            this.bandcampKollektionImportierenToolStripMenuItem.Name = "bandcampKollektionImportierenToolStripMenuItem";
+            this.bandcampKollektionImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.bandcampKollektionImportierenToolStripMenuItem.Text = "Bandcamp Kollektion importieren";
+            this.bandcampKollektionImportierenToolStripMenuItem.Click += new System.EventHandler(this.bandcampKollektionImportierenToolStripMenuItem_Click);
+            // 
+            // defekteM3UDateienReparierenToolStripMenuItem
+            // 
+            this.defekteM3UDateienReparierenToolStripMenuItem.Name = "defekteM3UDateienReparierenToolStripMenuItem";
+            this.defekteM3UDateienReparierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.defekteM3UDateienReparierenToolStripMenuItem.Text = "Defekte M3U Dateien reparieren";
+            this.defekteM3UDateienReparierenToolStripMenuItem.Click += new System.EventHandler(this.defekteM3UDateienReparierenToolStripMenuItem_Click);
             // 
             // splitContainer1
             // 
@@ -1502,6 +1531,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.filesystemIsoParseOpenFileDialog.Filter = "ISO9660 (*.iso), DD (*.img), httpd-ack (*.gdi)|*.iso;*.img;*.gdi";
             // 
+            // metafilesAutomatischErgänzenToolStripMenuItem
+            // 
+            this.metafilesAutomatischErgänzenToolStripMenuItem.Name = "metafilesAutomatischErgänzenToolStripMenuItem";
+            this.metafilesAutomatischErgänzenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.metafilesAutomatischErgänzenToolStripMenuItem.Text = "Metafiles automatisch ergänzen";
+            this.metafilesAutomatischErgänzenToolStripMenuItem.Click += new System.EventHandler(this.metafilesAutomatischErgänzenToolStripMenuItem_Click);
+            // 
             // MediaLibraryControl
             // 
             this.AllowDrop = true;
@@ -1695,5 +1731,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem batchImportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bandcampKollektionImportierenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem defekteM3UDateienReparierenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem metafilesAutomatischErgänzenToolStripMenuItem;
     }
 }

@@ -164,5 +164,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value);
         void SetDiscArchivatorAzusaLink(long discid, int mediumId);
         IEnumerable<DiscStatus> GetDiscArchivatorEntries();
+
+        Media[] findBrokenBandcampImports();
+        Media[] FindAutofixableMetafiles();
     }
 }

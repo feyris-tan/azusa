@@ -43,17 +43,26 @@ namespace moe.yo3explorer.azusa
                             }
                         }
 
-                        try
+                        if (context.CatchModuleExceptions)
+                        {
+                            try
+                            {
+                                control.OnLoad();
+                                loadedModules.Add(control);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                context.Splash.SetLabel(String.Format("Konnte Modul nicht laden: {0} ({1})",
+                                    control.IniKey,
+                                    e.Message));
+                                Thread.Sleep(1000);
+                            }
+                        }
+                        else
                         {
                             control.OnLoad();
                             loadedModules.Add(control);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            context.Splash.SetLabel(String.Format("Konnte Modul nicht laden: {0} ({1})", control.IniKey,
-                                e.Message));
-                            Thread.Sleep(1000);
                         }
                     }
                 }

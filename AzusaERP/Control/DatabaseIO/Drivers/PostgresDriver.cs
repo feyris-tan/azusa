@@ -1572,7 +1572,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vgmdbSearchTrackTranslation = connection.CreateCommand();
                 vgmdbSearchTrackTranslation.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_disc_track_translation WHERE name LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_disc_track_translation WHERE name LIKE @name";
                 vgmdbSearchTrackTranslation.Parameters.Add("@name", NpgsqlDbType.Text);
             }
 
@@ -1592,7 +1592,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vgmFindAlbumsByArbituraryProducts = connection.CreateCommand();
                 vgmFindAlbumsByArbituraryProducts.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_arbituaryproducts WHERE name LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_arbituaryproducts WHERE name LIKE @name";
                 vgmFindAlbumsByArbituraryProducts.Parameters.Add("@name", NpgsqlDbType.Text);
             }
 
@@ -1612,7 +1612,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vgmFindAlbumsByAlbumTitle = connection.CreateCommand();
                 vgmFindAlbumsByAlbumTitle.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb_album_titles WHERE title LIKE @name";
+                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_titles WHERE title LIKE @name";
                 vgmFindAlbumsByAlbumTitle.Parameters.Add("@name", NpgsqlDbType.Varchar);
             }
 
@@ -1679,7 +1679,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbGetAlbumCover == null)
             {
                 vgmdbGetAlbumCover = connection.CreateCommand();
-                vgmdbGetAlbumCover.CommandText = "SELECT picture_full FROM dump_vgmdb_albums WHERE id=@id";
+                vgmdbGetAlbumCover.CommandText = "SELECT picture_full FROM dump_vgmdb.albums WHERE id=@id";
                 vgmdbGetAlbumCover.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -1699,12 +1699,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbGetArbitraryProductNamesByAlbumId == null)
             {
                 vgmdbGetArbitraryProductNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetArbitraryProductNamesByAlbumId.CommandText = "SELECT name FROM dump_vgmdb_album_arbituaryproducts WHERE albumid = @id";
+                vgmdbGetArbitraryProductNamesByAlbumId.CommandText = "SELECT name FROM dump_vgmdb.album_arbituaryproducts WHERE albumid = @id";
                 vgmdbGetArbitraryProductNamesByAlbumId.Parameters.Add("@id", NpgsqlDbType.Integer);
 
                 vgmdbGetProductNamesByAlbumId = connection.CreateCommand();
                 vgmdbGetProductNamesByAlbumId.CommandText =
-                    "SELECT prod.name FROM dump_vgmdb_product_albums root JOIN dump_vgmdb_products prod ON root.productid = prod.id WHERE root.albumid = @id";
+                    "SELECT prod.name FROM dump_vgmdb.product_albums root JOIN dump_vgmdb.products prod ON root.productid = prod.id WHERE root.albumid = @id";
                 vgmdbGetProductNamesByAlbumId.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -1758,7 +1758,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbFindArtistsByName == null)
             {
                 vgmdbFindArtistsByName = connection.CreateCommand();
-                vgmdbFindArtistsByName.CommandText = "SELECT id FROM dump_vgmdb_artist WHERE name LIKE @name";
+                vgmdbFindArtistsByName.CommandText = "SELECT id FROM dump_vgmdb.artist WHERE name LIKE @name";
                 vgmdbFindArtistsByName.Parameters.Add("@name", NpgsqlDbType.Varchar);
             }
 
@@ -1775,7 +1775,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbFindAlbumIdsByArtistId == null)
             {
                 vgmdbFindAlbumIdsByArtistId = connection.CreateCommand();
-                vgmdbFindAlbumIdsByArtistId.CommandText = "SELECT albumid FROM dump_vgmdb_album_artists WHERE artistid=@id";
+                vgmdbFindAlbumIdsByArtistId.CommandText = "SELECT albumid FROM dump_vgmdb.album_artists WHERE artistid=@id";
                 vgmdbFindAlbumIdsByArtistId.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -1792,7 +1792,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbFindCoversByAlbumId == null)
             {
                 vgmdbFindCoversByAlbumId = connection.CreateCommand();
-                vgmdbFindCoversByAlbumId.CommandText = "SELECT buffer FROM dump_vgmdb_album_cover WHERE albumid=@id";
+                vgmdbFindCoversByAlbumId.CommandText = "SELECT buffer FROM dump_vgmdb.album_cover WHERE albumid=@id";
                 vgmdbFindCoversByAlbumId.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -1815,7 +1815,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbFindAlbumsBySkuPart == null)
             {
                 vgmdbFindAlbumsBySkuPart = connection.CreateCommand();
-                vgmdbFindAlbumsBySkuPart.CommandText = "SELECT id FROM dump_vgmdb_albums WHERE catalog LIKE @key";
+                vgmdbFindAlbumsBySkuPart.CommandText = "SELECT id FROM dump_vgmdb.albums WHERE catalog LIKE @key";
                 vgmdbFindAlbumsBySkuPart.Parameters.Add("@key", NpgsqlDbType.Varchar);
             }
 
@@ -1952,7 +1952,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vgmdbGetWebsitesCommand == null)
             {
                 vgmdbGetWebsitesCommand = connection.CreateCommand();
-                vgmdbGetWebsitesCommand.CommandText = "SELECT link FROM dump_vgmdb_album_websites WHERE albumid=@albumid";
+                vgmdbGetWebsitesCommand.CommandText = "SELECT link FROM dump_vgmdb.album_websites WHERE albumid=@albumid";
                 vgmdbGetWebsitesCommand.Parameters.Add("@albumid", NpgsqlDbType.Integer);
             }
 
@@ -1976,7 +1976,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 psxdcSearchCommand = connection.CreateCommand();
                 psxdcSearchCommand.CommandText =
-                    "SELECT id, platform,sku,title,additionals FROM dump_psxdatacenter_games WHERE title LIKE @p1 OR commontitle LIKE @p1 OR sku LIKE @p2";
+                    "SELECT id, platform,sku,title,additionals FROM dump_psxdatacenter.games WHERE title LIKE @p1 OR commontitle LIKE @p1 OR sku LIKE @p2";
                 psxdcSearchCommand.Parameters.Add("@p1", NpgsqlDbType.Varchar);
                 psxdcSearchCommand.Parameters.Add("@p2", NpgsqlDbType.Varchar);
             }
@@ -2039,7 +2039,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 psxDatacenterGetScreenshots = connection.CreateCommand();
                 psxDatacenterGetScreenshots.CommandText =
-                    "SELECT screenshot.buffer FROM dump_psxdatacenter_game_screenshots root JOIN dump_psxdatacenter_screenshots screenshot ON root.screenshotid = screenshot.id WHERE root.gameid=@id";
+                    "SELECT screenshot.buffer FROM dump_psxdatacenter.game_screenshots root JOIN dump_psxdatacenter.screenshots screenshot ON root.screenshotid = screenshot.id WHERE root.gameid=@id";
                 psxDatacenterGetScreenshots.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2222,7 +2222,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (getVnByReleaseCommand == null)
             {
                 getVnByReleaseCommand = connection.CreateCommand();
-                getVnByReleaseCommand.CommandText = "SELECT * FROM dump_vndb_release_vns root WHERE rid=@id";
+                getVnByReleaseCommand.CommandText = "SELECT * FROM dump_vndb.release_vns root WHERE rid=@id";
                 getVnByReleaseCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2253,7 +2253,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetReleaseByIdCommand == null)
             {
                 vndbGetReleaseByIdCommand = connection.CreateCommand();
-                vndbGetReleaseByIdCommand.CommandText = "SELECT * FROM dump_vndb_release WHERE id=@id";
+                vndbGetReleaseByIdCommand.CommandText = "SELECT * FROM dump_vndb.release WHERE id=@id";
                 vndbGetReleaseByIdCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2298,7 +2298,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetReleaseLanguageById == null)
             {
                 vndbGetReleaseLanguageById = connection.CreateCommand();
-                vndbGetReleaseLanguageById.CommandText = "SELECT lang FROM dump_vndb_release_languages WHERE rid=@id";
+                vndbGetReleaseLanguageById.CommandText = "SELECT lang FROM dump_vndb.release_languages WHERE rid=@id";
                 vndbGetReleaseLanguageById.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2314,7 +2314,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vndbGetReleaseMediaById = connection.CreateCommand();
                 vndbGetReleaseMediaById.CommandText =
-                    "SELECT medium, qty FROM dump_vndb_release_media WHERE rid=@id AND qty IS NOT NULL";
+                    "SELECT medium, qty FROM dump_vndb.release_media WHERE rid=@id AND qty IS NOT NULL";
                 vndbGetReleaseMediaById.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2329,7 +2329,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetReleasePlatformById == null)
             {
                 vndbGetReleasePlatformById = connection.CreateCommand();
-                vndbGetReleasePlatformById.CommandText = "SELECT platform FROM dump_vndb_release_platforms WHERE rid=@id";
+                vndbGetReleasePlatformById.CommandText = "SELECT platform FROM dump_vndb.release_platforms WHERE rid=@id";
                 vndbGetReleasePlatformById.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2345,7 +2345,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vndbGetReleaseProducersById = connection.CreateCommand();
                 vndbGetReleaseProducersById.CommandText =
-                    "SELECT DISTINCT name FROM dump_vndb_release_producers WHERE rid=@id";
+                    "SELECT DISTINCT name FROM dump_vndb.release_producers WHERE rid=@id";
                 vndbGetReleaseProducersById.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2371,7 +2371,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVn == null)
             {
                 vndbGetVn = connection.CreateCommand();
-                vndbGetVn.CommandText = "SELECT * FROM dump_vndb_vn WHERE id=@id";
+                vndbGetVn.CommandText = "SELECT * FROM dump_vndb.vn WHERE id=@id";
                 vndbGetVn.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2410,7 +2410,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnAnime == null)
             {
                 vndbGetVnAnime = connection.CreateCommand();
-                vndbGetVnAnime.CommandText = "SELECT * FROM dump_vndb_vn_anime WHERE vnid=@id";
+                vndbGetVnAnime.CommandText = "SELECT * FROM dump_vndb.vn_anime WHERE vnid=@id";
                 vndbGetVnAnime.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2429,7 +2429,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnPlatforms == null)
             {
                 vndbGetVnPlatforms = connection.CreateCommand();
-                vndbGetVnPlatforms.CommandText = "SELECT platform FROM dump_vndb_vn_platforms WHERE vnid=@id";
+                vndbGetVnPlatforms.CommandText = "SELECT platform FROM dump_vndb.vn_platforms WHERE vnid=@id";
                 vndbGetVnPlatforms.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2444,7 +2444,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnRelations == null)
             {
                 vndbGetVnRelations = connection.CreateCommand();
-                vndbGetVnRelations.CommandText = "SELECT relation,title FROM dump_vndb_vn_relation WHERE srcid=@id";
+                vndbGetVnRelations.CommandText = "SELECT relation,title FROM dump_vndb.vn_relation WHERE srcid=@id";
                 vndbGetVnRelations.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2460,7 +2460,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnScreens == null)
             {
                 vndbGetVnScreens = connection.CreateCommand();
-                vndbGetVnScreens.CommandText = "SELECT image FROM dump_vndb_vn_screens WHERE vnid=@id";
+                vndbGetVnScreens.CommandText = "SELECT image FROM dump_vndb.vn_screens WHERE vnid=@id";
                 vndbGetVnScreens.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2475,7 +2475,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnLanguages == null)
             {
                 vndbGetVnLanguages = connection.CreateCommand();
-                vndbGetVnLanguages.CommandText = "SELECT language FROM dump_vndb_vn_languages WHERE vnid=@id";
+                vndbGetVnLanguages.CommandText = "SELECT language FROM dump_vndb.vn_languages WHERE vnid=@id";
                 vndbGetVnLanguages.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2549,7 +2549,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 myFigureCollectionGetPhotoCommand = connection.CreateCommand();
                 myFigureCollectionGetPhotoCommand.CommandText =
-                    "SELECT image FROM dump_myfigurecollection_figurephotos WHERE id = @id";
+                    "SELECT image FROM dump_myfigurecollection.figurephotos WHERE id = @id";
                 myFigureCollectionGetPhotoCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2600,7 +2600,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vocadbGetAlbumCoverCommand == null)
             {
                 vocadbGetAlbumCoverCommand = connection.CreateCommand();
-                vocadbGetAlbumCoverCommand.CommandText = "SELECT cover FROM dump_vocadb_albums WHERE id=@id";
+                vocadbGetAlbumCoverCommand.CommandText = "SELECT cover FROM dump_vocadb.albums WHERE id=@id";
                 vocadbGetAlbumCoverCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2642,7 +2642,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vocadbGetTracksByAlbumCommand = connection.CreateCommand();
                 vocadbGetTracksByAlbumCommand.CommandText =
-                    "SELECT * FROM dump_vocadb_albumtracks WHERE albumid = @id ORDER BY albumid ASC, discnumber ASC, tracknumber ASC";
+                    "SELECT * FROM dump_vocadb.albumtracks WHERE albumid = @id ORDER BY albumid ASC, discnumber ASC, tracknumber ASC";
                 vocadbGetTracksByAlbumCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -2979,7 +2979,37 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             dataReader.Close();
         }
-        
+
+        public Media[] findBrokenBandcampImports()
+        {
+            NpgsqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT id FROM azusa.media WHERE dumppath IS NOT NULL AND dumppath LIKE '%disc.m3u' AND metafile IS NULL";
+            NpgsqlDataReader dataReader = cmd.ExecuteReader();
+            List<int> results = new List<int>();
+            while (dataReader.Read())
+                results.Add(dataReader.GetInt32(0));
+            dataReader.Close();
+
+            int[] idArray = results.ToArray();
+            Media[] mediaArray = Array.ConvertAll(idArray, x => GetMediaById(x));
+            return mediaArray;
+        }
+
+        public Media[] FindAutofixableMetafiles()
+        {
+            NpgsqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM azusa.media WHERE dumppath IS NOT NULL AND metafile IS NULL";
+            NpgsqlDataReader dataReader = cmd.ExecuteReader();
+            List<int> results = new List<int>();
+            while (dataReader.Read())
+                results.Add(dataReader.GetInt32(0));
+            dataReader.Close();
+
+            int[] idArray = results.ToArray();
+            Media[] mediaArray = Array.ConvertAll(idArray, x => GetMediaById(x));
+            return mediaArray;
+        }
+
         public void Dispose()
         {
             throw new NotImplementedException();

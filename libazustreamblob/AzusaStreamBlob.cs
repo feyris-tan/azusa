@@ -265,6 +265,7 @@ namespace libazustreamblob
 
         public void Flush()
         {
+            currentSegmentStream.Flush();
             if (transaction != null)
             {
                 transaction.Commit();

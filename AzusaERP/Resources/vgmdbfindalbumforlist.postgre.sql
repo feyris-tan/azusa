@@ -10,7 +10,7 @@
     root.notes,
     publisher.name
 
-FROM dump_vgmdb_albums root
+FROM dump_vgmdb.albums root
 LEFT JOIN dump_vgmdb.album_types type ON root.typeid = type.id
 LEFT JOIN dump_vgmdb.album_classification classification ON root.classificationid = classification.id
 LEFT JOIN dump_vgmdb.album_mediaformat mediaformat ON root.mediaformatid = mediaformat.id

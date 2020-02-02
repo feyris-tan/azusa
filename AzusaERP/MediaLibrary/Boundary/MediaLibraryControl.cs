@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using dsMediaLibraryClient.GraphDataLib;
+using libazuworker;
+using moe.yo3explorer.azusa.BandcampImporter;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
@@ -773,6 +775,66 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             context.DatabaseDriver.EndTransaction(true);
 
             UpdateFilesystemTreeView();
+        }
+
+        private void bandcampKollektionImportierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new BandcampImportForm().ShowDialog(this.FindForm());
+        }
+
+        private void defekteM3UDateienReparierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Media[] findBrokenBandcampImports = context.DatabaseDriver.findBrokenBandcampImports();
+            if (findBrokenBandcampImports.Length == 0)
+            {
+                MessageBox.Show("Nichts kaputt!");
+                return;
+            }
+
+            BrokenImportRepairWorker birw = new BrokenImportRepairWorker(findBrokenBandcampImports);
+
+            WorkerForm wf = new WorkerForm(birw);
+            wf.ShowDialog(this);
+
+            MessageBox.Show(String.Format("{0} M3U Dateien wurden durch M3U8 Dateien ersetzt.", findBrokenBandcampImports.Length));
+        }
+
+        private void metafilesAutomatischErgänzenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Media[] autofixableMetafiles = context.DatabaseDriver.FindAutofixableMetafiles();
+            int totalFixed = 0;
+            foreach (Media media in autofixableMetafiles)
+            {
+                string extension = Path.GetExtension(media.DumpStorageSpacePath).ToLowerInvariant();
+                switch (extension)
+                {
+                    case ".mkv":
+                    case ".mp3":
+                    case ".epub":
+                    case ".iso":
+                    case ".wbfs":
+                    case ".m4a":
+                    case ".flac":
+                    case ".zip":
+                    case ".gz":
+                    case ".xci":
+                    case ".nsp":
+                        continue;
+                    case ".m3u8":
+                        break;
+                    default:
+                        MessageBox.Show(String.Format("Autofix fehlgeschlagen: Unbekannte Dateierweiterung: {0}", extension));
+                        return;
+                }
+
+                FileInfo fileInfo = AzusaStorageSpaceDrive.FindFileOnConnectedSpaces(media.DumpStorageSpacePath);
+                media.MetaFileContent = File.ReadAllText(fileInfo.FullName);
+                media.SetDumpFile(fileInfo);
+                context.DatabaseDriver.UpdateMedia(media);
+                totalFixed++;
+            }
+
+            MessageBox.Show(String.Format("{0} Metadaten ergänzt.", totalFixed));
         }
     }
 }

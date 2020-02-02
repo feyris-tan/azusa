@@ -792,7 +792,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Bitmap Vgmdb_GetAlbumCover(int entryId)
         {
-            byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb_albums"), azuStreamBlob.DeriveKey("picture_full"), entryId);
+            byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb.albums"), azuStreamBlob.DeriveKey("picture_full"), entryId);
 
             Bitmap result = null;
             if (blob != null)
@@ -819,7 +819,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
                 vgmdbGetProductNamesByAlbumId = connection.CreateCommand();
                 vgmdbGetProductNamesByAlbumId.CommandText =
-                    "SELECT prod.name FROM dump_vgmdb_product_albums root JOIN dump_vgmdb.products prod ON root.productid = prod.id WHERE root.albumid = @id";
+                    "SELECT prod.name FROM dump_vgmdb.product_albums root JOIN dump_vgmdb.products prod ON root.productid = prod.id WHERE root.albumid = @id";
                 vgmdbGetProductNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -920,7 +920,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
             {
                 int scalerId = dataReader.GetInt32(0);
-                byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb_album_cover"),azuStreamBlob.DeriveKey("buffer"),scalerId);
+                byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb.album_cover"),azuStreamBlob.DeriveKey("buffer"),scalerId);
                 if (blob != null)
                 {
                     if (blob.Length > 0)
@@ -1160,7 +1160,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             result.DeveloperId = dataReader.GetString(7);
             result.PublisherId = dataReader.GetString(8);
             result.DateRelease = dataReader.GetDateTime(9);
-            result.Cover = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter_games"), azuStreamBlob.DeriveKey("cover"),previewId);
+            result.Cover = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter.games"), azuStreamBlob.DeriveKey("cover"),previewId);
             result.Description = dataReader.GetString(11);
             result.Barcode = dataReader.GetString(12);
             dataReader.Dispose();
@@ -1184,7 +1184,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
             {
                 int scalerId = dataReader.GetInt32(0);
-                yield return azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter_screenshots"),
+                yield return azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter.screenshots"),
                     azuStreamBlob.DeriveKey("buffer"), scalerId);
             }
 
@@ -1419,7 +1419,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetReleaseLanguageById == null)
             {
                 vndbGetReleaseLanguageById = connection.CreateCommand();
-                vndbGetReleaseLanguageById.CommandText = "SELECT lang FROM dump_vndb_release_languages WHERE rid=@id";
+                vndbGetReleaseLanguageById.CommandText = "SELECT lang FROM dump_vndb.release_languages WHERE rid=@id";
                 vndbGetReleaseLanguageById.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1435,7 +1435,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vndbGetReleaseMediaById = connection.CreateCommand();
                 vndbGetReleaseMediaById.CommandText =
-                    "SELECT medium, qty FROM dump_vndb_release_media WHERE rid=@id AND qty IS NOT NULL";
+                    "SELECT medium, qty FROM dump_vndb.release_media WHERE rid=@id AND qty IS NOT NULL";
                 vndbGetReleaseMediaById.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1450,7 +1450,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetReleasePlatformById == null)
             {
                 vndbGetReleasePlatformById = connection.CreateCommand();
-                vndbGetReleasePlatformById.CommandText = "SELECT platform FROM dump_vndb_release_platforms WHERE rid=@id";
+                vndbGetReleasePlatformById.CommandText = "SELECT platform FROM dump_vndb.release_platforms WHERE rid=@id";
                 vndbGetReleasePlatformById.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1466,7 +1466,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 vndbGetReleaseProducersById = connection.CreateCommand();
                 vndbGetReleaseProducersById.CommandText =
-                    "SELECT DISTINCT name FROM dump_vndb_release_producers WHERE rid=@id";
+                    "SELECT DISTINCT name FROM dump_vndb.release_producers WHERE rid=@id";
                 vndbGetReleaseProducersById.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1521,7 +1521,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!dataReader.IsDBNull(9))
                 result.WikipediaLink = dataReader.GetString(9);
 
-            byte[] coverBuffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb_vn"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
+            byte[] coverBuffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb.vn"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
             if (coverBuffer != null && coverBuffer.Length > 0)
             {
                 result.Image = (Bitmap)Image.FromStream(new MemoryStream(coverBuffer));
@@ -1535,7 +1535,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnAnime == null)
             {
                 vndbGetVnAnime = connection.CreateCommand();
-                vndbGetVnAnime.CommandText = "SELECT * FROM dump_vndb_vn_anime WHERE vnid=@id";
+                vndbGetVnAnime.CommandText = "SELECT * FROM dump_vndb.vn_anime WHERE vnid=@id";
                 vndbGetVnAnime.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1554,7 +1554,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnPlatforms == null)
             {
                 vndbGetVnPlatforms = connection.CreateCommand();
-                vndbGetVnPlatforms.CommandText = "SELECT platform FROM dump_vndb_vn_platforms WHERE vnid=@id";
+                vndbGetVnPlatforms.CommandText = "SELECT platform FROM dump_vndb.vn_platforms WHERE vnid=@id";
                 vndbGetVnPlatforms.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1569,7 +1569,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnRelations == null)
             {
                 vndbGetVnRelations = connection.CreateCommand();
-                vndbGetVnRelations.CommandText = "SELECT relation,title FROM dump_vndb_vn_relation WHERE srcid=@id";
+                vndbGetVnRelations.CommandText = "SELECT relation,title FROM dump_vndb.vn_relation WHERE srcid=@id";
                 vndbGetVnRelations.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1585,7 +1585,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnScreens == null)
             {
                 vndbGetVnScreens = connection.CreateCommand();
-                vndbGetVnScreens.CommandText = "SELECT scalerid FROM dump_vndb_vn_screens WHERE vnid=@id";
+                vndbGetVnScreens.CommandText = "SELECT scalerid FROM dump_vndb.vn_screens WHERE vnid=@id";
                 vndbGetVnScreens.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1595,7 +1595,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             while (dataReader.Read())
                 if (!dataReader.IsDBNull(0))
                 {
-                    byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb_vn_screens"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
+                    byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vndb.vn_screens"), azuStreamBlob.DeriveKey("image"), dataReader.GetInt32(0));
                     if (buffer != null && buffer.Length > 0)
                         result.Screens.Add(Image.FromStream(new MemoryStream(buffer)));
                 }
@@ -1604,7 +1604,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (vndbGetVnLanguages == null)
             {
                 vndbGetVnLanguages = connection.CreateCommand();
-                vndbGetVnLanguages.CommandText = "SELECT language FROM dump_vndb_vn_languages WHERE vnid=@id";
+                vndbGetVnLanguages.CommandText = "SELECT language FROM dump_vndb.vn_languages WHERE vnid=@id";
                 vndbGetVnLanguages.Parameters.Add("@id", DbType.Int32);
             }
 
@@ -1659,7 +1659,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!dataReader.IsDBNull(6))
                     child.Price = dataReader.GetDouble(6);
 
-                child.Thumbnail = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_myfigurecollection_figurephotos"), azuStreamBlob.DeriveKey("thumbnail"), child.ID);
+                child.Thumbnail = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_myfigurecollection.figurephotos"), azuStreamBlob.DeriveKey("thumbnail"), child.ID);
                 yield return child;
             }
             dataReader.Dispose();
@@ -1668,7 +1668,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public Image MyFigureCollection_GetPhoto(int wrappedFigureId)
         {
             byte[] buffer = azuStreamBlob.Get(
-                azuStreamBlob.DeriveKey("dump_myfigurecollection_figurephotos"),
+                azuStreamBlob.DeriveKey("dump_myfigurecollection.figurephotos"),
                 azuStreamBlob.DeriveKey("image"), 
                 wrappedFigureId);
             return Image.FromStream(new MemoryStream(buffer));
@@ -1705,7 +1705,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Image Vocadb_GetAlbumCover(int id)
         {
-            byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vocadb_albums"), azuStreamBlob.DeriveKey("cover"), id);
+            byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vocadb.albums"), azuStreamBlob.DeriveKey("cover"), id);
             if (buffer == null || buffer.Length == 0)
                 return null;
             Image image = Image.FromStream(new MemoryStream(buffer));
@@ -1909,6 +1909,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Media[] findBrokenBandcampImports()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Media[] FindAutofixableMetafiles()
         {
             throw new NotImplementedException();
         }
