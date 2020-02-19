@@ -7,4 +7,4 @@ left join azusa.mediatypes on media.mediaTypeId = azusa.mediatypes.id
 where (media.dumppath IS NULL or media.dumppath = '') 
   and products.consistent = FALSE
   and products.name IS NOT NULL
-  and azusa.mediatypes."ignoreForStatistics" = FALSE
+  and azusa.mediatypes.ignoreForStatistics = FALSE

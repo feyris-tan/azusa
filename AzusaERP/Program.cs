@@ -97,7 +97,10 @@ namespace moe.yo3explorer.azusa
             IniSection azusaIniSection = context.Ini["azusa"];
             if (azusaIniSection.ContainsKey("chdir"))
                 if (!string.IsNullOrEmpty(azusaIniSection["chdir"]))
-                    Environment.CurrentDirectory = azusaIniSection["chdir"];
+                    if (Directory.Exists(azusaIniSection["chdir"]))
+                        Environment.CurrentDirectory = azusaIniSection["chdir"];
+                    else
+                        Console.WriteLine("Der Ordner {0} konnte nicht gefunden werden!", azusaIniSection["chdir"]);
 
             CreateSplashThread();
 

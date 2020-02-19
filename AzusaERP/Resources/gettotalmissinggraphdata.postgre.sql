@@ -7,6 +7,6 @@ where (
 		((media.graphdata) IS NULL or (media.graphdata = ''))
 	and (product.consistent = FALSE) 
 	and (mediaType.graphData = TRUE)
-	and ((mediaType."ignoreForStatistics" = FALSE) 
-	  or (shelf."ignoreForStatistics" = FALSE))
+	and ((mediaType.ignoreForStatistics = FALSE) 
+	  or (shelf.ignoreForStatistics = FALSE))
 		)
