@@ -2128,7 +2128,25 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (!ndr.IsDBNull(18))
                 m.FauxHash = ndr.GetInt64(18);
-            
+
+            if (!ndr.IsDBNull(19))
+                m.DiscId = ndr.GetInt64(19);
+
+            if (!ndr.IsDBNull(20))
+                m.CICM = ndr.GetString(20);
+
+            if (!ndr.IsDBNull(21))
+                m.MHddLog = ndr.GetByteArray(21);
+
+            if (!ndr.IsDBNull(22))
+                m.ScsiInfo = ndr.GetString(22);
+
+            if (!ndr.IsDBNull(23))
+                m.Priv = ndr.GetByteArray(23);
+
+            if (!ndr.IsDBNull(24))
+                m.JedecId = ndr.GetByteArray(24);
+
             ndr.Dispose();
             return m;
         }

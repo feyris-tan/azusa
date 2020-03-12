@@ -690,6 +690,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(22))
                 m.ScsiInfo = ndr.GetString(22);
 
+            if (!ndr.IsDBNull(23))
+                m.Priv = ndr.GetByteArray(23);
+
+            if (!ndr.IsDBNull(24))
+                m.JedecId = ndr.GetByteArray(24);
+
             ndr.Dispose();
             return m;
         }
@@ -717,7 +723,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                                                  "    mediadescriptorsidecar=@mediadescriptorsidecar," +
                                                  "    issealed=@issealed, dateupdated=@dateupdated," +
                                                  "    fauxhash=@fauxhash, discid=@discid," +
-                                                 "    cicm=@cicm, mhddlog=@mhddlog, scsiinfo=@scsiinfo " +
+                                                 "    cicm=@cicm, mhddlog=@mhddlog, scsiinfo=@scsiinfo, priv=@priv, jedecid=@jedecId " +
                                                  "WHERE id=@id";
                 updateMediaCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -739,6 +745,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 updateMediaCommand.Parameters.Add("@cicm", NpgsqlDbType.Text);
                 updateMediaCommand.Parameters.Add("@mhddlog", NpgsqlDbType.Bytea);
                 updateMediaCommand.Parameters.Add("@scsiinfo", NpgsqlDbType.Text);
+                updateMediaCommand.Parameters.Add("@priv", NpgsqlDbType.Bytea);
+                updateMediaCommand.Parameters.Add("@jedecId", NpgsqlDbType.Bytea);
                 updateMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -797,6 +805,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (!string.IsNullOrEmpty(media.ScsiInfo))
                 updateMediaCommand.Parameters["@scsiinfo"].Value = media.ScsiInfo;
+
+            if (media.Priv != null)
+                updateMediaCommand.Parameters["@priv"].Value = media.Priv;
+
+            if (media.JedecId != null)
+                updateMediaCommand.Parameters["@jedecId"].Value = media.JedecId;
 
             updateMediaCommand.Parameters["@id"].Value = media.Id;
             int result = updateMediaCommand.ExecuteNonQuery();

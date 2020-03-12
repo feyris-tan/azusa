@@ -134,6 +134,11 @@ namespace libazuworker
             }
         }
 
+        public void InvokeMessageBox(string text)
+        {
+            Invoke((MethodInvoker) delegate { MessageBox.Show(this, text); });
+        }
+
         public void InvokeSetText(string text, params object[] args)
         {
             InvokeSetText(String.Format(text, args));

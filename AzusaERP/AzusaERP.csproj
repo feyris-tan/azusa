@@ -267,6 +267,10 @@
     <Compile Include="Control\Galleria\GalleriaModel.cs" />
     <Compile Include="Dumping\Entity\DiscStatus.cs" />
     <Compile Include="Dumping\Entity\DiscStatusProperty.cs" />
+    <Compile Include="FolderMapper\Boundary\IFolderMapperPreHook.cs" />
+    <Compile Include="FolderMapper\Boundary\MapperWorker.cs" />
+    <Compile Include="FolderMapper\Control\FileExtensionDictionary.cs" />
+    <Compile Include="FolderMapper\Control\RawCdRomStream.cs" />
     <Compile Include="Gelbooru\Boundary\GelboooruControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

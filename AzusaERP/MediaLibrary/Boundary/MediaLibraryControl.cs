@@ -9,6 +9,7 @@ using libazuworker;
 using moe.yo3explorer.azusa.BandcampImporter;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
+using moe.yo3explorer.azusa.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using NPlot;
@@ -819,6 +820,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     case ".gz":
                     case ".xci":
                     case ".nsp":
+                    case ".3ds":
                         continue;
                     case ".m3u8":
                         break;
@@ -835,6 +837,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             }
 
             MessageBox.Show(String.Format("{0} Metadaten ergänzt.", totalFixed));
+        }
+
+        private void imageOrdnerImportierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MapperWorker mapperWorker = new MapperWorker();
+            mapperWorker.Run(this.FindForm());
         }
     }
 }

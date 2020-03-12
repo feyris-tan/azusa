@@ -2,6 +2,7 @@
 using System.IO;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
+using Org.BouncyCastle.Crypto.Generators;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 {
@@ -30,6 +31,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public string CICM { get; set; }
         public byte[] MHddLog { get; set; }
         public string ScsiInfo { get; set; }
+        public byte[] Priv { get; set; }
+        public byte[] JedecId { get; set; }
 
         public void SetDumpFile(FileInfo fi)
         {
