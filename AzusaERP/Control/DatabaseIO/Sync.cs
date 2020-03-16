@@ -42,6 +42,22 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
                     target.Sync_CreateTable(tableName, columns);
                 }
 
+                //Alter Table wenn nötig
+                List<DatabaseColumn> missingColumns = source.Sync_DefineTable(tableName);
+                List<DatabaseColumn> existingColumns = target.Sync_DefineTable(tableName);
+                foreach (DatabaseColumn existingColumn in existingColumns)
+                {
+                    DatabaseColumn pgColumn = missingColumns.Find(x => x.ColumnName.ToLowerInvariant().Equals(existingColumn.ColumnName.ToLowerInvariant()));
+                    if (pgColumn != null)
+                        missingColumns.Remove(pgColumn);
+                }
+
+                foreach (DatabaseColumn missingColumn in missingColumns)
+                {
+                    Message(String.Format("Spalte hinzufügen: {0}", missingColumn));
+                    target.Sync_AlterTable(tableName, missingColumn);
+                }
+
                 //Delta
                 Message(String.Format("Berechne \u0394 für {0}", tableName));
                 DateTime? latestInsert = target.Sync_GetLastSyncDateForTable(tableName);
@@ -117,7 +133,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
             }
         }
 
-        private string randomString(int len)
+        internal static string randomString(int len)
         {
             var chars = "abcdefghijklmnopqrstuvwxyz";
             var stringChars = new char[len];
@@ -132,7 +148,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
             return new String(stringChars);
         }
 
-        private Random rng;
+        private static Random rng;
         
         private bool IsNumericString(string s)
         {

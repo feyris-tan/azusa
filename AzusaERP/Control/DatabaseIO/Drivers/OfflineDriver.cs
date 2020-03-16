@@ -27,6 +27,7 @@ using moe.yo3explorer.azusa.VgmDb.Entity;
 using moe.yo3explorer.azusa.VnDb.Entity;
 using moe.yo3explorer.azusa.VocaDB.Entity;
 using moe.yo3explorer.azusa.WarWalking.Entity;
+using Org.BouncyCastle.Math;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
@@ -251,9 +252,75 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotSupportedException();
         }
 
+        private Random rngInternal;
+
+        private Random RNG
+        {
+            get
+            {
+                if (rngInternal == null)
+                {
+                    rngInternal = new Random();
+                }
+                return rngInternal;
+            }
+        }
+
+        private DbType GuessSqliteDbType(string s)
+        {
+            switch (s)
+            {
+                case "INTEGER":
+                    return DbType.Int32;
+                case "TIMESTAMP":
+                    return DbType.DateTime;
+                case "BOOLEAN":
+                    return DbType.Boolean;
+                case "TEXT":
+                    return DbType.String;
+                case "DOUBLE":
+                    return DbType.Double;
+                case "SMALLINT":
+                    return DbType.Int16;
+                case "BIGINT":
+                    return DbType.Int64;
+                case "BLOB":
+                    return DbType.Binary;
+                case "DATE":
+                    return DbType.Date;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private string GetTableNameForPragma(string tableName)
+        {
+            while (tableName.Contains("."))
+                tableName = tableName.Substring(1);
+
+            if (tableName.StartsWith("0"))
+                tableName = String.Format("\"{0}\"", tableName);
+            return tableName;
+        }
+
         public List<DatabaseColumn> Sync_DefineTable(string tableName)
         {
-            throw new NotImplementedException();
+            List<DatabaseColumn> columns = new List<DatabaseColumn>();
+            SQLiteConnection connection = GetConnectionForTable(tableName);
+            SQLiteCommand command = connection.CreateCommand();
+            command.CommandText = String.Format("PRAGMA table_info({0})", GetTableNameForPragma(tableName));
+            SQLiteDataReader sqLiteDataReader = command.ExecuteReader();
+            while (sqLiteDataReader.Read())
+            {
+                DatabaseColumn outColumn = new DatabaseColumn();
+                outColumn.Ordingal = sqLiteDataReader.GetInt32(0);
+                outColumn.ColumnName = sqLiteDataReader.GetString(1);
+                outColumn.DbType = GuessSqliteDbType(sqLiteDataReader.GetString(2));
+                outColumn.ParameterName = String.Format("@{0}", Sync.randomString(outColumn.Ordingal + 1));
+                columns.Add(outColumn);
+            }
+            sqLiteDataReader.Close();
+            return columns;
         }
 
         public bool Sync_DoesTableExist(string tableName)
@@ -273,7 +340,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return result;
         }
 
-        
         public void Sync_CreateTable(string tableName, List<DatabaseColumn> columns)
         {
             tableName = tableName.MakeFullyQualifiedTableName();
@@ -1921,6 +1987,15 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public Media[] FindAutofixableMetafiles()
         {
             throw new NotImplementedException();
+        }
+
+        public void Sync_AlterTable(string tableName, DatabaseColumn missingColumn)
+        {
+            /*alter table sqlite_master add yeet int;*/
+            SQLiteConnection connection = GetConnectionForTable(tableName);
+            SQLiteCommand command = connection.CreateCommand();
+            command.CommandText = String.Format("ALTER TABLE {0} ADD {1} {2}", tableName, missingColumn.ColumnName, GuessSqliteDbType(missingColumn.DbType));
+            command.ExecuteNonQuery();
         }
 
         public LicenseState CheckLicenseStatus()

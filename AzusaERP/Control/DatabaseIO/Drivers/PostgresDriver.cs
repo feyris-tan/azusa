@@ -400,7 +400,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     product.CoverSize = dataReader.GetInt32(5);
                 if (!dataReader.IsDBNull(6))
                     product.NSFW = dataReader.GetBoolean(6);
-                product.IconId = dataReader.GetInt32(7);
+                if (!dataReader.IsDBNull(7))
+                    product.IconId = dataReader.GetInt32(7);
                 product.NumberOfDiscs = dataReader.GetInt32(8);
                 product.ContainsUndumped = dataReader.GetInt32(9) > 0;
                 product.MissingGraphData = dataReader.GetInt32(10);
@@ -1135,7 +1136,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (getAllManualCluseValesCommand == null)
             {
                 getAllManualCluseValesCommand = connection.CreateCommand();
-                getAllManualCluseValesCommand.CommandText = "SELECT * FROM dexcom.manualdata";
+                getAllManualCluseValesCommand.CommandText = "SELECT * FROM dexcom.manualdata ORDER BY ts ASC";
             }
 
             NpgsqlDataReader dataReader = getAllManualCluseValesCommand.ExecuteReader();
@@ -1185,7 +1186,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (manualGlucoseValueStoreCommand == null)
             {
                 manualGlucoseValueStoreCommand = connection.CreateCommand();
-                manualGlucoseValueStoreCommand.CommandText = "INSERT INTO dexcom_manualdata (pid,ts,messwert,einheit,hide,minuteModifier,remark) VALUES (@pid,@timestamp,@value,@unit,FALSE,0,'')";
+                manualGlucoseValueStoreCommand.CommandText = "INSERT INTO dexcom.manualdata (pid,ts,messwert,einheit,hide,minuteModifier,remark) VALUES (@pid,@timestamp,@value,@unit,FALSE,0,'')";
                 manualGlucoseValueStoreCommand.Parameters.Add("@timestamp", NpgsqlDbType.Timestamp);
                 manualGlucoseValueStoreCommand.Parameters.Add("@value", NpgsqlDbType.Integer);
                 manualGlucoseValueStoreCommand.Parameters.Add("@unit", NpgsqlDbType.Varchar);
@@ -2712,7 +2713,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 gelbooruGetPostsByTagCommand = connection.CreateCommand();
                 gelbooruGetPostsByTagCommand.CommandText =
-                    "SELECT DISTINCT postid FROM dump_gb_posttags WHERE tagid = @tagid";
+                    "SELECT DISTINCT postid FROM dump_gb.posttags WHERE tagid = @tagid";
                 gelbooruGetPostsByTagCommand.Parameters.Add("@tagid", NpgsqlDbType.Integer);
             }
 
@@ -3022,6 +3023,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             int[] idArray = results.ToArray();
             Media[] mediaArray = Array.ConvertAll(idArray, x => GetMediaById(x));
             return mediaArray;
+        }
+
+        public void Sync_AlterTable(string tableName, DatabaseColumn missingColumn)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()
