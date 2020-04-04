@@ -12,10 +12,26 @@ namespace moe.yo3explorer.azusa
         public Splash()
         {
             InitializeComponent();
+            
             if (File.Exists("splash.jpg"))
             {
                 ms = new MemoryStream(File.ReadAllBytes("splash.jpg"));
-                pictureBox1.BackgroundImage = Image.FromStream(ms);
+                Image theImage = Image.FromStream(ms);
+                Screen screen = Screen.PrimaryScreen;
+                int imageHeight = theImage.Height + 50;
+                int imageWidth = theImage.Width;
+
+                int targetHeight = screen.WorkingArea.Width;
+                int targetWidth = screen.WorkingArea.Height;
+                while ((targetWidth < imageWidth) || (targetHeight < imageHeight))
+                {
+                    imageWidth = (int) ((double)imageWidth * 0.9);
+                    imageHeight = (int) ((double)imageHeight * 0.9);
+                }
+
+                this.Width = imageWidth;
+                this.Height = imageHeight;
+                pictureBox1.BackgroundImage = theImage;
             }
         }
 
