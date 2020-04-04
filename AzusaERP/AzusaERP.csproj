@@ -150,6 +150,9 @@
     <Reference Include="MimeKit, Version=2.4.0.0, Culture=neutral, PublicKeyToken=bede1c8a46c66814, processorArchitecture=MSIL">
       <HintPath>packages\MimeKit.2.4.1\lib\net46\MimeKit.dll</HintPath>
     </Reference>
+    <Reference Include="NEbml.Core, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\RyuuguuKomachi\packages\NEbml.0.1.4\lib\NEbml.Core.dll</HintPath>
+    </Reference>
     <Reference Include="NmeaParser, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\SharpGIS.NmeaParser.1.10.0\lib\net451\NmeaParser.dll</HintPath>
     </Reference>
@@ -298,6 +301,7 @@
       <DependentUpon>SelectComPortForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IAzusaModule.cs" />
+    <Compile Include="IImageAcquisitionPlugin.cs" />
     <Compile Include="IPostConnectionTask.cs" />
     <Compile Include="Control\Licensing\LicenseState.cs" />
     <Compile Include="Control\MailArchive\Boundary\FolderService.cs" />
@@ -484,6 +488,7 @@
       <DependentUpon>TextInputForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UnixTimeConverter.cs" />
+    <Compile Include="Utilities\ffmpegImageAcquisition.cs" />
     <Compile Include="Utilities\MakeM3uFromDirectory.cs" />
     <Compile Include="VgmDb\Boundary\VgmDbControl.cs">
       <SubType>UserControl</SubType>

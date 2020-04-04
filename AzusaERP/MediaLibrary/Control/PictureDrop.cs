@@ -18,6 +18,44 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
             pictureBox1.AllowDrop = true;
             pictureBox1.DragEnter += PictureBox_DragEnter;
             pictureBox1.DragDrop += PictureBox_DragDrop;
+            pictureBox1.Paint += PictureBox1_Paint;
+
+            
+        }
+
+        private bool pluginsLoaded;
+        private void PictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            if (!pluginsLoaded)
+            {
+                LoadPlugins();
+                pluginsLoaded = true;
+            }
+        }
+
+        private void LoadPlugins()
+        {
+            AzusaContext azusaContext = AzusaContext.GetInstance();
+            foreach (IImageAcquisitionPlugin plugin in azusaContext.ImageAcquisitionPlugins)
+            {
+                if (plugin.CanStart())
+                {
+                    ToolStripButton tsb = new ToolStripButton(plugin.Name);
+                    tsb.Click += delegate (object sender, EventArgs args)
+                    {
+                        Image result = plugin.Acquire();
+                        if (result != null)
+                        {
+                            Data = JpegCompressor.CompressJpeg(result, MaxPictureSize);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Das Plug-In hat kein Bild geliefert!");
+                        }
+                    };
+                    this.contextMenuStrip1.Items.Add(tsb);
+                }
+            }
         }
 
         private void PictureBox_DragEnter(object sender, DragEventArgs e)

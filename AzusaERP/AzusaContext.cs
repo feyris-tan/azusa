@@ -31,6 +31,7 @@ namespace moe.yo3explorer.azusa
                 instance.LicenseSeed = NetworkAdapterLicenseMapper.GetLicenseMapping();
                 instance.Plugins = new List<AzusaPlugin>();
                 instance.PluginLoadQueue = new Queue<AzusaPlugin>();
+                instance.ImageAcquisitionPlugins = new List<IImageAcquisitionPlugin>();
             }
             
             instance.NumOperations++;
@@ -131,6 +132,8 @@ namespace moe.yo3explorer.azusa
         public List<AzusaPlugin> Plugins { get; private set; }
         public Queue<AzusaPlugin> PluginLoadQueue { get; private set; }
         public bool CatchModuleExceptions => true;
+
+        public List<IImageAcquisitionPlugin> ImageAcquisitionPlugins { get; private set; }
     }
 
 }

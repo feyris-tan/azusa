@@ -235,9 +235,14 @@ namespace moe.yo3explorer.azusa
             Array.Sort(exportedTypes, new TypeComparer());
 
             Type pluginType = typeof(AzusaPlugin);
+            Type imageAcquisitionPluginType = typeof(IImageAcquisitionPlugin);
+
             foreach (Type exportedType in exportedTypes)
             {
                 if (exportedType.IsAbstract)
+                    continue;
+
+                if (exportedType.IsInterface)
                     continue;
 
                 if (pluginType.IsAssignableFrom(exportedType))
@@ -251,6 +256,11 @@ namespace moe.yo3explorer.azusa
                     {
                         context.Splash.SetLabel(String.Format("Konnte Plug-In {0} nicht starten: {1}", exportedType.Name, e));
                     }
+                }
+                else if (imageAcquisitionPluginType.IsAssignableFrom(exportedType))
+                {
+                    IImageAcquisitionPlugin instance = (IImageAcquisitionPlugin)Activator.CreateInstance(exportedType);
+                    context.ImageAcquisitionPlugins.Add(instance);
                 }
             }
         }
