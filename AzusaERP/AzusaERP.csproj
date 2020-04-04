@@ -151,7 +151,7 @@
       <HintPath>packages\MimeKit.2.4.1\lib\net46\MimeKit.dll</HintPath>
     </Reference>
     <Reference Include="NEbml.Core, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\RyuuguuKomachi\packages\NEbml.0.1.4\lib\NEbml.Core.dll</HintPath>
+      <HintPath>packages\NEbml.0.1.4\lib\NEbml.Core.dll</HintPath>
     </Reference>
     <Reference Include="NmeaParser, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\SharpGIS.NmeaParser.1.10.0\lib\net451\NmeaParser.dll</HintPath>

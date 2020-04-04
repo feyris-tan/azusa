@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using NEbml.Core;
+using TagLib.Matroska;
+using File = System.IO.File;
 
 namespace moe.yo3explorer.azusa.Utilities
 {
@@ -15,6 +17,7 @@ namespace moe.yo3explorer.azusa.Utilities
     {
         public Image Acquire()
         {
+            
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.CheckPathExists = true;
             ofd.Filter = "MatrosKa Video (*.mkv)|*.mkv";
@@ -27,23 +30,31 @@ namespace moe.yo3explorer.azusa.Utilities
             if (!fileInfo.Exists)
                 return null;
 
-            FileStream fstream = fileInfo.OpenRead();
-            EbmlReader ebmlReader = new EbmlReader(fstream);
 
-            // https://code.acr.moe/kazari/winterchan/blob/09b64a289b30035024a202be06bf139346d4600e/inc/lib/webm/matroska-elements.txt
-            while (ebmlReader.ReadNext())
-            {
-                VInt elementId = ebmlReader.ElementId;
-                Console.WriteLine("{0:X} - {1:X}",elementId.EncodedValue,elementId.Value);
-            }
-            ebmlReader.Dispose();
+            TagLib.Matroska.File file = new TagLib.Matroska.File(fileInfo.FullName);
+            double totalDuration = file.Properties.Duration.TotalSeconds;
+            double tenPercent = totalDuration * 0.1;
+            double startOffset = tenPercent;
+            double endoffset = totalDuration - tenPercent;
+            int second = context.RandomNumberGenerator.Next((int)startOffset, (int)endoffset);
 
-            throw new NotImplementedException();
+            string tempFileName = Path.Combine(Path.GetTempPath(),String.Format("{0}.png",context.RandomNumberGenerator.Next()));
+            string ffmpeg_params = String.Format("-i \"{0}\" -ss {1} -vframes 1 -aspect 16:9 \"{2}\"", fileInfo.FullName, second, tempFileName);
+            Process ffmpeg = new Process();
+            ffmpeg.StartInfo.FileName = ffmpegPath;
+            ffmpeg.StartInfo.Arguments = ffmpeg_params;
+            ffmpeg.Start();
+            ffmpeg.WaitForExit();
+
+            byte[] imageBytes = File.ReadAllBytes(tempFileName);
+            File.Delete(tempFileName);
+            MemoryStream ms = new MemoryStream(imageBytes);
+            return Image.FromStream(ms);
         }
 
         private bool? startable;
         private string ffmpegPath;
-        private Process ffmpegProcess;
+        private AzusaContext context;
 
         public string Name => "Screenshot aus MKV anfertigen.";
 
@@ -52,8 +63,8 @@ namespace moe.yo3explorer.azusa.Utilities
             if (startable.HasValue)
                 return startable.Value;
 
-            AzusaContext azusaContext = AzusaContext.GetInstance();
-            ffmpegPath = azusaContext.ReadIniKey("ripkit", "ffmpegPath", null);
+            context = AzusaContext.GetInstance();
+            ffmpegPath = context.ReadIniKey("ripkit", "ffmpegPath", null);
             if (string.IsNullOrEmpty(ffmpegPath))
             {
                 startable = false;
