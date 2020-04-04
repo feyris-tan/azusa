@@ -39,6 +39,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.defekteM3UDateienReparierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metafilesAutomatischErgänzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageOrdnerImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.vervollständigkeitsassistentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.productsListView = new System.Windows.Forms.ListView();
@@ -208,7 +209,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.neuesProduktToolStripMenuItem,
-            this.batchImportToolStripMenuItem});
+            this.batchImportToolStripMenuItem,
+            this.vervollständigkeitsassistentToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(866, 24);
@@ -260,6 +262,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.imageOrdnerImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
             this.imageOrdnerImportierenToolStripMenuItem.Text = "Image Ordner importieren";
             this.imageOrdnerImportierenToolStripMenuItem.Click += new System.EventHandler(this.imageOrdnerImportierenToolStripMenuItem_Click);
+            // 
+            // vervollständigkeitsassistentToolStripMenuItem
+            // 
+            this.vervollständigkeitsassistentToolStripMenuItem.Name = "vervollständigkeitsassistentToolStripMenuItem";
+            this.vervollständigkeitsassistentToolStripMenuItem.Size = new System.Drawing.Size(164, 20);
+            this.vervollständigkeitsassistentToolStripMenuItem.Text = "Vervollständigungsassistent";
+            this.vervollständigkeitsassistentToolStripMenuItem.Click += new System.EventHandler(this.vervollständigkeitsassistentToolStripMenuItem_Click);
             // 
             // splitContainer1
             // 
@@ -1745,5 +1754,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem defekteM3UDateienReparierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem metafilesAutomatischErgänzenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem imageOrdnerImportierenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem vervollständigkeitsassistentToolStripMenuItem;
     }
 }

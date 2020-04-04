@@ -15,6 +15,8 @@ namespace moe.yo3explorer.azusa.Control.Licensing
                     continue;
                 if (networkInterface.Description.Contains("Bluetooth"))
                     continue;
+                if (networkInterface.Description.StartsWith("Npcap Loopback Adapter"))
+                    continue;
                 if (networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback)
                     continue;
 

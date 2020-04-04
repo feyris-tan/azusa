@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using dsMediaLibraryClient.GraphDataLib;
 using libazuworker;
@@ -36,7 +37,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         }
 
         #region Azusa Module Driver
+
         public string IniKey => "azusa";
+
         public string Title
         {
             get { return "eigene Medienbibliothek"; }
@@ -54,7 +57,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         public void OnLoad()
         {
-            
             context.Splash.SetLabel("Abfragen von Medientypen...");
             mediaTypes = new List<MediaType>();
             MediaType[] allMediaTypes = MediaTypeService.GetMediaTypes().ToArray();
@@ -73,22 +75,23 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 tabControl1.TabPages.Add(new ShelfTabPage(shelf));
                 productInShelf.Items.Add(shelf);
             }
-            currentShelf = ((ShelfTabPage)tabControl1.TabPages[0]).Shelf;
+
+            currentShelf = ((ShelfTabPage) tabControl1.TabPages[0]).Shelf;
 
             context.Splash.SetLabel("Abfragen von Plattformen...");
-            foreach(Platform platform in PlatformService.GetAllPlatforms())
+            foreach (Platform platform in PlatformService.GetAllPlatforms())
             {
                 productPlatform.Items.Add(platform);
             }
 
             context.Splash.SetLabel("Abfragen von Händlern...");
-            foreach(Shop shop in ShopService.GetAllShops())
+            foreach (Shop shop in ShopService.GetAllShops())
             {
                 productSupplier.Items.Add(shop);
             }
 
             context.Splash.SetLabel("Abfragen von Länderdaten...");
-            foreach(Country country in CountryService.GetCountries())
+            foreach (Country country in CountryService.GetCountries())
             {
                 productCountryOfOrigin.Items.Add(country);
             }
@@ -96,11 +99,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             context.Splash.SetLabel(String.Format("Abfragen von Inhalt von Regal {0}", currentShelf.Name));
             tabControl1_SelectedIndexChanged(tabControl1, new EventArgs());
         }
+
         #endregion Azusa Module Driver
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Shelf shelf = ((ShelfTabPage)tabControl1.SelectedTab).Shelf;
+            Shelf shelf = ((ShelfTabPage) tabControl1.SelectedTab).Shelf;
             productsListView.Items.Clear();
             foreach (ProductInShelf p in ShelfService.GetProducts(shelf))
             {
@@ -115,7 +119,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentProduct = null;
             UpdateProductSidebar();
         }
-        
+
         private void neuesProduktToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string newName = TextInputForm.Prompt("Produktname?", context.MainForm);
@@ -155,7 +159,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             if (productsListView.SelectedItems.Count != 1)
                 return;
 
-            currentProdInShelf = (ProductInShelf)productsListView.SelectedItems[0];
+            currentProdInShelf = (ProductInShelf) productsListView.SelectedItems[0];
             currentProduct = ProductService.GetProduct(currentProdInShelf.Id);
             UpdateProductSidebar();
 
@@ -201,6 +205,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             {
                 productPurchaseDate.Value = currentProduct.BoughtOn;
             }
+
             productISBN.Text = currentProduct.Sku;
             productId.Value = currentProduct.Id;
             productNSFW.Checked = currentProduct.NSFW;
@@ -208,7 +213,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             {
                 productDateInserted.Value = currentProduct.DateAdded;
             }
-            foreach(Shelf s in productInShelf.Items)
+
+            foreach (Shelf s in productInShelf.Items)
             {
                 if (s.Id == currentProduct.InShelf)
                 {
@@ -228,7 +234,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     break;
                 }
             }
-            foreach(Shop s in productSupplier.Items)
+
+            foreach (Shop s in productSupplier.Items)
             {
                 if (s.Id == currentProduct.SupplierId)
                 {
@@ -236,7 +243,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     break;
                 }
             }
-            foreach(Country c in productCountryOfOrigin.Items)
+
+            foreach (Country c in productCountryOfOrigin.Items)
             {
                 if (c.ID == currentProduct.CountryOfOriginId)
                 {
@@ -252,16 +260,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             if (productMediaListView.Items.Count == 1)
             {
-                 MediaInProduct singleMedium = (MediaInProduct)productMediaListView.Items[0];
-                 currentMedia = MediaService.GetSpecificMedia(singleMedium.MediaId);
-                 UpdateMediaSidebar();
+                MediaInProduct singleMedium = (MediaInProduct) productMediaListView.Items[0];
+                currentMedia = MediaService.GetSpecificMedia(singleMedium.MediaId);
+                UpdateMediaSidebar();
             }
         }
 
         private void UpdateProductTabMedia()
         {
             productMediaListView.Items.Clear();
-            foreach(MediaInProduct mts in MediaService.GetMediaFromProduct(currentProduct))
+            foreach (MediaInProduct mts in MediaService.GetMediaFromProduct(currentProduct))
             {
                 mts.ImageIndex = iconMapping[mts.ImageIndex];
                 productMediaListView.Items.Add(mts);
@@ -299,7 +307,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 return;
 
             mediaName.Text = currentMedia.Name;
-            foreach(MediaType mt in mediaType.Items)
+            foreach (MediaType mt in mediaType.Items)
             {
                 if (mt.Id == currentMedia.MediaTypeId)
                 {
@@ -307,6 +315,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     break;
                 }
             }
+
             mediaSku.Text = currentMedia.SKU;
             mediaStillSealed.Checked = currentMedia.isSealed;
             mediaStorageSpaceId.Value = currentMedia.DumpStorageSpaceId;
@@ -341,7 +350,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             UpdateFilesystemTreeView();
         }
-        
+
         private void UpdateGraphdataPlot(GraphData gd)
         {
             graphDataPlot.Clear();
@@ -360,9 +369,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 plotData[4][i] = sample.SampleDistance;
                 plotData[5][i] = sample.SectorNo;
             }
-            
+
             graphDataPlot.Legend = new Legend();
-            graphDataPlot.XAxis1 = new LinearAxis(0,gd.NumberOfSamples);
+            graphDataPlot.XAxis1 = new LinearAxis(0, gd.NumberOfSamples);
             graphDataPlot.YAxis1 = new LinearAxis(0, gd.SampleRate);
 
             Color[] colors = {Color.Cyan, Color.Yellow, Color.Pink, Color.Red, Color.Blue, Color.CornflowerBlue};
@@ -382,9 +391,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentMedia = null;
             if (productMediaListView.SelectedItems.Count > 0)
             {
-                MediaInProduct mip = (MediaInProduct)productMediaListView.SelectedItems[0];
+                MediaInProduct mip = (MediaInProduct) productMediaListView.SelectedItems[0];
                 currentMedia = MediaService.GetSpecificMedia(mip.MediaId);
             }
+
             UpdateMediaSidebar();
         }
 
@@ -396,10 +406,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private void TextBox_DragAndDrop(object sender, DragEventArgs e)
         {
-            TextBox target = (TextBox)sender;
+            TextBox target = (TextBox) sender;
 
             object j = e.Data.GetData(DataFormats.FileDrop);
-            string[] jStrings = (string[])j;
+            string[] jStrings = (string[]) j;
             target.MaxLength = Int32.MaxValue;
             target.Text = File.ReadAllText(jStrings[0]);
         }
@@ -427,9 +437,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentProduct.Picture = productCover.Data;
             currentProduct.BoughtOn = productPurchaseDate.Value.Date;
             currentProduct.Sku = productISBN.Text;
-            currentProduct.PlatformId = ((Platform)productPlatform.SelectedItem).Id;
-            currentProduct.SupplierId = ((Shop)productSupplier.SelectedItem).Id;
-            currentProduct.CountryOfOriginId = ((Country)productCountryOfOrigin.SelectedItem).ID;
+            currentProduct.PlatformId = ((Platform) productPlatform.SelectedItem).Id;
+            currentProduct.SupplierId = ((Shop) productSupplier.SelectedItem).Id;
+            currentProduct.CountryOfOriginId = ((Country) productCountryOfOrigin.SelectedItem).ID;
             currentProduct.Screenshot = productScreenshot.Data;
             currentProduct.NSFW = productNSFW.Checked;
             if (!productCost.Value.HasValue)
@@ -437,6 +447,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 MessageBox.Show("Ungültiger Wert bei Preis.");
                 return;
             }
+
             currentProduct.Price = productCost.Value.Value;
 
             ProductService.UpdateProduct(currentProduct);
@@ -445,6 +456,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 ProductService.SetCover(currentProduct);
                 productCover.DataChanged = false;
             }
+
             if (productScreenshot.DataChanged)
             {
                 ProductService.SetScreenshot(currentProduct);
@@ -456,13 +468,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private void mediaSave_Click(object sender, EventArgs e)
         {
-            currentMedia.Id = (int)mediaID.Value;
-            currentMedia.RelatedProductId = (int)mediaProductId.Value;
+            currentMedia.Id = (int) mediaID.Value;
+            currentMedia.RelatedProductId = (int) mediaProductId.Value;
             currentMedia.Name = mediaName.Text;
-            currentMedia.MediaTypeId = ((MediaType)mediaType.SelectedItem).Id;
+            currentMedia.MediaTypeId = ((MediaType) mediaType.SelectedItem).Id;
             currentMedia.SKU = mediaSku.Text;
             currentMedia.isSealed = mediaStillSealed.Checked;
-            currentMedia.DumpStorageSpaceId = (int)mediaStorageSpaceId.Value;
+            currentMedia.DumpStorageSpaceId = (int) mediaStorageSpaceId.Value;
             currentMedia.DumpStorageSpacePath = mediaDumpPath.Text;
             currentMedia.MetaFileContent = mediaMetadata.Text;
             currentMedia.DateAdded = mediaDateAdded.Value;
@@ -496,8 +508,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private void RefreshAndEnsureSelectedMedium(object sender, EventArgs e, int mediaId)
         {
             UpdateProductTabMedia();
-            
-            foreach(MediaInProduct mip in productMediaListView.Items)
+
+            foreach (MediaInProduct mip in productMediaListView.Items)
             {
                 if (mip.MediaId == mediaId)
                 {
@@ -531,8 +543,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     FileInfo[] ibgFiles = di.GetFiles("*.ibg", SearchOption.TopDirectoryOnly);
                     if (ibgFiles.Length == 1)
                     {
-                        string result = string.Format("Soll die Datei {0} jetzt importiert werden?", ibgFiles[0].FullName);
-                        if (MessageBox.Show(this, result, "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        string result = string.Format("Soll die Datei {0} jetzt importiert werden?",
+                            ibgFiles[0].FullName);
+                        if (MessageBox.Show(this, result, "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                            DialogResult.Yes)
                         {
                             importedFromImgBurn = true;
                             mediaGraphData.MaxLength = Int32.MaxValue;
@@ -590,7 +604,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             mediaFauxHash.Text = result.ToString();
         }
-        
+
         private void AutoSetStorageSpaceId(string rootName)
         {
             string mediaId = Path.Combine(rootName, "azusa_storagespace_id.xml");
@@ -618,7 +632,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private string lastPath = null;
 
-        private void playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem_Click(object sender,
+            EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
 
@@ -627,7 +642,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             if (fbd.ShowDialog(this) != DialogResult.OK)
                 return;
-            
+
             DirectoryInfo di = new DirectoryInfo(fbd.SelectedPath);
 
             DeleteIfNecessary(di, "Thumbs.db");
@@ -640,6 +655,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 fi.Remove(folderJpg);
                 files = fi.ToArray();
             }
+
             string[] result = Array.ConvertAll(files, x => x.Name);
             string outFileName = Path.Combine(di.FullName, String.Format("{0}.m3u8", di.Name));
             File.WriteAllLines(outFileName, result);
@@ -661,9 +677,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         }
 
         #region Alles, was mit dem Dateisystembaum zusammenhängt
+
         private void filesystemContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
         }
 
         private void UpdateFilesystemTreeView()
@@ -684,7 +700,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 }
                 else
                 {
-                    FilesystemMetadataTreeViewItem parent = treeNodes.First(x => x.Entity.Id == treeNodes[i].Entity.ParentId);
+                    FilesystemMetadataTreeViewItem parent =
+                        treeNodes.First(x => x.Entity.Id == treeNodes[i].Entity.ParentId);
                     parent.Nodes.Add(treeNodes[i]);
                 }
             }
@@ -694,7 +711,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         {
             if (mediaFilesystemTreeView.Nodes.Count > 0)
             {
-                DialogResult confirm = MessageBox.Show(this,"Das Dateisystem für dieses Medium wurde schon eingelesen. Sollen die Informationen überschrieben werden?","",MessageBoxButtons.YesNo);
+                DialogResult confirm = MessageBox.Show(this,
+                    "Das Dateisystem für dieses Medium wurde schon eingelesen. Sollen die Informationen überschrieben werden?",
+                    "", MessageBoxButtons.YesNo);
                 if (confirm != DialogResult.Yes)
                     return;
             }
@@ -722,6 +741,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             UpdateFilesystemTreeView();
         }
+
         #endregion
 
         private void metadatenExportierenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -732,7 +752,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             if (saveFileDialog1.ShowDialog(this) != DialogResult.OK)
                 return;
 
-            File.WriteAllText(saveFileDialog1.FileName,mediaMetadata.Text);
+            File.WriteAllText(saveFileDialog1.FileName, mediaMetadata.Text);
 
             if (sender == metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem)
             {
@@ -765,11 +785,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             if (mediaFilesystemTreeView.Nodes.Count > 0)
             {
-                DialogResult confirm = MessageBox.Show(this, "Das Dateisystem für dieses Medium wurde schon eingelesen. Sollen die Informationen überschrieben werden?", "", MessageBoxButtons.YesNo);
+                DialogResult confirm = MessageBox.Show(this,
+                    "Das Dateisystem für dieses Medium wurde schon eingelesen. Sollen die Informationen überschrieben werden?",
+                    "", MessageBoxButtons.YesNo);
                 if (confirm != DialogResult.Yes)
                     return;
             }
-            
+
             context.DatabaseDriver.BeginTransaction();
             context.DatabaseDriver.ForgetFilesystemContents(currentMedia.Id);
             FilesystemMetadataGatherer.Gather(currentMedia, candidates[0]);
@@ -797,7 +819,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             WorkerForm wf = new WorkerForm(birw);
             wf.ShowDialog(this);
 
-            MessageBox.Show(String.Format("{0} M3U Dateien wurden durch M3U8 Dateien ersetzt.", findBrokenBandcampImports.Length));
+            MessageBox.Show(String.Format("{0} M3U Dateien wurden durch M3U8 Dateien ersetzt.",
+                findBrokenBandcampImports.Length));
         }
 
         private void metafilesAutomatischErgänzenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -825,7 +848,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     case ".m3u8":
                         break;
                     default:
-                        MessageBox.Show(String.Format("Autofix fehlgeschlagen: Unbekannte Dateierweiterung: {0}", extension));
+                        MessageBox.Show(String.Format("Autofix fehlgeschlagen: Unbekannte Dateierweiterung: {0}",
+                            extension));
                         return;
                 }
 
@@ -843,6 +867,62 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         {
             MapperWorker mapperWorker = new MapperWorker();
             mapperWorker.Run(this.FindForm());
+        }
+
+        private Thread complationAssistantThread;
+        private void vervollständigkeitsassistentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            complationAssistantThread = new Thread(WrapCompletionAssistant);
+            complationAssistantThread.Name = "Vervollständigungsassistent";
+            complationAssistantThread.Start();
+        }
+
+        private void WrapCompletionAssistant()
+        {
+            System.Windows.Forms.Control[] lockables = new System.Windows.Forms.Control[]
+                {menuStrip1, tabControl1, productsListView, tabControl2, mediaTabPages};
+            Invoke((MethodInvoker) delegate
+            {
+                foreach (var lockable in lockables)
+                    lockable.Enabled = false;
+            });
+
+            CompletionAssistant();
+
+            Invoke((MethodInvoker)delegate
+            {
+                foreach (var lockable in lockables)
+                    lockable.Enabled = true;
+            });
+        }
+
+        private void CompletionAssistant()
+        {
+            foreach (TabPage shelfTabPage in tabControl1.TabPages)
+            {
+                Invoke((MethodInvoker) delegate { tabControl1.SelectedTab = shelfTabPage;});
+                
+                for (int i = 0; i < productsListView.Items.Count; i++)
+                {
+                    Invoke((MethodInvoker) delegate
+                    {
+                        productsListView.SelectedIndices.Clear();
+                        productsListView.SelectedIndices.Add(i);
+                        productsListView.EnsureVisible(i);
+                        tabControl2.SelectedIndex = 2;
+                    });
+                    for (int j = 0; j < productMediaListView.Items.Count; j++)
+                    {
+                        Invoke((MethodInvoker)delegate
+                        {
+                            productMediaListView.SelectedIndices.Clear();
+                            productMediaListView.SelectedIndices.Add(j);
+                            productMediaListView.EnsureVisible(j);
+                        });
+                        Thread.Sleep(10);
+                    }
+                }
+            }
         }
     }
 }
