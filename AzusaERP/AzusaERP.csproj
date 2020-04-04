@@ -484,6 +484,7 @@
       <DependentUpon>TextInputForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UnixTimeConverter.cs" />
+    <Compile Include="Utilities\MakeM3uFromDirectory.cs" />
     <Compile Include="VgmDb\Boundary\VgmDbControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

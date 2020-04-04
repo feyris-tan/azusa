@@ -207,10 +207,12 @@ namespace moe.yo3explorer.azusa
                 LoadPlugin(context.PluginLoadQueue.Dequeue());
             }
 
+            ScanPluginAssembly(context, this.GetType().Assembly);
+
             if (!context.Ini.ContainsKey("plugins"))
                 return;
 
-            Type pluginType = typeof(AzusaPlugin);
+            
             IniSection pluginSection = context.Ini["plugins"];
             foreach (KeyValuePair<string, string> keyValuePair in pluginSection)
             {
@@ -223,24 +225,44 @@ namespace moe.yo3explorer.azusa
                 string path = new FileInfo(keyValuePair.Value).FullName;
 
                 Assembly assembly = Assembly.LoadFile(path);
-                Type[] exportedTypes = assembly.GetExportedTypes();
-                foreach (Type exportedType in exportedTypes)
+                ScanPluginAssembly(context, assembly);
+            }
+        }
+
+        private void ScanPluginAssembly(AzusaContext context, Assembly assembly)
+        {
+            Type[] exportedTypes = assembly.GetExportedTypes();
+            Array.Sort(exportedTypes, new TypeComparer());
+
+            Type pluginType = typeof(AzusaPlugin);
+            foreach (Type exportedType in exportedTypes)
+            {
+                if (exportedType.IsAbstract)
+                    continue;
+
+                if (pluginType.IsAssignableFrom(exportedType))
                 {
-                    if (pluginType.IsAssignableFrom(exportedType))
+                    try
                     {
-                        try
-                        {
-                            AzusaPlugin instance = (AzusaPlugin)Activator.CreateInstance(exportedType);
-                            LoadPlugin(instance);
-                        }
-                        catch (Exception e)
-                        {
-                            context.Splash.SetLabel(String.Format("Konnte Plug-In {0} nicht starten: {1}",exportedType.Name,e));
-                        }
+                        AzusaPlugin instance = (AzusaPlugin)Activator.CreateInstance(exportedType);
+                        LoadPlugin(instance);
+                    }
+                    catch (Exception e)
+                    {
+                        context.Splash.SetLabel(String.Format("Konnte Plug-In {0} nicht starten: {1}", exportedType.Name, e));
                     }
                 }
             }
         }
+
+        class TypeComparer : IComparer<Type>
+        {
+            public int Compare(Type x, Type y)
+            {
+                return x.Name.CompareTo(y.Name);
+            }
+        }
+
 
         private void LoadPlugin(AzusaPlugin instance)
         {

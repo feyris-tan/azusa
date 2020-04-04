@@ -69,6 +69,11 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
             {
                 singleFileMode = false;
             }
+            else if (fileExtensionDictionary.CountExtensions(".mkv") > 1 &&
+                     fileExtensionDictionary.HasExtension(".m3u8"))
+            {
+                singleFileMode = false;
+            }
             else if (fileExtensionDictionary.HasExtension(".cue") && fileExtensionDictionary.HasExtension(".bin"))
             {
                 singleFileMode = true;
@@ -236,7 +241,19 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                     case ".flac":
                         if (singleFileMode)
                         {
-                            throw new NotImplementedException("multifile .flac");
+                            throw new NotImplementedException("single file .flac");
+                        }
+                        else
+                        {
+                            FileInfo outputFileInfo = new FileInfo(Path.Combine(outputDir.FullName, fileInfo.Name));
+                            CopyFile(fileInfo, outputFileInfo);
+                            AttemptDelete(fileInfo);
+                        }
+                        break;
+                    case ".mkv":
+                        if (singleFileMode)
+                        {
+                            throw new NotImplementedException("single file .flac");
                         }
                         else
                         {
