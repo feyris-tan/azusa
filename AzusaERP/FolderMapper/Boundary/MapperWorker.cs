@@ -190,6 +190,9 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                         {
                             CopyFile(fileInfo, singleFileOutput);
                             mediaById.SetDumpFile(singleFileOutput);
+                            FileStream fileStream = singleFileOutput.OpenRead();
+                            mediaById.SetFilesystemMetadata(fileStream);
+                            fileStream.Close();
                             databaseDriver.UpdateMedia(mediaById);
                             AttemptDelete(fileInfo);
                         }

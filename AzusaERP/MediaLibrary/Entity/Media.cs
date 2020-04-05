@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
-using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using Org.BouncyCastle.Crypto.Generators;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 {

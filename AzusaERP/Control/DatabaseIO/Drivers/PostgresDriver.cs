@@ -590,6 +590,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 mt.IgnoreForStatistics = dataReader.GetBoolean(6);
                 if (!dataReader.IsDBNull(7))
                     mt.VnDbKey = dataReader.GetString(7);
+                mt.HasFilesystem = dataReader.GetBoolean(8);
                 yield return mt;
             }
             dataReader.Dispose();

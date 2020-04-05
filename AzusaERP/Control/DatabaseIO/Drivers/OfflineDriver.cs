@@ -2262,6 +2262,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 mt.DateAdded = dataReader.GetDateTime(4);
                 mt.IgnoreForStatistics = dataReader.GetBoolean(6);
                 mt.Icon = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.mediatypes"), azuStreamBlob.DeriveKey("icon"), mt.Id);
+                mt.HasFilesystem = dataReader.GetBoolean(8);
                 yield return mt;
             }
             dataReader.Dispose();

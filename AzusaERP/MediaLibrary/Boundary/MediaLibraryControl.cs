@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -55,6 +56,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             return this;
         }
 
+        private List<Platform> platforms;
         public void OnLoad()
         {
             context.Splash.SetLabel("Abfragen von Medientypen...");
@@ -79,7 +81,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentShelf = ((ShelfTabPage) tabControl1.TabPages[0]).Shelf;
 
             context.Splash.SetLabel("Abfragen von Plattformen...");
-            foreach (Platform platform in PlatformService.GetAllPlatforms())
+            platforms = PlatformService.GetAllPlatforms().ToList();
+            foreach (Platform platform in platforms)
             {
                 productPlatform.Items.Add(platform);
             }
@@ -869,6 +872,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mapperWorker.Run(this.FindForm());
         }
 
+        #region Vervollständigungsassistent
         private Thread complationAssistantThread;
         private void vervollständigkeitsassistentToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -919,10 +923,161 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                             productMediaListView.SelectedIndices.Add(j);
                             productMediaListView.EnsureVisible(j);
                         });
-                        Thread.Sleep(10);
+                        if (TryAutocomplete() == AutoCompleteResult.ABORT)
+                            return;
                     }
                 }
             }
         }
+
+        enum AutoCompleteResult
+        {
+            CONTINUE,
+            ABORT
+        }
+
+        private AutoCompleteResult TryAutocomplete()
+        {
+            if (currentProduct.Consistent)
+                return AutoCompleteResult.CONTINUE;
+
+            string label = String.Format("{0} - {1}", currentProduct.Name, currentMedia.Name);
+
+            if (string.IsNullOrEmpty(currentMedia.DumpStorageSpacePath))
+            {
+                MessageBox.Show(String.Format("Dump für {0} fehlt.",label));
+                return AutoCompleteResult.ABORT;
+            }
+
+            FileInfo physicalDumpFileInfo = AzusaStorageSpaceDrive.FindFileOnConnectedSpaces(currentMedia.DumpStorageSpacePath);
+            if (physicalDumpFileInfo == null)
+            {
+                MessageBox.Show(String.Format("Die Datei für den Dump von {0} existiert nicht.",label));
+                return AutoCompleteResult.ABORT;
+            }
+            if (!physicalDumpFileInfo.Exists)
+            {
+                MessageBox.Show(String.Format("Die Datei {0} existiert nicht.", physicalDumpFileInfo.FullName));
+                return AutoCompleteResult.ABORT;
+            }
+
+            if (currentProduct.PlatformId == 0)
+            {
+                if (!TryAutofillPlattform())
+                {
+                    MessageBox.Show(String.Format("Plattformeinstellung für {0} fehlt.", label));
+                    return AutoCompleteResult.ABORT;
+                }
+            }
+
+            if (productScreenshot.Data == null && currentShelf.ScreenshotRequired)
+            {
+                MessageBox.Show(String.Format("Screenshot für {0} fehlt.", label));
+                return AutoCompleteResult.ABORT;
+            }
+
+            if (productCover.Data == null)
+            {
+                MessageBox.Show(String.Format("Coverbild für {0} fehlt.", label));
+                return AutoCompleteResult.ABORT;
+            }
+
+            if (currentMedia == null)
+            {
+                if (productMediaListView.Items.Count == 1)
+                    return AutoCompleteResult.CONTINUE;
+                else
+                    return AutoCompleteResult.ABORT;
+            }
+            if (currentMedia.DumpStorageSpaceId == 0)
+            {
+                MessageBox.Show(String.Format("Dump für {0} fehlt.", label));
+                return AutoCompleteResult.ABORT;
+            }
+
+            if (string.IsNullOrEmpty(currentMedia.GraphDataContent))
+            {
+                MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
+                if (currentMediaType.GraphData)
+                {
+                    MessageBox.Show(String.Format("Graphdaten für {0} fehlen."));
+                    return AutoCompleteResult.ABORT;
+                }
+            }
+
+            if (mediaFilesystemTreeView.Nodes.Count == 0)
+            {
+                MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
+                if (currentMediaType.HasFilesystem)
+                {
+                    Platform platform = platforms.Find(x => x.Id == currentProduct.PlatformId);
+                    if (!platform.LongName.Equals("Audio CD") && !IsAudioCd())
+                    {
+                        MessageBox.Show(String.Format("Dateisystem von {0} wurde noch nicht geparst.",label));
+                        return AutoCompleteResult.ABORT;
+                    }
+                }
+            }
+
+            return AutoCompleteResult.CONTINUE;
+        }
+
+        private bool IsAudioCd()
+        {
+            bool ism3u8 = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".m3u8");
+            if (ism3u8)
+                return true;
+            else if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
+            {
+                return currentMedia.MetaFileContent.ToLowerInvariant().Contains(".flac");
+            }
+            else
+            {
+                throw new Exception("lolwat?");
+            }
+        }
+        private bool TryAutofillPlattform()
+        {
+            string label = String.Format("{0} - {1}", currentProduct.Name, currentMedia.Name);
+
+            MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
+            bool isMkv = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".mkv");
+            bool isTvShow = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".mkv");
+            bool isMusicCd = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".flac");
+            Platform proposedPlattform = null;
+            if (isMkv && currentMediaType.ShortName.Equals("DVD"))
+            {
+                proposedPlattform = platforms.Find(x => x.ShortName.Equals("DVD"));
+            }
+            else if (isMkv && currentMediaType.ShortName.Equals("Blu-Ray"))
+            {
+                proposedPlattform = platforms.Find(x => x.ShortName.Equals("Blu-Ray"));
+            }
+            else if (isMusicCd && currentMediaType.ShortName.Equals("CD"))
+            {
+                proposedPlattform = platforms.Find(x => x.ShortName.Equals("CD"));
+            }
+            else if (isTvShow && currentMediaType.ShortName.Equals("DVD"))
+            {
+                proposedPlattform = platforms.Find(x => x.ShortName.Equals("DVD"));
+            }
+
+            if (proposedPlattform == null)
+            {
+                return false;
+            }
+
+            DialogResult dialogResult = MessageBox.Show(String.Format("Ist die Plattform {0} korrekt im Falle von {1}?", proposedPlattform.ShortName, label), null, MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.No)
+                return false;
+
+            productPlatform.SelectedItem = proposedPlattform;
+            Invoke((MethodInvoker) delegate
+            {
+                productSave_Click(vervollständigkeitsassistentToolStripMenuItem, new EventArgs());
+            });
+            return true;
+        }
+        #endregion
     }
 }

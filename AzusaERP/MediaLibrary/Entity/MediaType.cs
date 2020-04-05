@@ -12,6 +12,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public byte[] Icon { get; set; }
         public bool IgnoreForStatistics { get; set; }
         public string VnDbKey { get; set; }
+        public bool HasFilesystem { get; set; }
 
         public override string ToString()
         {
