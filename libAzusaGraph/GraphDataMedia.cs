@@ -13,7 +13,7 @@ namespace dsMediaLibraryClient.GraphDataLib
         private string bookType;
         private string id;
         private string trackPath;
-        private short[] speeds;
+        private float[] speeds;
         private long capacity;
         private long layerBreak;
 
@@ -22,17 +22,18 @@ namespace dsMediaLibraryClient.GraphDataLib
             try
             {
                 value = value.Replace("; ","");
-                string[] args = value.Split('x');
-                speeds = new short[args.Length];
+                value = value.Replace(",", ".");
+                string[] args = value.Split(new string[] {"x"}, StringSplitOptions.RemoveEmptyEntries);
+                speeds = new float[args.Length];
                 for (int i = 0; i < args.Length; i++)
                 {
-                    speeds[i] = short.Parse(args[i]);
+                    speeds[i] = float.Parse(args[i]);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Console.WriteLine("Could not parse speeds: {0}", value);
-                speeds = new short[0];
+                speeds = new float[0];
             }
             
         }
@@ -61,7 +62,7 @@ namespace dsMediaLibraryClient.GraphDataLib
             set { trackPath = value;}
         }
 
-        public short[] Speeds
+        public float[] Speeds
         {
             get { return speeds;}
             set { speeds = value;}

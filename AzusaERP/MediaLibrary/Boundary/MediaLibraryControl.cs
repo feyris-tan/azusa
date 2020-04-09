@@ -797,10 +797,19 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             context.DatabaseDriver.BeginTransaction();
             context.DatabaseDriver.ForgetFilesystemContents(currentMedia.Id);
-            FilesystemMetadataGatherer.Gather(currentMedia, candidates[0]);
-            context.DatabaseDriver.EndTransaction(true);
+            try
+            {
+                FilesystemMetadataGatherer.Gather(currentMedia, candidates[0]);
+                context.DatabaseDriver.EndTransaction(true);
 
-            UpdateFilesystemTreeView();
+                UpdateFilesystemTreeView();
+            }
+            catch (Exception exception)
+            {
+                context.DatabaseDriver.EndTransaction(false);
+                MessageBox.Show(exception.Message);
+            }
+            
         }
 
         private void bandcampKollektionImportierenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1011,7 +1020,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 if (currentMediaType.HasFilesystem)
                 {
                     Platform platform = platforms.Find(x => x.Id == currentProduct.PlatformId);
-                    if (!platform.LongName.Equals("Audio CD") && !IsAudioCd())
+                    if (/*!platform.LongName.Equals("Audio CD") &&*/ !IsAudioCd())
                     {
                         MessageBox.Show(String.Format("Dateisystem von {0} wurde noch nicht geparst.",label));
                         return AutoCompleteResult.ABORT;
@@ -1024,12 +1033,17 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private bool IsAudioCd()
         {
-            bool ism3u8 = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".m3u8");
+            string extension = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant();
+            bool ism3u8 = extension.Equals(".m3u8");
             if (ism3u8)
                 return true;
             else if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
             {
                 return currentMedia.MetaFileContent.ToLowerInvariant().Contains(".flac");
+            }
+            else if (extension.Equals(".mkv"))
+            {
+                return false;
             }
             else
             {
