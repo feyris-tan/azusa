@@ -67,5 +67,7 @@ namespace moe.yo3explorer.ryuuguuKomachi.DicModBridge
             extension = extension.ToLowerInvariant();
             return CountExtensions(extension) > 0;
         }
+
+        public int DifferentExtension => wrapped.Count;
     }
 }

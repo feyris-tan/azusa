@@ -50,6 +50,7 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
             string singleFileFilter = null;
             bool singleFileMode = false;
             string outputExtension = null;
+            bool isAudiobook = false;
             if (fileExtensionDictionary.HasExtension(".dvd") && fileExtensionDictionary.HasExtension(".iso"))
             {
                 singleFileMode = true;
@@ -91,6 +92,19 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                 singleFileMode = true;
                 singleFileFilter = "Nintendo Switch ROM (*.xci)|*.xci";
                 outputExtension = ".xci";
+            }
+            else if (fileExtensionDictionary.CountExtensions(".mkv") == 1 && fileExtensionDictionary.DifferentExtension == 1)
+            {
+                singleFileMode = true;
+                singleFileFilter = "MatrosKa Video (*.mkv)|*.mkv";
+                outputExtension = ".mkv";
+            }
+            else if (fileExtensionDictionary.CountExtensions(".wav") == 1 && fileExtensionDictionary.HasExtension(".ibg"))
+            {
+                isAudiobook = true;
+                singleFileMode = true;
+                singleFileFilter = "MP3 (*.mp3)|*.mp3";
+                outputExtension = ".mp3";
             }
             else
             {
@@ -256,7 +270,10 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                     case ".mkv":
                         if (singleFileMode)
                         {
-                            throw new NotImplementedException("single file .flac");
+                            CopyFile(fileInfo, singleFileOutput);
+                            mediaById.SetDumpFile(singleFileOutput);
+                            databaseDriver.UpdateMedia(mediaById);
+                            AttemptDelete(fileInfo);
                         }
                         else
                         {
@@ -335,8 +352,11 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                         if (string.IsNullOrEmpty(mediaById.DumpStorageSpacePath))
                         {
                             FileInfo outputFileInfo = new FileInfo(Path.Combine(outputDir.FullName, fileInfo.Name));
-                            CopyFile(fileInfo, outputFileInfo);
-                            mediaById.SetDumpFile(outputFileInfo);
+                            if (!isAudiobook)
+                            {
+                                CopyFile(fileInfo, outputFileInfo);
+                                mediaById.SetDumpFile(outputFileInfo);
+                            }
                         }
                         string cuefile = File.ReadAllText(fileInfo.FullName);
                         bool deleteCue = false;
@@ -363,6 +383,43 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                             goto case ".log";
                         else
                             MessageBox.Show("Don't know how to deal with TXT file:" + fileInfo.Name);
+                        break;
+                    case ".wav":
+                        if (singleFileMode)
+                        {
+                            string mp3Filename = Path.ChangeExtension(fileInfo.FullName, ".mp3");
+                            string wavFilename = fileInfo.FullName;
+                            string lamePath = azusaContext.ReadIniKey("ripkit", "lamePath", null);
+                            if (string.IsNullOrEmpty(lamePath))
+                            {
+                                MessageBox.Show("LAME ist nicht vorhanden!");
+                                WorkerForm.InvokeClose();
+                                return;
+                            }
+
+                            WorkerForm.InvokeNextStep("Encodiere: " + fileInfo.Name);
+                            System.Diagnostics.Process lame = new System.Diagnostics.Process();
+                            lame.StartInfo.FileName = lamePath;
+                            lame.StartInfo.Arguments = String.Format("\"{0}\" \"{1}\"", wavFilename, mp3Filename);
+                            lame.Start();
+                            WorkerForm.InvokeNextStep(String.Format("Encode: {0}", mp3Filename));
+                            lame.WaitForExit();
+
+                            WorkerForm.InvokeNextStep("Kopiere MP3 Datei...");
+                            FileInfo mp3Info = new FileInfo(mp3Filename);
+                            CopyFile(mp3Info, singleFileOutput);
+                            mediaById.SetDumpFile(singleFileOutput);
+                            databaseDriver.UpdateMedia(mediaById);
+
+                            System.Threading.Thread.Sleep(100);
+                            AttemptDelete(fileInfo);
+                            AttemptDelete(mp3Info);
+
+                        }
+                        else
+                        {
+                            throw new NotImplementedException("wav in multi file mode.");
+                        }
                         break;
                     default:
                         MessageBox.Show("Don't know how to deal with file:" + fileInfo.Name);

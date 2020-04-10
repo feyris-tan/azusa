@@ -1056,8 +1056,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
             bool isMkv = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".mkv");
-            bool isTvShow = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".mkv");
-            bool isMusicCd = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".flac");
+            bool isTvShow = false;
+            bool isMusicCd = false;
+            if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
+            {
+                isTvShow = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".mkv");
+                isMusicCd = currentMedia.MetaFileContent.ToLowerInvariant().Contains(".flac");
+            }
             Platform proposedPlattform = null;
             if (isMkv && currentMediaType.ShortName.Equals("DVD"))
             {
