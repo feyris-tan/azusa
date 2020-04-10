@@ -397,7 +397,6 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                                 return;
                             }
 
-                            WorkerForm.InvokeNextStep("Encodiere: " + fileInfo.Name);
                             System.Diagnostics.Process lame = new System.Diagnostics.Process();
                             lame.StartInfo.FileName = lamePath;
                             lame.StartInfo.Arguments = String.Format("\"{0}\" \"{1}\"", wavFilename, mp3Filename);

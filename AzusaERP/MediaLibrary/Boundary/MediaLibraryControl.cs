@@ -1035,7 +1035,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         {
             string extension = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant();
             bool ism3u8 = extension.Equals(".m3u8");
+            bool isMp3 = extension.Equals(".mp3");
             if (ism3u8)
+                return true;
+            else if (isMp3)
                 return true;
             else if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
             {
