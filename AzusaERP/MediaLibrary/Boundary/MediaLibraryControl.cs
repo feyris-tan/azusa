@@ -1093,9 +1093,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             if (dialogResult == DialogResult.No)
                 return false;
 
-            productPlatform.SelectedItem = proposedPlattform;
             Invoke((MethodInvoker) delegate
             {
+                productPlatform.SelectedItem = proposedPlattform;
                 productSave_Click(vervollständigkeitsassistentToolStripMenuItem, new EventArgs());
             });
             return true;
