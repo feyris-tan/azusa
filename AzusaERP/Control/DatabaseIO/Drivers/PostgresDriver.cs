@@ -3052,5 +3052,20 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             activateLicenseCommand.ExecuteNonQuery();
             
         }
+
+        private int deletedMedia;
+        private NpgsqlCommand removeMediaCommand;
+        public void RemoveMedia(Media currentMedia)
+        {
+            if (removeMediaCommand == null)
+            {
+                removeMediaCommand = connection.CreateCommand();
+                removeMediaCommand.CommandText = "DELETE FROM azusa.media WHERE id = @id";
+                removeMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
+            }
+            removeMediaCommand.Parameters["@id"].Value = currentMedia.Id;
+            deletedMedia += removeMediaCommand.ExecuteNonQuery();
+
+        }
     }
 }

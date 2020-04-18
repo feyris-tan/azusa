@@ -168,5 +168,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         Media[] findBrokenBandcampImports();
         Media[] FindAutofixableMetafiles();
         void Sync_AlterTable(string tableName, DatabaseColumn missingColumn);
+        void RemoveMedia(Media currentMedia);
     }
 }

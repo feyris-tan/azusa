@@ -306,6 +306,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             discScannenToolStripMenuItem.Enabled = enabled;
             mediaFilesystemTreeView.Enabled = enabled;
 
+            productRemoveMediaButton.Enabled = enabled && productMediaListView.Items.Count > 1;
+
             if (!enabled)
                 return;
 
@@ -1101,5 +1103,15 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             return true;
         }
         #endregion
+
+        private void productRemoveMediaButton_Click(object sender, EventArgs e)
+        {
+            string rant = String.Format("Soll das Medium {0} wirklich aus dem Produkt {1} entfernt werden?", currentMedia.Name, currentProduct.Name);
+            DialogResult dr = MessageBox.Show(rant, "", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr != DialogResult.Yes)
+                return;
+
+            context.DatabaseDriver.RemoveMedia(currentMedia);
+        }
     }
 }

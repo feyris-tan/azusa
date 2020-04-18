@@ -73,6 +73,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.productAddMediaButton = new System.Windows.Forms.Button();
+            this.productRemoveMediaButton = new System.Windows.Forms.Button();
             this.productTabScreenshots = new System.Windows.Forms.TabPage();
             this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabLinks = new System.Windows.Forms.TabPage();
@@ -613,16 +614,18 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             // tableLayoutPanel6
             // 
-            this.tableLayoutPanel6.ColumnCount = 2;
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.ColumnCount = 4;
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel6.Controls.Add(this.productAddMediaButton, 1, 0);
+            this.tableLayoutPanel6.Controls.Add(this.productRemoveMediaButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 134);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(181, 29);
             this.tableLayoutPanel6.TabIndex = 2;
             // 
@@ -630,13 +633,25 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.productAddMediaButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.productAddMediaButton.Enabled = false;
-            this.productAddMediaButton.Location = new System.Drawing.Point(93, 3);
+            this.productAddMediaButton.Location = new System.Drawing.Point(48, 3);
             this.productAddMediaButton.Name = "productAddMediaButton";
-            this.productAddMediaButton.Size = new System.Drawing.Size(85, 23);
+            this.productAddMediaButton.Size = new System.Drawing.Size(39, 23);
             this.productAddMediaButton.TabIndex = 0;
             this.productAddMediaButton.Text = "Hinzufügen";
             this.productAddMediaButton.UseVisualStyleBackColor = true;
             this.productAddMediaButton.Click += new System.EventHandler(this.addMediaButton_Click);
+            // 
+            // productRemoveMediaButton
+            // 
+            this.productRemoveMediaButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productRemoveMediaButton.Enabled = false;
+            this.productRemoveMediaButton.Location = new System.Drawing.Point(3, 3);
+            this.productRemoveMediaButton.Name = "productRemoveMediaButton";
+            this.productRemoveMediaButton.Size = new System.Drawing.Size(39, 23);
+            this.productRemoveMediaButton.TabIndex = 1;
+            this.productRemoveMediaButton.Text = "Entfernen";
+            this.productRemoveMediaButton.UseVisualStyleBackColor = true;
+            this.productRemoveMediaButton.Click += new System.EventHandler(this.productRemoveMediaButton_Click);
             // 
             // productTabScreenshots
             // 
@@ -1755,5 +1770,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem metafilesAutomatischErgänzenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem imageOrdnerImportierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem vervollständigkeitsassistentToolStripMenuItem;
+        private System.Windows.Forms.Button productRemoveMediaButton;
     }
 }
