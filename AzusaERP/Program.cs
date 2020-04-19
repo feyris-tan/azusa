@@ -35,6 +35,9 @@ namespace moe.yo3explorer.azusa
                         break;
                     case "--setup":
                         break;
+                    case "--makelicense":
+                        CreateLicenseFile();
+                        return;
                     case "--upgrade1to2":
                         Program p = new Program();
                         p.context = AzusaContext.GetInstance();
@@ -69,6 +72,28 @@ namespace moe.yo3explorer.azusa
             }
             
             context.DestroyContext();
+        }
+
+        private static void CreateLicenseFile()
+        {
+            Random random = new Random();
+            byte[] buffer = new byte[4096];
+            random.NextBytes(buffer);
+            MemoryStream ms = new MemoryStream(buffer, 0, buffer.Length);
+            BinaryWriter bw = new BinaryWriter(ms);
+            long ts = DateTime.Now.Ticks;
+            bw.Write(7163340663742102081UL);
+            bw.Write(1L);
+            bw.Write(Environment.ProcessorCount);
+            bw.Write(Environment.MachineName);
+            bw.Write(Environment.UserName);
+            bw.Write(Environment.UserDomainName);
+            bw.Write(Guid.NewGuid().ToByteArray());
+            bw.Write(0L);
+            bw.Write(ts);
+            bw.Write(0L);
+            string fname = String.Format("AzusaLic_{0}_{1}.bin", Environment.MachineName, ts);
+            File.WriteAllBytes(fname, buffer);
         }
 
         private AzusaContext context;
@@ -111,62 +136,88 @@ namespace moe.yo3explorer.azusa
 
             context.Splash.SetLabel("Starte Webserver...");
             context.WebServer = new WebServer();
-            
-            context.Splash.SetLabel("Überprüfe Verfügbarkeit der Online-Datenbank...");
-            bool available = false;
-            try
+            bool connected = false;
+            int useRest = context.ReadIniKey("rest", "use", 0);
+            if (useRest > 0)
             {
-                if (Convert.ToInt32(azusaIniSection["forceOffline"]) == 0)
+                try
                 {
-                    Ping ping = new Ping();
-                    PingReply pong = ping.Send(context.Ini["postgresql"]["server"]);
-                    if (pong.Status == IPStatus.Success)
+                    RestDriver restDriver = new RestDriver();
+                    if (restDriver.ConnectionIsValid())
                     {
-                        available = TcpProbe(context.Ini["postgresql"]["server"],
-                            Convert.ToInt16(context.Ini["postgresql"]["port"]));
+                        connected = true;
+                        context.DatabaseDriver = restDriver;
                     }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed to use the REST Client: " + e.Message);
+                }
+            }
 
-                    if (!available)
+            if (!connected)
+            {
+                bool onlineAvailable = false;
+                context.Splash.SetLabel("Überprüfe Verfügbarkeit der Online-Datenbank...");
+                try
+                {
+                    if (Convert.ToInt32(azusaIniSection["forceOffline"]) == 0)
                     {
-                        if (context.Ini.ContainsKey("sshProxy"))
+                        Ping ping = new Ping();
+                        PingReply pong = ping.Send(context.Ini["postgresql"]["server"]);
+                        if (pong.Status == IPStatus.Success)
                         {
-                            if (Convert.ToInt32(context.Ini["sshProxy"]["allow"]) > 0)
+                            onlineAvailable = TcpProbe(context.Ini["postgresql"]["server"],
+                                Convert.ToInt16(context.Ini["postgresql"]["port"]));
+                        }
+
+                        if (!onlineAvailable)
+                        {
+                            if (context.Ini.ContainsKey("sshProxy"))
                             {
-                                available = AttemptSshPortForward();
+                                if (Convert.ToInt32(context.Ini["sshProxy"]["allow"]) > 0)
+                                {
+                                    onlineAvailable = AttemptSshPortForward();
+                                }
                             }
                         }
                     }
                 }
-            }
-            catch
-            {
-                available = false;
+                catch
+                {
+                    onlineAvailable = false;
+                }
+
+                if (onlineAvailable)
+                {
+                    try
+                    {
+                        ConnectOnline();
+                        connected = true;
+                    }
+                    catch (DatabaseConnectionException e)
+                    {
+                        context.Splash.SetLabel("");
+                        DialogResult askOffline =
+                            MessageBox.Show(
+                                String.Format(
+                                    "Die Verbindung zur Datenbank ist fehlgeschlagen. Soll offline gearbeitet werden?\n{0}", e),
+                                "Azusa", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                        if (askOffline == DialogResult.Yes)
+                        {
+                            ConnectOffline();
+                            connected = true;
+                        }
+                        else
+                        {
+                            context.Splash.InvokeClose();
+                            return true;
+                        }
+                    }
+                }
             }
 
-            if (available)
-                try
-                {
-                    ConnectOnline();
-                }
-                catch (DatabaseConnectionException e)
-                {
-                    context.Splash.SetLabel("");
-                    DialogResult askOffline =
-                        MessageBox.Show(
-                            String.Format(
-                                "Die Verbindung zur Datenbank ist fehlgeschlagen. Soll offline gearbeitet werden?\n{0}", e),
-                            "Azusa", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                    if (askOffline == DialogResult.Yes)
-                    {
-                        ConnectOffline();
-                    }
-                    else
-                    {
-                        context.Splash.InvokeClose();
-                        return true;
-                    }
-                }
-            else
+            if (!connected)
             {
                 ConnectOffline();
             }

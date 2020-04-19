@@ -1998,6 +1998,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             command.ExecuteNonQuery();
         }
 
+        public void RemoveMedia(Media currentMedia)
+        {
+            throw new NotImplementedException();
+        }
+
         public LicenseState CheckLicenseStatus()
         {
             throw new NotImplementedException();

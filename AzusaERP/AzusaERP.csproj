@@ -228,6 +228,7 @@
     <Compile Include="Control\DatabaseIO\Drivers\OfflineDriver.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\PostgresDriver.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\PostgresLogProvider.cs" />
+    <Compile Include="Control\DatabaseIO\Drivers\RestDriver.cs" />
     <Compile Include="Control\DatabaseIO\IStreamBlobOwner.cs" />
     <Compile Include="Control\DatabaseIO\Migrations\Migration1to2.cs" />
     <Compile Include="Control\DatabaseIO\SqlIndex.cs" />

@@ -1111,7 +1111,11 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             if (dr != DialogResult.Yes)
                 return;
 
+            MediaInProduct mip = (MediaInProduct)productMediaListView.Items[0];
+
             context.DatabaseDriver.RemoveMedia(currentMedia);
+            RefreshAndEnsureSelectedProduct(sender, e, currentProduct.Id);
+            RefreshAndEnsureSelectedMedium(sender, e, mip.MediaId);
         }
     }
 }
