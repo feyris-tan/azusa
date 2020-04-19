@@ -142,11 +142,16 @@ namespace moe.yo3explorer.azusa
             {
                 try
                 {
+                    Console.WriteLine("Überprüfe die Verfügbarkeit der REST-Schnittstelle...");
                     RestDriver restDriver = new RestDriver();
                     if (restDriver.ConnectionIsValid())
                     {
                         connected = true;
                         context.DatabaseDriver = restDriver;
+                    }
+                    else
+                    {
+                        Console.WriteLine("REST-Schnittstelle sagt: " + restDriver.RestDriverErrorState);
                     }
                 }
                 catch (Exception e)

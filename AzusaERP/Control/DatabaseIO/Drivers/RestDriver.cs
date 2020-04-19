@@ -4,8 +4,8 @@ using System.Data.Common;
 using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Licensing;
 using moe.yo3explorer.azusa.Control.MailArchive.Entity;
@@ -22,6 +22,7 @@ using moe.yo3explorer.azusa.VgmDb.Entity;
 using moe.yo3explorer.azusa.VnDb.Entity;
 using moe.yo3explorer.azusa.VocaDB.Entity;
 using moe.yo3explorer.azusa.WarWalking.Entity;
+using Newtonsoft.Json;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
@@ -60,6 +61,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             byte[] buffer = File.ReadAllBytes(fi.FullName);
             byte[] compressed = HashLib.HashFactory.Crypto.SHA3.CreateBlueMidnightWish224().ComputeBytes(buffer).GetBytes();
             license = BitConverter.ToString(compressed);
+            license = license.Replace("-", "");
 
             webClient = new WebClient();
             webClient.BaseAddress = url;
@@ -70,6 +72,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             webClient.Headers.Add("Azusa-User-Domain-Name", Environment.UserDomainName);
             webClient.Headers.Add("Azusa-License", license);
             webClient.Headers.Add("Authorization", "Azusa-License");
+            webClient.Headers.Add("Azusa-License-Buffer-Size", buffer.Length.ToString());
         }
         
 
@@ -77,6 +80,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         private RestDriverErrorState errorState;
         private string license;
         private WebClient webClient;
+
+        public RestDriverErrorState RestDriverErrorState => errorState;
 
         public void Dispose()
         {
@@ -115,7 +120,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Tour> WarWalking_GetAllTours()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/warwalking/tours");
+            List<Tour> list = JsonConvert.DeserializeObject<List<Tour>>(rawJson);
+            return list;
         }
 
         public bool WarWalking_IsAccessPointKnown(string bssid)
@@ -165,7 +172,33 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public bool ConnectionIsValid()
         {
-            throw new NotImplementedException();
+            if (RestDriverErrorState != RestDriverErrorState.NoError)
+                return false;
+
+            try
+            {
+                string rawJson = webClient.DownloadString("/startup/validate");
+                JsonDocument jsonDocument = JsonDocument.Parse(rawJson);
+                JsonElement isValid = jsonDocument.RootElement.GetProperty("isValid");
+                return isValid.GetBoolean();
+            }
+            catch (WebException web)
+            {
+                Console.WriteLine(web.Status);
+                if (web.Status == WebExceptionStatus.ProtocolError)
+                {
+                    HttpWebResponse hwr = (HttpWebResponse) web.Response;
+                    if (hwr.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        Console.WriteLine("Die Lizenznummer \"{0}\" wurde abgelehnt.", this.license);
+                    }
+                    else
+                    {
+                        Console.WriteLine(hwr.StatusDescription);
+                    }
+                }
+                return false;
+            }
         }
 
         public List<string> GetAllPublicTableNames()

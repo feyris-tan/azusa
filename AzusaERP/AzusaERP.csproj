@@ -153,6 +153,9 @@
     <Reference Include="NEbml.Core, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\NEbml.0.1.4\lib\NEbml.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NmeaParser, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\SharpGIS.NmeaParser.1.10.0\lib\net451\NmeaParser.dll</HintPath>
     </Reference>
@@ -235,6 +238,8 @@
     <Compile Include="Control\DatabaseIO\Sync.cs" />
     <Compile Include="Control\DatabaseIO\SyncException.cs" />
     <Compile Include="Control\Galleria\DefaultGalleriaModel.cs" />
+    <Compile Include="Control\JsonIO\UnixtimeToDatetimeJsonConverter.cs" />
+    <Compile Include="Control\JsonIO\WeirdQuarkusDatetimeConverter.cs" />
     <Compile Include="Control\Licensing\GuidUtils.cs" />
     <Compile Include="Control\Licensing\LicenseValidationFailedException.cs" />
     <Compile Include="Control\Setup\PostgresqlModel.cs" />
