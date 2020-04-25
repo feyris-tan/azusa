@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using DiscUtils;
+using DiscUtils.Iso9660;
 using dsMediaLibraryClient.GraphDataLib;
 using libazuworker;
 using moe.yo3explorer.azusa.BandcampImporter;
@@ -14,6 +16,7 @@ using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
+using moe.yo3explorer.ryuuguuKomachi.DicModBridge;
 using NPlot;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
@@ -975,7 +978,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     productsListView.SelectedIndices.Clear();
                     productsListView.SelectedIndices.Add(i);
                     productsListView.EnsureVisible(i);
-                    tabControl2.SelectedIndex = 2;
                 });
                 if (CompletionAssistantProduct() == AutoCompleteResult.ABORT)
                     return AutoCompleteResult.ABORT;
@@ -993,6 +995,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     productMediaListView.SelectedIndices.Clear();
                     productMediaListView.SelectedIndices.Add(j);
                     productMediaListView.EnsureVisible(j);
+                    tabControl2.SelectedIndex = 2;
                 });
                 if (TryAutocomplete() == AutoCompleteResult.ABORT)
                     return AutoCompleteResult.ABORT;
@@ -1081,7 +1084,31 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 if (currentMediaType.HasFilesystem)
                 {
                     Platform platform = platforms.Find(x => x.Id == currentProduct.PlatformId);
-                    if (/*!platform.LongName.Equals("Audio CD") &&*/ !IsAudioCd())
+                    string mediaExtension = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant();
+                    if (mediaExtension.Equals(".iso"))
+                    {
+                        FileInfo isoInfo = AzusaStorageSpaceDrive.FindFileOnConnectedSpaces(currentMedia.DumpStorageSpacePath);
+                        string q = String.Format("Soll das Dateisystem im Abbild \"{0}\" für {1} gesetzt werden?", isoInfo.FullName, label);
+                        DialogResult qdr = MessageBox.Show(q, "", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (qdr == DialogResult.Yes)
+                        {
+                            FileStream isoStream = isoInfo.OpenRead();
+
+                            context.DatabaseDriver.BeginTransaction();
+                            context.DatabaseDriver.ForgetFilesystemContents(currentMedia.Id);
+                            FilesystemMetadataGatherer.Gather(currentMedia, isoStream);
+                            context.DatabaseDriver.EndTransaction(true);
+
+                            isoStream.Close();
+                            Invoke((MethodInvoker)delegate { UpdateFilesystemTreeView(); });
+                            TryAutocomplete();
+                        }
+                        else
+                        {
+                            return AutoCompleteResult.ABORT;
+                        }
+                    }
+                    else if (/*!platform.LongName.Equals("Audio CD") &&*/ !IsAudioCd())
                     {
                         MessageBox.Show(String.Format("Dateisystem von {0} wurde noch nicht geparst.",label));
                         return AutoCompleteResult.ABORT;
@@ -1109,6 +1136,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             {
                 return false;
             }
+            else if (extension.Equals(".iso"))
+            {
+                return false;
+            }
             else
             {
                 throw new Exception("lolwat?");
@@ -1120,6 +1151,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
             bool isMkv = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".mkv");
+            bool isIso = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".iso");
+            bool isMp3 = Path.GetExtension(currentMedia.DumpStorageSpacePath).ToLowerInvariant().Equals(".mp3");
             bool isTvShow = false;
             bool isMusicCd = false;
             if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
@@ -1136,13 +1169,34 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             {
                 proposedPlattform = platforms.Find(x => x.ShortName.Equals("Blu-Ray"));
             }
-            else if (isMusicCd && currentMediaType.ShortName.Equals("CD"))
+            else if ((isMusicCd || isMp3) && currentMediaType.ShortName.Equals("CD"))
             {
                 proposedPlattform = platforms.Find(x => x.ShortName.Equals("CD"));
             }
             else if (isTvShow && currentMediaType.ShortName.Equals("DVD"))
             {
                 proposedPlattform = platforms.Find(x => x.ShortName.Equals("DVD"));
+            }
+            else if (isIso && currentMediaType.ShortName.Equals("CD"))
+            {
+                FileInfo fi = AzusaStorageSpaceDrive.FindFileOnConnectedSpaces(currentMedia.DumpStorageSpacePath);
+                if (fi != null)
+                {
+                    FileStream isoStream = fi.OpenRead();
+                    if (CDReader.Detect(isoStream))
+                    {
+                        CDReader cdromReader = new CDReader(isoStream, true, true);
+                        FileExtensionDictionary extensions = new FileExtensionDictionary();
+                        ScanIsoDirectory(cdromReader.Root, extensions);
+                        cdromReader.Dispose();
+                        double mp3Percentage = extensions.GetPercentageOfExtension(".mp3");
+                        if (mp3Percentage > 90)
+                        {
+                            proposedPlattform = platforms.Find(x => x.ShortName.Equals("MP3"));
+                        }
+                    }
+                    isoStream.Dispose();
+                }
             }
 
             if (proposedPlattform == null)
@@ -1160,6 +1214,18 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 productSave_Click(vervollständigkeitsassistentToolStripMenuItem, new EventArgs());
             });
             return true;
+        }
+
+        private void ScanIsoDirectory(DiscDirectoryInfo ddi, FileExtensionDictionary extensions)
+        {
+            foreach (DiscDirectoryInfo subdir in ddi.GetDirectories())
+            {
+                ScanIsoDirectory(subdir, extensions);
+            }
+            foreach (DiscFileInfo file in ddi.GetFiles())
+            {
+                extensions.CountFile(new FileInfo(file.Name));
+            }
         }
         #endregion
 

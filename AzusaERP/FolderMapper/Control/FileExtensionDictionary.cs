@@ -69,5 +69,28 @@ namespace moe.yo3explorer.ryuuguuKomachi.DicModBridge
         }
 
         public int DifferentExtension => wrapped.Count;
+
+        public int TotalFiles
+        {
+            get
+            {
+                int result = 0;
+                foreach(KeyValuePair<string,int> entry in wrapped)
+                {
+                    result += entry.Value;
+                }
+                return result;
+            }
+        }
+
+        public double GetPercentageOfExtension(string extension)
+        {
+            if (!wrapped.ContainsKey(extension))
+                return 0;
+
+            double totalFiles = (double)TotalFiles;
+            double numFiles = (double)wrapped[extension];
+            return (numFiles * 100.0) / totalFiles;
+        }
     }
 }

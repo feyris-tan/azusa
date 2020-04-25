@@ -1392,7 +1392,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.imageParsenToolStripMenuItem,
             this.discScannenToolStripMenuItem});
             this.filesystemContextMenuStrip.Name = "filesystemContextMenuStrip";
-            this.filesystemContextMenuStrip.Size = new System.Drawing.Size(217, 48);
+            this.filesystemContextMenuStrip.Size = new System.Drawing.Size(217, 70);
             this.filesystemContextMenuStrip.Text = "Filesystem";
             this.filesystemContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.filesystemContextMenuStrip_Opening);
             // 
