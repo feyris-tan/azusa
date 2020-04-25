@@ -40,6 +40,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.metafilesAutomatischErgänzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageOrdnerImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vervollständigkeitsassistentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.allesVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.regalVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.produktVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.productsListView = new System.Windows.Forms.ListView();
@@ -266,10 +269,34 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             // vervollständigkeitsassistentToolStripMenuItem
             // 
+            this.vervollständigkeitsassistentToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.allesVervollständigenToolStripMenuItem,
+            this.regalVervollständigenToolStripMenuItem,
+            this.produktVervollständigenToolStripMenuItem});
             this.vervollständigkeitsassistentToolStripMenuItem.Name = "vervollständigkeitsassistentToolStripMenuItem";
             this.vervollständigkeitsassistentToolStripMenuItem.Size = new System.Drawing.Size(164, 20);
             this.vervollständigkeitsassistentToolStripMenuItem.Text = "Vervollständigungsassistent";
-            this.vervollständigkeitsassistentToolStripMenuItem.Click += new System.EventHandler(this.vervollständigkeitsassistentToolStripMenuItem_Click);
+            // 
+            // allesVervollständigenToolStripMenuItem
+            // 
+            this.allesVervollständigenToolStripMenuItem.Name = "allesVervollständigenToolStripMenuItem";
+            this.allesVervollständigenToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.allesVervollständigenToolStripMenuItem.Text = "alles vervollständigen";
+            this.allesVervollständigenToolStripMenuItem.Click += new System.EventHandler(this.allesVervollständigen_Click);
+            // 
+            // regalVervollständigenToolStripMenuItem
+            // 
+            this.regalVervollständigenToolStripMenuItem.Name = "regalVervollständigenToolStripMenuItem";
+            this.regalVervollständigenToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.regalVervollständigenToolStripMenuItem.Text = "Regal vervollständigen";
+            this.regalVervollständigenToolStripMenuItem.Click += new System.EventHandler(this.regalVervollständigen_Click);
+            // 
+            // produktVervollständigenToolStripMenuItem
+            // 
+            this.produktVervollständigenToolStripMenuItem.Name = "produktVervollständigenToolStripMenuItem";
+            this.produktVervollständigenToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.produktVervollständigenToolStripMenuItem.Text = "Produkt vervollständigen";
+            this.produktVervollständigenToolStripMenuItem.Click += new System.EventHandler(this.produktVervollständigen_Click);
             // 
             // splitContainer1
             // 
@@ -1771,5 +1798,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem imageOrdnerImportierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem vervollständigkeitsassistentToolStripMenuItem;
         private System.Windows.Forms.Button productRemoveMediaButton;
+        private System.Windows.Forms.ToolStripMenuItem allesVervollständigenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem regalVervollständigenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem produktVervollständigenToolStripMenuItem;
     }
 }

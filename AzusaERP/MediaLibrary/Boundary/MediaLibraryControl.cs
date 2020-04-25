@@ -885,8 +885,33 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         #region Vervollständigungsassistent
         private Thread complationAssistantThread;
-        private void vervollständigkeitsassistentToolStripMenuItem_Click(object sender, EventArgs e)
+        private CompletionAssistantMode completionWizardMode;
+        private enum CompletionAssistantMode
         {
+            EVERYTHING,
+            SHELF,
+            PRODUCT
+        }
+
+        private void allesVervollständigen_Click(object sender, EventArgs e)
+        {
+            completionWizardMode = CompletionAssistantMode.EVERYTHING;
+            complationAssistantThread = new Thread(WrapCompletionAssistant);
+            complationAssistantThread.Name = "Vervollständigungsassistent";
+            complationAssistantThread.Start();
+        }
+
+        private void regalVervollständigen_Click(object sender, EventArgs e)
+        {
+            completionWizardMode = CompletionAssistantMode.SHELF;
+            complationAssistantThread = new Thread(WrapCompletionAssistant);
+            complationAssistantThread.Name = "Vervollständigungsassistent";
+            complationAssistantThread.Start();
+        }
+
+        private void produktVervollständigen_Click(object sender, EventArgs e)
+        {
+            completionWizardMode = CompletionAssistantMode.PRODUCT;
             complationAssistantThread = new Thread(WrapCompletionAssistant);
             complationAssistantThread.Name = "Vervollständigungsassistent";
             complationAssistantThread.Start();
@@ -913,32 +938,66 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private void CompletionAssistant()
         {
+
+            switch (completionWizardMode)
+            {
+                case CompletionAssistantMode.EVERYTHING:
+                    CompletetionAssistantEverything();
+                    break;
+                case CompletionAssistantMode.SHELF:
+                    CompletionAssistantShelf();
+                    break;
+                case CompletionAssistantMode.PRODUCT:
+                    CompletionAssistantProduct();
+                    break;
+                default:
+                    throw new NotImplementedException(completionWizardMode.ToString());
+            }
+        }
+
+        private void CompletetionAssistantEverything()
+        {
             foreach (TabPage shelfTabPage in tabControl1.TabPages)
             {
-                Invoke((MethodInvoker) delegate { tabControl1.SelectedTab = shelfTabPage;});
-                
-                for (int i = 0; i < productsListView.Items.Count; i++)
-                {
-                    Invoke((MethodInvoker) delegate
-                    {
-                        productsListView.SelectedIndices.Clear();
-                        productsListView.SelectedIndices.Add(i);
-                        productsListView.EnsureVisible(i);
-                        tabControl2.SelectedIndex = 2;
-                    });
-                    for (int j = 0; j < productMediaListView.Items.Count; j++)
-                    {
-                        Invoke((MethodInvoker)delegate
-                        {
-                            productMediaListView.SelectedIndices.Clear();
-                            productMediaListView.SelectedIndices.Add(j);
-                            productMediaListView.EnsureVisible(j);
-                        });
-                        if (TryAutocomplete() == AutoCompleteResult.ABORT)
-                            return;
-                    }
-                }
+                Invoke((MethodInvoker)delegate { tabControl1.SelectedTab = shelfTabPage; });
+                if (CompletionAssistantShelf() == AutoCompleteResult.ABORT)
+                    return;
             }
+
+        }
+
+        private AutoCompleteResult CompletionAssistantShelf()
+        {
+            for (int i = 0; i < productsListView.Items.Count; i++)
+            {
+                Invoke((MethodInvoker)delegate
+                {
+                    productsListView.SelectedIndices.Clear();
+                    productsListView.SelectedIndices.Add(i);
+                    productsListView.EnsureVisible(i);
+                    tabControl2.SelectedIndex = 2;
+                });
+                if (CompletionAssistantProduct() == AutoCompleteResult.ABORT)
+                    return AutoCompleteResult.ABORT;
+            }
+
+            return AutoCompleteResult.CONTINUE;
+        }
+
+        private AutoCompleteResult CompletionAssistantProduct()
+        {
+            for (int j = 0; j < productMediaListView.Items.Count; j++)
+            {
+                Invoke((MethodInvoker)delegate
+                {
+                    productMediaListView.SelectedIndices.Clear();
+                    productMediaListView.SelectedIndices.Add(j);
+                    productMediaListView.EnsureVisible(j);
+                });
+                if (TryAutocomplete() == AutoCompleteResult.ABORT)
+                    return AutoCompleteResult.ABORT;
+            }
+            return AutoCompleteResult.CONTINUE;
         }
 
         enum AutoCompleteResult
