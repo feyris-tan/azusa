@@ -1073,7 +1073,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 MediaType currentMediaType = mediaTypes.Find(x => x.Id == currentMedia.MediaTypeId);
                 if (currentMediaType.GraphData)
                 {
-                    MessageBox.Show(String.Format("Graphdaten für {0} fehlen."));
+                    MessageBox.Show(String.Format("Graphdaten für {0} fehlen.",label));
                     return AutoCompleteResult.ABORT;
                 }
             }
@@ -1125,7 +1125,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             bool ism3u8 = extension.Equals(".m3u8");
             bool isMp3 = extension.Equals(".mp3");
             if (ism3u8)
-                return true;
+            {
+                if (currentMedia.MetaFileContent.ToLowerInvariant().Contains(".mkv"))
+                    return false;
+                else
+                    return true;
+            }
             else if (isMp3)
                 return true;
             else if (!string.IsNullOrEmpty(currentMedia.MetaFileContent))
@@ -1176,6 +1181,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             else if (isTvShow && currentMediaType.ShortName.Equals("DVD"))
             {
                 proposedPlattform = platforms.Find(x => x.ShortName.Equals("DVD"));
+            }
+            else if (isTvShow && currentMediaType.ShortName.Equals("Blu-Ray"))
+            {
+                proposedPlattform = platforms.Find(x => x.ShortName.Equals("Blu-Ray"));
             }
             else if (isIso && currentMediaType.ShortName.Equals("CD"))
             {
@@ -1241,6 +1250,15 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             context.DatabaseDriver.RemoveMedia(currentMedia);
             RefreshAndEnsureSelectedProduct(sender, e, currentProduct.Id);
             RefreshAndEnsureSelectedMedium(sender, e, mip.MediaId);
+        }
+
+        private void m3UEditorÖffnenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m3uGeneratorFileDrop generator = new m3uGeneratorFileDrop();
+            if (generator.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            setMetadataAndDump_Click(generator.FileName);
         }
     }
 }

@@ -156,6 +156,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metadatenExportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.m3UEditorÖffnenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metadataAndDumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -1544,9 +1545,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.öffneDumpToolStripMenuItem,
             this.playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem,
             this.metadatenExportierenToolStripMenuItem,
-            this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem});
+            this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem,
+            this.m3UEditorÖffnenToolStripMenuItem});
             this.mediaMoreOptions.Name = "mediaMoreOptions";
-            this.mediaMoreOptions.Size = new System.Drawing.Size(390, 114);
+            this.mediaMoreOptions.Size = new System.Drawing.Size(390, 136);
             // 
             // setMetadataAndDump
             // 
@@ -1582,6 +1584,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem.Size = new System.Drawing.Size(389, 22);
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem.Text = "Metadaten exportieren und als neuen Dump setzen";
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem.Click += new System.EventHandler(this.metadatenExportierenToolStripMenuItem_Click);
+            // 
+            // m3UEditorÖffnenToolStripMenuItem
+            // 
+            this.m3UEditorÖffnenToolStripMenuItem.Name = "m3UEditorÖffnenToolStripMenuItem";
+            this.m3UEditorÖffnenToolStripMenuItem.Size = new System.Drawing.Size(389, 22);
+            this.m3UEditorÖffnenToolStripMenuItem.Text = "M3U-Editor öffnen";
+            this.m3UEditorÖffnenToolStripMenuItem.Click += new System.EventHandler(this.m3UEditorÖffnenToolStripMenuItem_Click);
             // 
             // metadataAndDumpOpenFileDialog
             // 
@@ -1801,5 +1810,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem allesVervollständigenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem regalVervollständigenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem produktVervollständigenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem m3UEditorÖffnenToolStripMenuItem;
     }
 }
