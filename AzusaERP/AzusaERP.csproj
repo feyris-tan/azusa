@@ -360,6 +360,12 @@
       <DependentUpon>CurrencyConverterTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaLibrary\Control\JpegCompressor.cs" />
+    <Compile Include="MediaLibrary\Control\m3uGeneratorFileDrop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\m3uGeneratorFileDrop.Designer.cs">
+      <DependentUpon>m3uGeneratorFileDrop.cs</DependentUpon>
+    </Compile>
     <Compile Include="MediaLibrary\Control\PictureDrop.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -584,6 +590,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Control\CurrencyConverterTextBox.resx">
       <DependentUpon>CurrencyConverterTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MediaLibrary\Control\m3uGeneratorFileDrop.resx">
+      <DependentUpon>m3uGeneratorFileDrop.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Control\PictureDrop.resx">
       <DependentUpon>PictureDrop.cs</DependentUpon>

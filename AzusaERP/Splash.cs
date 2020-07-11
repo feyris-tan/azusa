@@ -12,27 +12,44 @@ namespace moe.yo3explorer.azusa
         public Splash()
         {
             InitializeComponent();
-            
-            if (File.Exists("splash.jpg"))
+            bool hasImage = false;
+            Random random = AzusaContext.GetInstance().RandomNumberGenerator;
+
+            if (Directory.Exists("splashes"))
             {
-                ms = new MemoryStream(File.ReadAllBytes("splash.jpg"));
-                Image theImage = Image.FromStream(ms);
-                Screen screen = Screen.PrimaryScreen;
-                int imageHeight = theImage.Height + 50;
-                int imageWidth = theImage.Width;
-
-                int targetHeight = screen.WorkingArea.Width;
-                int targetWidth = screen.WorkingArea.Height;
-                while ((targetWidth < imageWidth) || (targetHeight < imageHeight))
-                {
-                    imageWidth = (int) ((double)imageWidth * 0.9);
-                    imageHeight = (int) ((double)imageHeight * 0.9);
-                }
-
-                this.Width = imageWidth;
-                this.Height = imageHeight;
-                pictureBox1.BackgroundImage = theImage;
+                DirectoryInfo di = new DirectoryInfo("splashes");
+                FileInfo[] fileInfos = di.GetFiles("*.jpg");
+                int id = random.Next(fileInfos.GetLowerBound(0), fileInfos.GetUpperBound(0));
+                SetSplashImage(fileInfos[id].FullName);
+                hasImage = true;
             }
+
+            if (File.Exists("splash.jpg") && !hasImage)
+            {
+                string fname = "splash.jpg";
+                SetSplashImage(fname);
+            }
+        }
+
+        private void SetSplashImage(string fname)
+        {
+            ms = new MemoryStream(File.ReadAllBytes(fname));
+            Image theImage = Image.FromStream(ms);
+            Screen screen = Screen.PrimaryScreen;
+            int imageHeight = theImage.Height + 50;
+            int imageWidth = theImage.Width;
+
+            int targetHeight = screen.WorkingArea.Width;
+            int targetWidth = screen.WorkingArea.Height;
+            while ((targetWidth < imageWidth) || (targetHeight < imageHeight))
+            {
+                imageWidth = (int) ((double) imageWidth * 0.9);
+                imageHeight = (int) ((double) imageHeight * 0.9);
+            }
+
+            this.Width = imageWidth;
+            this.Height = imageHeight;
+            pictureBox1.BackgroundImage = theImage;
         }
 
         private MemoryStream ms;
