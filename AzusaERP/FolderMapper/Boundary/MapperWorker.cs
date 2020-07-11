@@ -290,6 +290,11 @@ namespace moe.yo3explorer.azusa.FolderMapper.Boundary
                         databaseDriver.UpdateMedia(mediaById);
                         AttemptDelete(fileInfo);
                         break;
+                    case ".cdt":
+                        mediaById.CdTextContent = File.ReadAllBytes(fileInfo.FullName);
+                        databaseDriver.UpdateMedia(mediaById);
+                        AttemptDelete(fileInfo);
+                        break;
                     case ".m3u8":
                         if (string.IsNullOrEmpty(mediaById.DumpStorageSpacePath))
                         {

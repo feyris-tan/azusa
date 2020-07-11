@@ -35,7 +35,19 @@ namespace moe.yo3explorer.azusa.DexcomHistory.Boundary
             AzusaContext context = AzusaContext.GetInstance();
             context.Splash.SetLabel("Frage CGM Tage ab...");
             UpdateDates();
-            listBox1.SelectedIndex = listBox1.Items.Count - 1;
+            if (listBox1.Items.Count > 0)
+            {
+                int lastDay = listBox1.Items.Count;
+                while (true)
+                {
+                    lastDay--;
+                    ListBoxDateWrapper lbdw = (ListBoxDateWrapper)listBox1.Items[lastDay];
+                    if (lbdw.Value > DateTime.Now)
+                        continue;
+                    else
+                        break;
+                }
+            }
         }
 
         private AzusaDexTimeline LoadTimelineFromDevice(SerialPort sp)

@@ -1,4 +1,6 @@
 ﻿using System;
+using moe.yo3explorer.azusa.Control.JsonIO;
+using Newtonsoft.Json;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Entity
 {
@@ -10,6 +12,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public bool Complete { get; set; }
         public byte[] Picture { get; set; }
         public double Price { get; set; }
+        [JsonConverter(typeof(UnixtimeToDatetimeJsonConverter))]
         public DateTime BoughtOn { get; set; }
         public string Sku { get; set; }
         public int PlatformId { get; set; }

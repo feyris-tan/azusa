@@ -33,11 +33,15 @@ namespace moe.yo3explorer.azusa.Gelbooru.Boundary
         {
             context = AzusaContext.GetInstance();
             if (!context.Ini.ContainsKey(IniKey))
-                throw new Exception("ini category missing");
+                return;
 
             IniSection iniSection = context.Ini[IniKey];
             if (!iniSection.ContainsKey("path"))
                 throw new Exception("path missing");
+
+            if (iniSection.ContainsKey("disable"))
+                if (Convert.ToInt32(iniSection["disable"]) > 0)
+                    return;
 
             DirectoryInfo di = new DirectoryInfo(iniSection["path"]);
             if (!di.Exists)

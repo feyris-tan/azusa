@@ -16,7 +16,7 @@ namespace moe.yo3explorer.azusa.WarWalking.Entity
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("dateAdded")]
-        [JsonConverter(typeof(WeirdQuarkusDatetimeConverter))]
+        [JsonConverter(typeof(UnixtimeToDatetimeJsonConverter))]
         public DateTime DateAdded { get; set; }
     }
 }

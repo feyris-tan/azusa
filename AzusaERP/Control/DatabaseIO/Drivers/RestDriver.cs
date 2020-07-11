@@ -23,6 +23,7 @@ using moe.yo3explorer.azusa.VnDb.Entity;
 using moe.yo3explorer.azusa.VocaDB.Entity;
 using moe.yo3explorer.azusa.WarWalking.Entity;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
@@ -95,7 +96,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public int? SedgeTree_GetLatestVersion()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/sedgetree/latestVersion");
+            if (string.IsNullOrEmpty(rawJson))
+                return null;
+
+            return Int32.Parse(rawJson);
         }
 
         public byte[] SedgeTree_GetDataByVersion(int version)
@@ -251,7 +256,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public void Statistics_Insert(DateTime today, int totalProducts, int totalMedia, int missingCover, int missingGraph,
+        public void Statistics_Insert(DateTime today, int totalProducts, int totalMedia, int missingCover,
+            int missingGraph,
             int undumped, int missingScreenshots)
         {
             throw new NotImplementedException();
@@ -259,17 +265,39 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Shop> GetAllShops()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/azusa/shops");
+            List<Shop> list = JsonConvert.DeserializeObject<List<Shop>>(rawJson);
+            return list;
         }
 
         public IEnumerable<Shelf> GetAllShelves()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/azusa/shelves");
+            List<Shelf> list = JsonConvert.DeserializeObject<List<Shelf>>(rawJson);
+            return list;
         }
 
         public IEnumerable<ProductInShelf> GetProductsInShelf(Shelf shelf)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString(String.Format("/azusa/products/inshelf/{0}",shelf.Id));
+            JArray deserializeObject = (JArray)JsonConvert.DeserializeObject(rawJson);
+            foreach (JToken jToken in deserializeObject)
+            {
+                ProductInShelf productInShelf = new ProductInShelf();
+                productInShelf.CoverSize = jToken.Value<long>("CoverSize");
+                productInShelf.BoughtOn = UnixTimeConverter.FromUnixTime(jToken.Value<long>("BoughtOn"));
+                productInShelf.ContainsUndumped = jToken.Value<bool>("ContainsUndumped");
+                productInShelf.IconId = jToken.Value<int>("IconId");
+                productInShelf.Id = jToken.Value<int>("Id");
+                productInShelf.MissingGraphData = jToken.Value<int>("MissingGraphData");
+                productInShelf.NSFW = jToken.Value<bool>("NSFW");
+                productInShelf.Name = jToken.Value<string>("Name");
+                productInShelf.NumberOfDiscs = jToken.Value<int>("NumberOfDiscs");
+                productInShelf.Price = jToken.Value<double>("Price");
+                productInShelf.relatedShelf = shelf;
+                yield return productInShelf;
+            }
+            yield break;
         }
 
         public int CreateProductAndReturnId(Shelf shelf, string name)
@@ -279,7 +307,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Product GetProductById(int id)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString(String.Format("/azusa/products/{0}", id));
+            Product product = JsonConvert.DeserializeObject<Product>(rawJson);
+            return product;
         }
 
         public void UpdateProduct(Product product)
@@ -299,12 +329,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Platform> GetAllPlatforms()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/azusa/platforms");
+            List<Platform> list = JsonConvert.DeserializeObject<List<Platform>>(rawJson);
+            return list;
         }
 
         public IEnumerable<MediaType> GetMediaTypes()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/azusa/mediaTypes");
+            List<MediaType> list = JsonConvert.DeserializeObject<List<MediaType>>(rawJson);
+            return list;
         }
 
         public IEnumerable<MediaInProduct> GetMediaByProduct(Product prod)
@@ -329,12 +363,19 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Country> GetAllCountries()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/azusa/countries");
+            List<Country> list = JsonConvert.DeserializeObject<List<Country>>(rawJson);
+            return list;
         }
 
         public IEnumerable<DateTime> Dexcom_GetDates()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/cgm/dates");
+            List<long> list = JsonConvert.DeserializeObject<List<long>>(rawJson);
+            list.Sort();
+            foreach (long l in list)
+                yield return UnixTimeConverter.FromUnixTime(l / 1000);
+            yield break;
         }
 
         public bool Dexcom_InsertTimestamp(DexTimelineEntry entry)
@@ -349,7 +390,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString(String.Format("/cgm/timeline/{0}", day.ToUnixTime()));
+            List<DexTimelineEntry> list = JsonConvert.DeserializeObject<List<DexTimelineEntry>>(rawJson);
+            return list;
         }
 
         public int MailArchive_GetLatestMessageId()
@@ -481,7 +524,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Note> Notebook_GetAllNotes()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/notebook/notes");
+            List<Note> list = JsonConvert.DeserializeObject<List<Note>>(rawJson);
+            return list;
         }
 
         public Note Notebook_CreateNote(string name, bool isCategory, int? parent)
