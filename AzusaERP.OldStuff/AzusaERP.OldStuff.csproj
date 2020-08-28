@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{95CF3FF5-149B-473E-928C-DD5FC99BB84C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AzusaERP.OldStuff</RootNamespace>
+    <AssemblyName>AzusaERP.OldStuff</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DexcomHistory\Boundary\DexcomHistoryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DexcomHistory\Boundary\DexcomHistoryControl.Designer.cs">
+      <DependentUpon>DexcomHistoryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DexcomHistory\Boundary\DexcomHistoryService.cs" />
+    <Compile Include="DexcomHistory\Boundary\ManualDataEntires.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DexcomHistory\Boundary\ManualDataEntires.Designer.cs">
+      <DependentUpon>ManualDataEntires.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DexcomHistory\Control\AzusaErpLogCallback.cs" />
+    <Compile Include="DexcomHistory\Control\ListBoxDateWrapper.cs" />
+    <Compile Include="DexcomHistory\Control\ManualDataRepository.cs" />
+    <Compile Include="DexcomHistory\Control\SelectComPortForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DexcomHistory\Control\SelectComPortForm.Designer.cs">
+      <DependentUpon>SelectComPortForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DexcomHistory\Entity\ManualDataEntity.cs" />
+    <Compile Include="MailArchive\Boundary\FolderService.cs" />
+    <Compile Include="MailArchive\Boundary\MessageService.cs" />
+    <Compile Include="MailArchive\Control\MailFetchTask.cs" />
+    <Compile Include="MailArchive\Control\MailProtocolLogger.cs" />
+    <Compile Include="MailArchive\Entity\Folder.cs" />
+    <Compile Include="MailArchive\Entity\Mail.cs" />
+    <Compile Include="MockHashLib.cs" />
+    <Compile Include="MockKeepass.cs" />
+    <Compile Include="MockMailKit.cs" />
+    <Compile Include="MockNewtonsoftJson.cs" />
+    <Compile Include="MockNmeaParser.cs" />
+    <Compile Include="MockNPlot.cs" />
+    <Compile Include="Notebook\Boundary\NotebookControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Notebook\Boundary\NotebookControl.Designer.cs">
+      <DependentUpon>NotebookControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notebook\Control\NodeTreeViewItem.cs" />
+    <Compile Include="Notebook\Entity\Note.cs" />
+    <Compile Include="PasswordManagement\Boundary\PasswordManagement.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MockAzusa.cs" />
+    <Compile Include="SedgeTree\Boundary\Calendar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\Calendar.designer.cs">
+      <DependentUpon>Calendar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\Checker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\Checker.designer.cs">
+      <DependentUpon>Checker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\DummyControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\DummyControl.designer.cs">
+      <DependentUpon>DummyControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\Editor.designer.cs">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\PersonSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\PersonSelector.designer.cs">
+      <DependentUpon>PersonSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\SedgeTreeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\SedgeTreeControl.Designer.cs">
+      <DependentUpon>SedgeTreeControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\TreeDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SedgeTree\Boundary\TreeDisplay.designer.cs">
+      <DependentUpon>TreeDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SedgeTree\Control\SedgeTreeMemoryCardEmulation.cs" />
+    <Compile Include="SedgeTree\Entitiy\Bloodline.cs" />
+    <Compile Include="SedgeTree\Entitiy\Family.cs" />
+    <Compile Include="SedgeTree\Entitiy\Gender.cs" />
+    <Compile Include="SedgeTree\Entitiy\Person.cs" />
+    <Compile Include="WarWalking\Boundary\DiscoveryService.cs" />
+    <Compile Include="WarWalking\Boundary\TourService.cs" />
+    <Compile Include="WarWalking\Boundary\WarWalkingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WarWalking\Boundary\WarWalkingControl.Designer.cs">
+      <DependentUpon>WarWalkingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WarWalking\Boundary\WarWalkingControl.History.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WarWalking\Control\DiscoveryListViewItem.cs" />
+    <Compile Include="WarWalking\Control\Interop.cs" />
+    <Compile Include="WarWalking\Control\TourNode.cs" />
+    <Compile Include="WarWalking\Control\TourProcessor.cs" />
+    <Compile Include="WarWalking\Control\WlanApi.cs" />
+    <Compile Include="WarWalking\Entity\ByteBuffer.cs" />
+    <Compile Include="WarWalking\Entity\Discovery.cs" />
+    <Compile Include="WarWalking\Entity\Tour.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DexcomHistory\Boundary\DexcomHistoryControl.resx">
+      <DependentUpon>DexcomHistoryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DexcomHistory\Boundary\ManualDataEntires.resx">
+      <DependentUpon>ManualDataEntires.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DexcomHistory\Control\SelectComPortForm.resx">
+      <DependentUpon>SelectComPortForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notebook\Boundary\NotebookControl.resx">
+      <DependentUpon>NotebookControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\Calendar.resx">
+      <DependentUpon>Calendar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\Checker.resx">
+      <DependentUpon>Checker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\DummyControl.resx">
+      <DependentUpon>DummyControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\Editor.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\PersonSelector.resx">
+      <DependentUpon>PersonSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\SedgeTreeControl.resx">
+      <DependentUpon>SedgeTreeControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SedgeTree\Boundary\TreeDisplay.resx">
+      <DependentUpon>TreeDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WarWalking\Boundary\WarWalkingControl.resx">
+      <DependentUpon>WarWalkingControl.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libazudex\libazusadex.csproj">
+      <Project>{e67df67b-de84-4f95-9a0b-5c6a69dc3a86}</Project>
+      <Name>libazusadex</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libini\libini.csproj">
+      <Project>{a6e030af-0153-43f5-bd58-43594cefe7f4}</Project>
+      <Name>libini</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

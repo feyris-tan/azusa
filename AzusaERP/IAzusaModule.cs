@@ -6,6 +6,5 @@
         string Title { get; }
         System.Windows.Forms.Control GetSelf();
         void OnLoad();
-        int Priority { get; }
     }
 }

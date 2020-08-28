@@ -4,20 +4,15 @@ using System.Data.Common;
 using System.Drawing;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Licensing;
-using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
-using moe.yo3explorer.azusa.DexcomHistory.Entity;
-using moe.yo3explorer.azusa.Dumping.Entity;
-using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.Notebook.Entity;
-using moe.yo3explorer.azusa.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.SedgeTree.Entitiy;
-using moe.yo3explorer.azusa.VgmDb.Entity;
-using moe.yo3explorer.azusa.VnDb.Entity;
-using moe.yo3explorer.azusa.VocaDB.Entity;
-using moe.yo3explorer.azusa.WarWalking.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
+using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO
 {
@@ -30,13 +25,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
 
         bool WarWalking_IsTourKnown(long hash);
         int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name);
-        IEnumerable<Tour> WarWalking_GetAllTours();
         bool WarWalking_IsAccessPointKnown(string bssid);
-        Discovery WarWalking_GetByBssid(string bssid);
-        void WarWalking_UpdateDiscovery(Discovery discovery);
-        void WarWalking_AddAccessPoint(Discovery discovery);
-        IEnumerable<Discovery> WarWalking_GetDiscoveriesByTour(Tour tour);
-        byte[] SedgeTree_GetPhotoByPerson(Person person);
         void SedgeTree_UpdatePhoto(byte[] data, string personId);
         void SedgeTree_ErasePhoto(string personId);
         void SedgeTree_InsertPhoto(byte[] data, string personId);
@@ -72,14 +61,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         bool Dexcom_TestForTimestamp(DateTime theDate, DateTime theTime);
         IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day);
         int MailArchive_GetLatestMessageId();
-        void MailArchive_StoreMessage(Mail mail);
         bool MailArchive_TestForMessage(int uid);
-        Mail MailArchive_GetSpecificMessage(int uid);
         bool MailArchive_TestForFolder(long folderId);
-        void MailArchive_InsertFolder(Folder folder);
-        int MailArchive_CountItemsInFolder(Folder folder);
-        long MailArchive_GetHighestMessageUTimeInFolder(Folder folder);
-        IEnumerable<ManualDataEntity> Dexcom_GetAllManualGlucoseValues();
         bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt);
         void Dexcom_ManualGlucoseValueStore(DateTime timestamp, short value, string unit);
         void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note);
@@ -98,8 +81,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         DbDataReader Sync_GetUpdateSyncReader(string tableName, DateTime? latestUpdate);
         void Sync_CopyUpdatesFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage, Queue<object> leftovers);
 
-        IEnumerable<Note> Notebook_GetAllNotes();
-        Note Notebook_CreateNote(string name, bool isCategory, int? parent);
         string Notebook_GetRichText(int noteId);
         void Notebook_UpdateNote(int currentNoteId, string text);
 

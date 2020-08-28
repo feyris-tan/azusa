@@ -16,13 +16,14 @@ namespace moe.yo3explorer.azusa
 
         private AzusaContext context;
 
+        
         internal void ModuleScan()
         {
             AzusaContext context = AzusaContext.GetInstance();
             Assembly azusaExe = Assembly.GetCallingAssembly();
             Type[] classes = azusaExe.GetTypes();
             Type moduleType = typeof(IAzusaModule);
-            List<IAzusaModule> loadedModules = new List<IAzusaModule>();
+            List<Type> foundModules = new List<Type>();
             foreach (Type type in classes)
             {
                 Type[] interfaces = type.GetInterfaces();
@@ -30,57 +31,48 @@ namespace moe.yo3explorer.azusa
                 {
                     if (iface.Equals(moduleType))
                     {
-                        IAzusaModule control = (IAzusaModule)Activator.CreateInstance(type);
-
-                        if (context.Ini.ContainsKey("hidepage"))
-                        {
-                            var hidepage = context.Ini["hidepage"];
-                            if (hidepage.ContainsKey(control.IniKey))
-                            {
-                                int result = Convert.ToInt32(hidepage[control.IniKey]);
-                                if (result != 0)
-                                    continue;
-                            }
-                        }
-
-                        if (context.CatchModuleExceptions)
-                        {
-                            try
-                            {
-                                control.OnLoad();
-                                loadedModules.Add(control);
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e);
-                                context.Splash.SetLabel(String.Format("Konnte Modul nicht laden: {0} ({1})",
-                                    control.IniKey,
-                                    e.Message));
-                                Thread.Sleep(1000);
-                            }
-                        }
-                        else
-                        {
-                            control.OnLoad();
-                            loadedModules.Add(control);
-                        }
+                        foundModules.Add(type);
                     }
                 }
             }
-
-            loadedModules.Sort((x, y) => x.Priority.CompareTo(y.Priority));
-
-            foreach(IAzusaModule loadedModule in loadedModules)
+            
+            foreach(Type loadedModule in foundModules)
             {
-                TabPage tabPage = new TabPage();
-                System.Windows.Forms.Control control = loadedModule.GetSelf();
-                control.Dock = DockStyle.Fill;
-                tabPage.Controls.Add(control);
-                tabPage.Text = loadedModule.Title;
-                tabControl1.TabPages.Add(tabPage);
+                ToolStripButton tsb = new ToolStripButton(loadedModule.Name);
+                tsb.Click += delegate(object sender, EventArgs args)
+                {
+                    IAzusaModule instance = (IAzusaModule)Activator.CreateInstance(loadedModule);
+                    instance.OnLoad();
+
+                    Form subform = new Form();
+                    System.Windows.Forms.Control control = instance.GetSelf();
+                    control.Dock = DockStyle.Fill;
+                    subform.Controls.Add(control);
+                    subform.Text = instance.Title;
+                    subform.Show(this);
+                };
+
+                stammdatenToolStripMenuItem.DropDownItems.Add(tsb);
+                stammdatenToolStripMenuItem.Visible = true;
             }
         }
+        
 
+        private bool mediaLibraryBooted;
+        internal void BootMediaLibrary()
+        {
+            if (!mediaLibraryBooted)
+            {
+                foreach (ToolStripItem toolStripItem in mediaLibraryControl1.DestroyMenuStrip())
+                {
+                    menuStrip1.Items.Add(toolStripItem);
+                }
+
+                mediaLibraryControl1.OnLoad();
+                mediaLibraryBooted = true;
+            }
+        }
+        
         public void SetStatusBar(string s)
         {
             Invoke((MethodInvoker)delegate { toolStripStatusLabel1.Text = s; });
@@ -110,14 +102,7 @@ namespace moe.yo3explorer.azusa
                 }
             }
         }
-
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            TabPage tabPage = tabControl1.SelectedTab;
-            System.Windows.Forms.Control control = tabPage.Controls[0];
-            context.CurrentOnScreenModule = (IAzusaModule)control;
-        }
-
+        
         private void beendenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();

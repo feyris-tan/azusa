@@ -235,6 +235,7 @@ namespace moe.yo3explorer.azusa
             context.Splash.SetLabel("Erstelle Hauptfenster...");
             context.MainForm = new MainForm();
             context.Splash.SetLabel("Lade Module...");
+            context.MainForm.BootMediaLibrary();
             context.MainForm.ModuleScan();
             context.MainForm.Icon = icon;
 
@@ -328,7 +329,6 @@ namespace moe.yo3explorer.azusa
                 return x.Name.CompareTo(y.Name);
             }
         }
-
 
         private void LoadPlugin(AzusaPlugin instance)
         {

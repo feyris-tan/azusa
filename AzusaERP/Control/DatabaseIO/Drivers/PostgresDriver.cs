@@ -12,22 +12,17 @@ using System.Threading;
 using AzusaERP;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Licensing;
-using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
-using moe.yo3explorer.azusa.DexcomHistory.Entity;
-using moe.yo3explorer.azusa.Dumping.Entity;
-using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.Notebook.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using moe.yo3explorer.azusa.Properties;
-using moe.yo3explorer.azusa.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.SedgeTree.Entitiy;
-using moe.yo3explorer.azusa.VgmDb.Entity;
-using moe.yo3explorer.azusa.VnDb.Entity;
-using moe.yo3explorer.azusa.VocaDB.Entity;
-using moe.yo3explorer.azusa.WarWalking.Entity;
+using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 using Npgsql;
 using Npgsql.Logging;
 using NpgsqlTypes;
@@ -98,55 +93,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Tour> WarWalking_GetAllTours()
-        {
-            NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM warwalking.tours";
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                Tour child = new Tour();
-                child.Name = dataReader.GetString(3);
-                child.DateAdded = dataReader.GetDateTime(4);
-                child.Hash = dataReader.GetInt64(1);
-                child.ID = dataReader.GetInt32(0);
-                child.RecordingStarted = UnixTimeConverter.FromUnixTime(dataReader.GetInt64(2));
-                yield return child;
-            }
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
         public bool WarWalking_IsAccessPointKnown(string bssid)
         {
             throw new NotImplementedException();
         }
-
-        public Discovery WarWalking_GetByBssid(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WarWalking_UpdateDiscovery(Discovery discovery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WarWalking_AddAccessPoint(Discovery discovery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Discovery> WarWalking_GetDiscoveriesByTour(Tour tour)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] SedgeTree_GetPhotoByPerson(Person person)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void SedgeTree_UpdatePhoto(byte[] data, string personId)
         {
             throw new NotImplementedException();
@@ -1096,72 +1047,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public void MailArchive_StoreMessage(Mail mail)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool MailArchive_TestForMessage(int uid)
         {
             throw new NotImplementedException();
         }
-
-        public Mail MailArchive_GetSpecificMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public bool MailArchive_TestForFolder(long folderId)
         {
             throw new NotImplementedException();
         }
-
-        public void MailArchive_InsertFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int MailArchive_CountItemsInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long MailArchive_GetHighestMessageUTimeInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        private NpgsqlCommand getAllManualCluseValesCommand;
-        public IEnumerable<ManualDataEntity> Dexcom_GetAllManualGlucoseValues()
-        {
-            if (getAllManualCluseValesCommand == null)
-            {
-                getAllManualCluseValesCommand = connection.CreateCommand();
-                getAllManualCluseValesCommand.CommandText = "SELECT * FROM dexcom.manualdata ORDER BY ts ASC";
-            }
-
-            NpgsqlDataReader dataReader = getAllManualCluseValesCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                ManualDataEntity mde = new ManualDataEntity();
-                mde.pid = dataReader.GetInt64(0);
-                mde.dateAdded = dataReader.GetDateTime(1);
-                mde.ts = dataReader.GetDateTime(2);
-                mde.messwert = dataReader.GetInt16(3);
-                mde.einheit = dataReader.GetString(4);
-                if (!dataReader.IsDBNull(5))
-                    mde.be = dataReader.GetByte(5);
-                if (!dataReader.IsDBNull(6))
-                    mde.novorapid = dataReader.GetByte(6);
-                if (!dataReader.IsDBNull(7))
-                    mde.levemir = dataReader.GetByte(7);
-                mde.hide = dataReader.GetBoolean(8);
-                mde.minuteCorrection = dataReader.GetInt32(9);
-                mde.notice = dataReader.GetString(10);
-                yield return mde;
-            }
-            dataReader.Dispose();
-        }
+        
 
         private NpgsqlCommand manualGlucoseValueTestForTimestampCommand;
         public bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt)
@@ -1491,54 +1386,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<Note> Notebook_GetAllNotes()
-        {
-            NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook.notes";
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                Note note = new Note();
-                note.id = dataReader.GetInt32(0);
-                note.isCategory = dataReader.GetBoolean(1);
-                if (!dataReader.IsDBNull(2))
-                    note.parent = dataReader.GetInt32(2);
-                note.name = dataReader.GetString(3);
-                yield return note;
-            }
-            dataReader.Dispose();
-        }
-
-        private NpgsqlCommand createNote;
-        public Note Notebook_CreateNote(string name, bool isCategory, int? parent)
-        {
-            if (createNote == null)
-            {
-                createNote = connection.CreateCommand();
-                createNote.CommandText = "INSERT INTO notebook_notes (iscategory,parent,name) VALUES (@iscategory,@parent,@name) RETURNING id";
-                createNote.Parameters.Add("@iscategory", NpgsqlDbType.Boolean);
-                createNote.Parameters.Add("@parent", NpgsqlDbType.Integer);
-                createNote.Parameters.Add("@name", NpgsqlDbType.Varchar);
-            }
-            
-            createNote.Parameters["@iscategory"].Value = isCategory;
-
-            if (parent.HasValue)
-                createNote.Parameters["@parent"].Value = parent.Value;
-            else
-                createNote.Parameters["@parent"].Value = DBNull.Value;
-
-            createNote.Parameters["@name"].Value = name;
-            
-            Note result = new Note();
-            result.id = (int)createNote.ExecuteScalar();
-            result.isCategory = isCategory;
-            result.name = name;
-            result.parent = parent;
-            return result;
-        }
-
+        
         private NpgsqlCommand notebookGetText;
         public string Notebook_GetRichText(int noteId)
         {

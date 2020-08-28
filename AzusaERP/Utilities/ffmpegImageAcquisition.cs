@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using NEbml.Core;
-using TagLib.Matroska;
 using File = System.IO.File;
 
 namespace moe.yo3explorer.azusa.Utilities
@@ -67,6 +61,7 @@ namespace moe.yo3explorer.azusa.Utilities
             ffmpegPath = context.ReadIniKey("ripkit", "ffmpegPath", null);
             if (string.IsNullOrEmpty(ffmpegPath))
             {
+                Console.WriteLine("ffmpegPath in category ripkit is not set!");
                 startable = false;
                 return false;
             }

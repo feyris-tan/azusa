@@ -29,12 +29,13 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.dateiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.beendenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.plugInsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.mediaLibraryControl1 = new moe.yo3explorer.azusa.MediaLibrary.Boundary.MediaLibraryControl();
+            this.stammdatenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -43,12 +44,35 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dateiToolStripMenuItem,
+            this.stammdatenToolStripMenuItem,
             this.plugInsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(731, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // dateiToolStripMenuItem
+            // 
+            this.dateiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.beendenToolStripMenuItem});
+            this.dateiToolStripMenuItem.Name = "dateiToolStripMenuItem";
+            this.dateiToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+            this.dateiToolStripMenuItem.Text = "Datei";
+            // 
+            // beendenToolStripMenuItem
+            // 
+            this.beendenToolStripMenuItem.Name = "beendenToolStripMenuItem";
+            this.beendenToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.beendenToolStripMenuItem.Text = "Beenden";
+            this.beendenToolStripMenuItem.Click += new System.EventHandler(this.beendenToolStripMenuItem_Click);
+            // 
+            // plugInsToolStripMenuItem
+            // 
+            this.plugInsToolStripMenuItem.Name = "plugInsToolStripMenuItem";
+            this.plugInsToolStripMenuItem.Size = new System.Drawing.Size(63, 20);
+            this.plugInsToolStripMenuItem.Text = "Plug-Ins";
+            this.plugInsToolStripMenuItem.Visible = false;
             // 
             // statusStrip1
             // 
@@ -66,37 +90,20 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(38, 17);
             this.toolStripStatusLabel1.Text = "Hello!";
             // 
-            // tabControl1
+            // mediaLibraryControl1
             // 
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 24);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(731, 357);
-            this.tabControl1.TabIndex = 2;
-            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            this.mediaLibraryControl1.AllowDrop = true;
+            this.mediaLibraryControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mediaLibraryControl1.Location = new System.Drawing.Point(0, 24);
+            this.mediaLibraryControl1.Name = "mediaLibraryControl1";
+            this.mediaLibraryControl1.Size = new System.Drawing.Size(731, 357);
+            this.mediaLibraryControl1.TabIndex = 2;
             // 
-            // dateiToolStripMenuItem
+            // stammdatenToolStripMenuItem
             // 
-            this.dateiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.beendenToolStripMenuItem});
-            this.dateiToolStripMenuItem.Name = "dateiToolStripMenuItem";
-            this.dateiToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
-            this.dateiToolStripMenuItem.Text = "Datei";
-            // 
-            // beendenToolStripMenuItem
-            // 
-            this.beendenToolStripMenuItem.Name = "beendenToolStripMenuItem";
-            this.beendenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.beendenToolStripMenuItem.Text = "Beenden";
-            this.beendenToolStripMenuItem.Click += new System.EventHandler(this.beendenToolStripMenuItem_Click);
-            // 
-            // plugInsToolStripMenuItem
-            // 
-            this.plugInsToolStripMenuItem.Name = "plugInsToolStripMenuItem";
-            this.plugInsToolStripMenuItem.Size = new System.Drawing.Size(63, 20);
-            this.plugInsToolStripMenuItem.Text = "Plug-Ins";
-            this.plugInsToolStripMenuItem.Visible = false;
+            this.stammdatenToolStripMenuItem.Name = "stammdatenToolStripMenuItem";
+            this.stammdatenToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
+            this.stammdatenToolStripMenuItem.Text = "Stammdaten";
             // 
             // MainForm
             // 
@@ -104,7 +111,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(731, 403);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.mediaLibraryControl1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Name = "MainForm";
@@ -123,10 +130,11 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripMenuItem dateiToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem beendenToolStripMenuItem;
         internal System.Windows.Forms.ToolStripMenuItem plugInsToolStripMenuItem;
+        private MediaLibrary.Boundary.MediaLibraryControl mediaLibraryControl1;
+        private System.Windows.Forms.ToolStripMenuItem stammdatenToolStripMenuItem;
     }
 }

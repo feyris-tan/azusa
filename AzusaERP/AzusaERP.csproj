@@ -135,29 +135,14 @@
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <HintPath>packages\Ionic.Zip.1.9.1.8\lib\Ionic.Zip.dll</HintPath>
     </Reference>
-    <Reference Include="KeePassLib, Version=2.30.0.15901, Culture=neutral, PublicKeyToken=a47af649847d8ce7, processorArchitecture=MSIL">
-      <HintPath>packages\KeePassLib.2.30\lib\KeePassLib.dll</HintPath>
-    </Reference>
     <Reference Include="lzo.net, Version=0.0.6.0, Culture=neutral, PublicKeyToken=7c3b11b873e0cbca, processorArchitecture=MSIL">
       <HintPath>packages\lzo.net.0.0.6\lib\net45\lzo.net.dll</HintPath>
-    </Reference>
-    <Reference Include="MailKit, Version=2.4.0.0, Culture=neutral, PublicKeyToken=4e064fe7c44a8f1b, processorArchitecture=MSIL">
-      <HintPath>packages\MailKit.2.4.1\lib\net46\MailKit.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="MimeKit, Version=2.4.0.0, Culture=neutral, PublicKeyToken=bede1c8a46c66814, processorArchitecture=MSIL">
-      <HintPath>packages\MimeKit.2.4.1\lib\net46\MimeKit.dll</HintPath>
-    </Reference>
-    <Reference Include="NEbml.Core, Version=0.1.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\NEbml.0.1.4\lib\NEbml.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="NmeaParser, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\SharpGIS.NmeaParser.1.10.0\lib\net451\NmeaParser.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=4.1.2.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>packages\Npgsql.4.1.2\lib\net461\Npgsql.dll</HintPath>
@@ -221,10 +206,10 @@
   <ItemGroup>
     <Compile Include="AzusaContext.cs" />
     <Compile Include="AzusaPlugin.cs" />
-    <Compile Include="BandcampImporter\ArbitraryStreamFileAbstraction.cs" />
-    <Compile Include="BandcampImporter\BandcampAlbumEntry.cs" />
-    <Compile Include="BandcampImporter\BandcampImportWorker.cs" />
-    <Compile Include="BandcampImporter\BrokenImportRepairWorker.cs" />
+    <Compile Include="Utilities\BandcampImporter\ArbitraryStreamFileAbstraction.cs" />
+    <Compile Include="Utilities\BandcampImporter\BandcampAlbumEntry.cs" />
+    <Compile Include="Utilities\BandcampImporter\BandcampImportWorker.cs" />
+    <Compile Include="Utilities\BandcampImporter\BrokenImportRepairWorker.cs" />
     <Compile Include="Control\DatabaseIO\DatabaseColumn.cs" />
     <Compile Include="Control\DatabaseIO\DatabaseConnectionException.cs" />
     <Compile Include="Control\DatabaseIO\DbDataReaderExtensions.cs" />
@@ -256,14 +241,6 @@
       <DependentUpon>SetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Control\Setup\StartupFailedException.cs" />
-    <Compile Include="DexcomHistory\Boundary\ManualDataEntires.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DexcomHistory\Boundary\ManualDataEntires.Designer.cs">
-      <DependentUpon>ManualDataEntires.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DexcomHistory\Control\ManualDataRepository.cs" />
-    <Compile Include="DexcomHistory\Entity\ManualDataEntity.cs" />
     <Compile Include="Control\FilesystemMetadata\Boundary\FilesystemMetadataGatherer.cs" />
     <Compile Include="Control\FilesystemMetadata\Boundary\FilesystemMetadataTreeViewItem.cs" />
     <Compile Include="Control\FilesystemMetadata\Entity\FilesystemMetadataEntity.cs" />
@@ -274,58 +251,37 @@
       <DependentUpon>Galleria.cs</DependentUpon>
     </Compile>
     <Compile Include="Control\Galleria\GalleriaModel.cs" />
-    <Compile Include="Dumping\Entity\DiscStatus.cs" />
-    <Compile Include="Dumping\Entity\DiscStatusProperty.cs" />
-    <Compile Include="FolderMapper\Boundary\IFolderMapperPreHook.cs" />
-    <Compile Include="FolderMapper\Boundary\MapperWorker.cs" />
-    <Compile Include="FolderMapper\Control\FileExtensionDictionary.cs" />
-    <Compile Include="FolderMapper\Control\RawCdRomStream.cs" />
-    <Compile Include="Gelbooru\Boundary\GelboooruControl.cs">
+    <Compile Include="Utilities\Dumping\Entity\DiscStatus.cs" />
+    <Compile Include="Utilities\Dumping\Entity\DiscStatusProperty.cs" />
+    <Compile Include="Utilities\FolderMapper\Boundary\IFolderMapperPreHook.cs" />
+    <Compile Include="Utilities\FolderMapper\Boundary\MapperWorker.cs" />
+    <Compile Include="Utilities\FolderMapper\Control\FileExtensionDictionary.cs" />
+    <Compile Include="Utilities\FolderMapper\Control\RawCdRomStream.cs" />
+    <Compile Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Gelbooru\Boundary\GelboooruControl.Designer.cs">
+    <Compile Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.Designer.cs">
       <DependentUpon>GelboooruControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gelbooru\Control\GelbooruGalleriaModel.cs" />
-    <Compile Include="Gelbooru\Entity\GelbooruTag.cs" />
+    <Compile Include="OfflineReaders\Gelbooru\Control\GelbooruGalleriaModel.cs" />
+    <Compile Include="OfflineReaders\Gelbooru\Entity\GelbooruTag.cs" />
     <Compile Include="HastSetExtensions.cs" />
     <Compile Include="IAzusaWebHandler.cs" />
     <Compile Include="Control\DatabaseIO\IDatabaseDriver.cs" />
-    <Compile Include="DexcomHistory\Boundary\DexcomHistoryControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="DexcomHistory\Boundary\DexcomHistoryControl.Designer.cs">
-      <DependentUpon>DexcomHistoryControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DexcomHistory\Boundary\DexcomHistoryService.cs" />
-    <Compile Include="DexcomHistory\Control\AzusaErpLogCallback.cs" />
-    <Compile Include="DexcomHistory\Control\ListBoxDateWrapper.cs" />
-    <Compile Include="DexcomHistory\Control\SelectComPortForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DexcomHistory\Control\SelectComPortForm.Designer.cs">
-      <DependentUpon>SelectComPortForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="IAzusaModule.cs" />
     <Compile Include="IImageAcquisitionPlugin.cs" />
     <Compile Include="IPostConnectionTask.cs" />
     <Compile Include="Control\Licensing\LicenseState.cs" />
-    <Compile Include="Control\MailArchive\Boundary\FolderService.cs" />
-    <Compile Include="Control\MailArchive\Boundary\MessageService.cs" />
-    <Compile Include="Control\MailArchive\Control\MailFetchTask.cs" />
-    <Compile Include="Control\MailArchive\Control\MailProtocolLogger.cs" />
-    <Compile Include="Control\MailArchive\Entity\Folder.cs" />
-    <Compile Include="Control\MailArchive\Entity\Mail.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BandcampImporter\BandcampImportForm.cs">
+    <Compile Include="Utilities\BandcampImporter\BandcampImportForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BandcampImporter\BandcampImportForm.Designer.cs">
+    <Compile Include="Utilities\BandcampImporter\BandcampImportForm.Designer.cs">
       <DependentUpon>BandcampImportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaLibrary\Boundary\CountryService.cs" />
@@ -399,24 +355,15 @@
     <Compile Include="MediaLibrary\Entity\ProductInShelf.cs" />
     <Compile Include="MediaLibrary\Entity\Shelf.cs" />
     <Compile Include="MediaLibrary\Entity\Shop.cs" />
-    <Compile Include="MyFigureCollection\Boundary\FigureListViewItem.cs" />
-    <Compile Include="MyFigureCollection\Boundary\MyFigureCollection.cs">
+    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\FigureListViewItem.cs" />
+    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MyFigureCollection\Boundary\MyFigureCollection.Designer.cs">
+    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.Designer.cs">
       <DependentUpon>MyFigureCollection.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyFigureCollection\Entity\Figure.cs" />
+    <Compile Include="OfflineReaders\MyFigureCollection\Entity\Figure.cs" />
     <Compile Include="Control\Licensing\NetworkAdapterLicenseMapper.cs" />
-    <Compile Include="Notebook\Boundary\NotebookControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Notebook\Boundary\NotebookControl.Designer.cs">
-      <DependentUpon>NotebookControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Notebook\Control\NodeTreeViewItem.cs" />
-    <Compile Include="Notebook\Entity\Note.cs" />
-    <Compile Include="Control\PasswordManagement\Boundary\PasswordManagement.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources1.Designer.cs">
@@ -424,14 +371,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PsxDatacenter\Boundary\PsxDatacenterControl.cs">
+    <Compile Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PsxDatacenter\Boundary\PsxDatacenterControl.Designer.cs">
+    <Compile Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.Designer.cs">
       <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="PsxDatacenter\Entity\PsxDatacenterGame.cs" />
-    <Compile Include="PsxDatacenter\Entity\PsxDatacenterPreview.cs" />
+    <Compile Include="OfflineReaders\PsxDatacenter\Entity\PsxDatacenterGame.cs" />
+    <Compile Include="OfflineReaders\PsxDatacenter\Entity\PsxDatacenterPreview.cs" />
     <None Include="Resources\add.png" />
     <None Include="Resources\accept.png" />
     <Content Include="Resources\Gelbooru.GetTags.Postgre.sql" />
@@ -439,53 +386,6 @@
     <None Include="packages.config" />
     <None Include="Resources\openfolderHS.png" />
     <Content Include="Resources\Vocadb.FindSongRelatedAlbum.sql" />
-    <Compile Include="SedgeTree\Boundary\Calendar.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\Calendar.designer.cs">
-      <DependentUpon>Calendar.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\Checker.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\Checker.designer.cs">
-      <DependentUpon>Checker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\DummyControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\DummyControl.designer.cs">
-      <DependentUpon>DummyControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\Editor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\Editor.designer.cs">
-      <DependentUpon>Editor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\PersonSelector.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\PersonSelector.designer.cs">
-      <DependentUpon>PersonSelector.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\SedgeTreeControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\SedgeTreeControl.Designer.cs">
-      <DependentUpon>SedgeTreeControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\TreeDisplay.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SedgeTree\Boundary\TreeDisplay.designer.cs">
-      <DependentUpon>TreeDisplay.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SedgeTree\Control\SedgeTreeMemoryCardEmulation.cs" />
-    <Compile Include="SedgeTree\Entitiy\Bloodline.cs" />
-    <Compile Include="SedgeTree\Entitiy\Family.cs" />
-    <Compile Include="SedgeTree\Entitiy\Gender.cs" />
-    <Compile Include="SedgeTree\Entitiy\Person.cs" />
     <Compile Include="Splash.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -502,53 +402,34 @@
     <Compile Include="UnixTimeConverter.cs" />
     <Compile Include="Utilities\ffmpegImageAcquisition.cs" />
     <Compile Include="Utilities\MakeM3uFromDirectory.cs" />
-    <Compile Include="VgmDb\Boundary\VgmDbControl.cs">
+    <Compile Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="VgmDb\Boundary\VgmDbControl.Designer.cs">
+    <Compile Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.Designer.cs">
       <DependentUpon>VgmDbControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="VgmDb\Entity\Album.cs" />
-    <Compile Include="VgmDb\Entity\AlbumListEntry.cs" />
-    <Compile Include="VgmDb\Entity\Track.cs" />
-    <Compile Include="VnDb\Boundary\VnDbControl.cs">
+    <Compile Include="OfflineReaders\VgmDb\Entity\Album.cs" />
+    <Compile Include="OfflineReaders\VgmDb\Entity\AlbumListEntry.cs" />
+    <Compile Include="OfflineReaders\VgmDb\Entity\Track.cs" />
+    <Compile Include="OfflineReaders\VnDb\Boundary\VnDbControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="VnDb\Boundary\VnDbControl.Designer.cs">
+    <Compile Include="OfflineReaders\VnDb\Boundary\VnDbControl.Designer.cs">
       <DependentUpon>VnDbControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="VnDb\Entity\VndbRelease.cs" />
-    <Compile Include="VnDb\Entity\VndbSearchResult.cs" />
-    <Compile Include="VnDb\Entity\VndbVn.cs" />
-    <Compile Include="VnDb\Entity\VndbVnAnime.cs" />
-    <Compile Include="VnDb\Entity\VndbVnResult.cs" />
-    <Compile Include="VocaDB\Boundary\VocaDbOffline.cs">
+    <Compile Include="OfflineReaders\VnDb\Entity\VndbRelease.cs" />
+    <Compile Include="OfflineReaders\VnDb\Entity\VndbSearchResult.cs" />
+    <Compile Include="OfflineReaders\VnDb\Entity\VndbVn.cs" />
+    <Compile Include="OfflineReaders\VnDb\Entity\VndbVnAnime.cs" />
+    <Compile Include="OfflineReaders\VnDb\Entity\VndbVnResult.cs" />
+    <Compile Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="VocaDB\Boundary\VocaDbOffline.Designer.cs">
+    <Compile Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.Designer.cs">
       <DependentUpon>VocaDbOffline.cs</DependentUpon>
     </Compile>
-    <Compile Include="VocaDB\Control\VocaDbSearchResultListViewItem.cs" />
-    <Compile Include="VocaDB\Entity\VocadbTrackEntry.cs" />
-    <Compile Include="WarWalking\Boundary\DiscoveryService.cs" />
-    <Compile Include="WarWalking\Boundary\TourService.cs" />
-    <Compile Include="WarWalking\Boundary\WarWalkingControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="WarWalking\Boundary\WarWalkingControl.Designer.cs">
-      <DependentUpon>WarWalkingControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="WarWalking\Boundary\WarWalkingControl.History.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="WarWalking\Control\DiscoveryListViewItem.cs" />
-    <Compile Include="WarWalking\Control\Interop.cs" />
-    <Compile Include="WarWalking\Control\TourNode.cs" />
-    <Compile Include="WarWalking\Control\TourProcessor.cs" />
-    <Compile Include="WarWalking\Control\WlanApi.cs" />
-    <Compile Include="WarWalking\Entity\ByteBuffer.cs" />
-    <Compile Include="WarWalking\Entity\Discovery.cs" />
-    <Compile Include="WarWalking\Entity\Tour.cs" />
+    <Compile Include="OfflineReaders\VocaDB\Control\VocaDbSearchResultListViewItem.cs" />
+    <Compile Include="OfflineReaders\VocaDB\Entity\VocadbTrackEntry.cs" />
     <Compile Include="WebServer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -558,25 +439,16 @@
     <EmbeddedResource Include="Control\Setup\SetupForm.resx">
       <DependentUpon>SetupForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DexcomHistory\Boundary\DexcomHistoryControl.resx">
-      <DependentUpon>DexcomHistoryControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DexcomHistory\Boundary\ManualDataEntires.resx">
-      <DependentUpon>ManualDataEntires.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DexcomHistory\Control\SelectComPortForm.resx">
-      <DependentUpon>SelectComPortForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Control\Galleria\Galleria.resx">
       <DependentUpon>Galleria.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Gelbooru\Boundary\GelboooruControl.resx">
+    <EmbeddedResource Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.resx">
       <DependentUpon>GelboooruControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BandcampImporter\BandcampImportForm.resx">
+    <EmbeddedResource Include="Utilities\BandcampImporter\BandcampImportForm.resx">
       <DependentUpon>BandcampImportForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Boundary\MediaLibraryControl.resx">
@@ -603,40 +475,16 @@
     <EmbeddedResource Include="MediaLibrary\Control\ScanForm.resx">
       <DependentUpon>ScanForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MyFigureCollection\Boundary\MyFigureCollection.resx">
+    <EmbeddedResource Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.resx">
       <DependentUpon>MyFigureCollection.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Notebook\Boundary\NotebookControl.resx">
-      <DependentUpon>NotebookControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="PsxDatacenter\Boundary\PsxDatacenterControl.resx">
+    <EmbeddedResource Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.resx">
       <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\Calendar.resx">
-      <DependentUpon>Calendar.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\Checker.resx">
-      <DependentUpon>Checker.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\DummyControl.resx">
-      <DependentUpon>DummyControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\Editor.resx">
-      <DependentUpon>Editor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\PersonSelector.resx">
-      <DependentUpon>PersonSelector.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\SedgeTreeControl.resx">
-      <DependentUpon>SedgeTreeControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SedgeTree\Boundary\TreeDisplay.resx">
-      <DependentUpon>TreeDisplay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Splash.resx">
       <DependentUpon>Splash.cs</DependentUpon>
@@ -644,17 +492,14 @@
     <EmbeddedResource Include="TextInputForm.resx">
       <DependentUpon>TextInputForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="VgmDb\Boundary\VgmDbControl.resx">
+    <EmbeddedResource Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.resx">
       <DependentUpon>VgmDbControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="VnDb\Boundary\VnDbControl.resx">
+    <EmbeddedResource Include="OfflineReaders\VnDb\Boundary\VnDbControl.resx">
       <DependentUpon>VnDbControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="VocaDB\Boundary\VocaDbOffline.resx">
+    <EmbeddedResource Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.resx">
       <DependentUpon>VocaDbOffline.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WarWalking\Boundary\WarWalkingControl.resx">
-      <DependentUpon>WarWalkingControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -716,7 +561,7 @@
     <Content Include="Resources\VgmDbGetReleaseEvent.sql" />
     <Content Include="Resources\VndbSearch.Postgre.sql" />
     <Content Include="Resources\Vocadb.Search.Postgre.sql" />
-    <Compile Include="VocaDB\Entity\VocadbSearchResult.cs" />
+    <Compile Include="OfflineReaders\VocaDB\Entity\VocadbSearchResult.cs" />
     <None Include="Resources\Find_VS.png" />
     <Content Include="Resources\GetMediaByProduct.Postgre.sql" />
     <Content Include="Resources\GetProductsInShelf.Postgre.sql" />

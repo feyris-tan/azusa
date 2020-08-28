@@ -10,13 +10,6 @@ Do not expect any fancy web design tricks or colorful graphics from this, as thi
 # What can it do?
 - Keep a list of your media collection, including date of purchase, cost, article number, cover scans, and screenshots.
 	- For optical media, cue sheets, IBG Graph Data, checksums, CD-Text, Audio playlists, logfiles and a list of files may be attached.
-- Read glucose values of a specific model of CGM sensor.
-	- and display pretty charts
-	- estimate HBA1C value from these value. (not medically accurate, always ask your doctor for exact values.)
-- Assist with wardriving/warwalking/warbiking seesions, if a GPS sensor and a Wi-Fi interface is available.
-- Keep notes
-- Keep a (very rudimentary, human) family tree
-	- This feature is a fun idea I once had, but never reached a state which I would be happy with. If you're looking for an app for genealogy, there are probably much better applications/services out there.
 - Help increasing a media collection, by keeping a local copy of relevant data from:
 	- VGMDB.info
 	- psxdatacenter.net

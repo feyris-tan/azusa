@@ -8,20 +8,15 @@ using System.Text;
 using System.Text.Json;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Licensing;
-using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
-using moe.yo3explorer.azusa.DexcomHistory.Entity;
-using moe.yo3explorer.azusa.Dumping.Entity;
-using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.Notebook.Entity;
-using moe.yo3explorer.azusa.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.SedgeTree.Entitiy;
-using moe.yo3explorer.azusa.VgmDb.Entity;
-using moe.yo3explorer.azusa.VnDb.Entity;
-using moe.yo3explorer.azusa.VocaDB.Entity;
-using moe.yo3explorer.azusa.WarWalking.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
+using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -122,44 +117,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<Tour> WarWalking_GetAllTours()
-        {
-            string rawJson = webClient.DownloadString("/warwalking/tours");
-            List<Tour> list = JsonConvert.DeserializeObject<List<Tour>>(rawJson);
-            return list;
-        }
-
+        
         public bool WarWalking_IsAccessPointKnown(string bssid)
         {
             throw new NotImplementedException();
         }
-
-        public Discovery WarWalking_GetByBssid(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WarWalking_UpdateDiscovery(Discovery discovery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WarWalking_AddAccessPoint(Discovery discovery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Discovery> WarWalking_GetDiscoveriesByTour(Tour tour)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] SedgeTree_GetPhotoByPerson(Person person)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void SedgeTree_UpdatePhoto(byte[] data, string personId)
         {
             throw new NotImplementedException();
@@ -400,17 +363,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public void MailArchive_StoreMessage(Mail mail)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool MailArchive_TestForMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Mail MailArchive_GetSpecificMessage(int uid)
         {
             throw new NotImplementedException();
         }
@@ -419,27 +372,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public void MailArchive_InsertFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int MailArchive_CountItemsInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long MailArchive_GetHighestMessageUTimeInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<ManualDataEntity> Dexcom_GetAllManualGlucoseValues()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt)
         {
             throw new NotImplementedException();
@@ -521,19 +454,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<Note> Notebook_GetAllNotes()
-        {
-            string rawJson = webClient.DownloadString("/notebook/notes");
-            List<Note> list = JsonConvert.DeserializeObject<List<Note>>(rawJson);
-            return list;
-        }
-
-        public Note Notebook_CreateNote(string name, bool isCategory, int? parent)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public string Notebook_GetRichText(int noteId)
         {
             throw new NotImplementedException();

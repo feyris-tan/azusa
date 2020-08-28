@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -10,18 +9,18 @@ using DiscUtils;
 using DiscUtils.Iso9660;
 using dsMediaLibraryClient.GraphDataLib;
 using libazuworker;
-using moe.yo3explorer.azusa.BandcampImporter;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using moe.yo3explorer.azusa.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.ryuuguuKomachi.DicModBridge;
+using moe.yo3explorer.azusa.Utilities.BandcampImporter;
+using moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary;
+using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
 using NPlot;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 {
-    public partial class MediaLibraryControl : UserControl, IAzusaModule
+    public partial class MediaLibraryControl : UserControl
     {
         private List<MediaType> mediaTypes;
         private Shelf currentShelf;
@@ -1259,6 +1258,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 return;
 
             setMetadataAndDump_Click(generator.FileName);
+        }
+
+        public IEnumerable<ToolStripItem> DestroyMenuStrip()
+        {
+            while (menuStrip1.Items.Count > 0)
+            {
+                yield return menuStrip1.Items[0];
+            }
+
+            Controls.Remove(menuStrip1);
         }
     }
 }

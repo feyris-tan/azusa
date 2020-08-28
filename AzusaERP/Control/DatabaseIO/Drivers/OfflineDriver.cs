@@ -11,23 +11,17 @@ using System.Xml.Serialization;
 using libazustreamblob;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Licensing;
-using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
-using moe.yo3explorer.azusa.DexcomHistory.Entity;
-using moe.yo3explorer.azusa.Dumping.Entity;
-using moe.yo3explorer.azusa.Gelbooru.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.Notebook.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
+using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using moe.yo3explorer.azusa.Properties;
-using moe.yo3explorer.azusa.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.SedgeTree.Entitiy;
-using moe.yo3explorer.azusa.VgmDb.Entity;
-using moe.yo3explorer.azusa.VnDb.Entity;
-using moe.yo3explorer.azusa.VocaDB.Entity;
-using moe.yo3explorer.azusa.WarWalking.Entity;
-using Org.BouncyCastle.Math;
+using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
@@ -100,39 +94,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotSupportedException();
         }
-
-        private SQLiteCommand getAllManualGlucoseValuesCommand;
-        public IEnumerable<ManualDataEntity> Dexcom_GetAllManualGlucoseValues()
-        {
-            if (getAllManualGlucoseValuesCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dexcom.manualdata");
-                getAllManualGlucoseValuesCommand = connection.CreateCommand();
-                getAllManualGlucoseValuesCommand.CommandText = "SELECT * FROM dexcom.manualdata ORDER BY ts ASC";
-            }
-            SQLiteDataReader dataReader = getAllManualGlucoseValuesCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                ManualDataEntity mde = new ManualDataEntity();
-                mde.pid = dataReader.GetInt64(0);
-                mde.dateAdded = dataReader.GetDateTime(1);
-                mde.ts = dataReader.GetDateTime(2);
-                mde.messwert = dataReader.GetInt16(3);
-                mde.einheit = dataReader.GetString(4);
-                if (!dataReader.IsDBNull(5))
-                    mde.be = dataReader.GetByte(5);
-                if (!dataReader.IsDBNull(6))
-                    mde.novorapid = dataReader.GetByte(6);
-                if (!dataReader.IsDBNull(7))
-                    mde.levemir = dataReader.GetByte(7);
-                mde.hide = dataReader.GetBoolean(8);
-                mde.minuteCorrection = dataReader.GetInt32(9);
-                mde.notice = dataReader.GetString(10);
-                yield return mde;
-            }
-            dataReader.Dispose();
-        }
-
+        
         public IEnumerable<DateTime> Dexcom_GetDates()
         {
             SQLiteConnection connection = GetConnectionForTable("dexcom.history");
@@ -652,62 +614,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             cmd.Dispose();
             syncReader.Dispose();
-        }
-
-        public IEnumerable<Note> Notebook_GetAllNotes()
-        {
-            SQLiteConnection connection = GetConnectionForTable("notebook.notes");
-            SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT id, iscategory, parent, name FROM notebook.notes";
-            SQLiteDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                Note note = new Note();
-                note.id = dataReader.GetInt32(0);
-                note.isCategory = dataReader.GetBoolean(1);
-                if (!dataReader.IsDBNull(2))
-                    note.parent = dataReader.GetInt32(2);
-                note.name = dataReader.GetString(3);
-                yield return note;
-            }
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand createNote;
-        public Note Notebook_CreateNote(string name, bool isCategory, int? parent)
-        {
-            SQLiteConnection connection = GetConnectionForTable("notebook.notes");
-            if (createNote == null)
-            {
-                createNote = connection.CreateCommand();
-                createNote.CommandText = "INSERT INTO notebook.notes (id,dateadded,iscategory,parent,name) VALUES (@id,@dateadded,@iscategory,@parent,@name)";
-                createNote.Parameters.Add("@id", DbType.Int32);
-                createNote.Parameters.Add("@dateadded", DbType.DateTime);
-                createNote.Parameters.Add("@iscategory", DbType.Boolean);
-                createNote.Parameters.Add("@parent", DbType.Int32);
-                createNote.Parameters.Add("@name", DbType.String);
-            }
-
-            Note result = new Note();
-            result.id = AzusaContext.GetInstance().RandomNumberGenerator.Next();
-            result.isCategory = isCategory;
-            result.name = name;
-            result.parent = parent;
-
-            createNote.Parameters["@id"].Value = result.id;
-            createNote.Parameters["@dateAdded"].Value = DateTime.Now;
-            createNote.Parameters["@iscategory"].Value = isCategory;
-
-            if (parent.HasValue)
-                createNote.Parameters["@parent"].Value = parent.Value;
-            else
-                createNote.Parameters["@parent"].Value = DBNull.Value;
-
-            createNote.Parameters["@name"].Value = name;
-            if (createNote.ExecuteNonQuery() != 1)
-                throw new Exception("note creation failed");
-
-            return result;
         }
 
         private SQLiteCommand notebookGetText;
@@ -2366,36 +2272,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             cmd.Dispose();
         }
 
-        public int MailArchive_CountItemsInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long MailArchive_GetHighestMessageUTimeInFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
         public int MailArchive_GetLatestMessageId()
         {
             throw new NotImplementedException();
         }
-
-        public Mail MailArchive_GetSpecificMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void MailArchive_InsertFolder(Folder folder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void MailArchive_StoreMessage(Mail mail)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public bool MailArchive_TestForFolder(long folderId)
         {
             throw new NotImplementedException();
@@ -2431,12 +2312,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             dataReader.Close();
             return result;
         }
-
-        public byte[] SedgeTree_GetPhotoByPerson(Person person)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void SedgeTree_InsertPhoto(byte[] data, string personId)
         {
             throw new NotImplementedException();
@@ -2517,42 +2393,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotSupportedException();
         }
-
-        public void WarWalking_AddAccessPoint(Discovery discovery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Tour> WarWalking_GetAllTours()
-        {
-            SQLiteConnection connection = GetConnectionForTable("warwalking.tours");
-            SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM warwalking.tours";
-            SQLiteDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                Tour child = new Tour();
-                child.Name = dataReader.GetString(3);
-                child.DateAdded = dataReader.GetDateTime(4);
-                child.Hash = dataReader.GetInt64(1);
-                child.ID = dataReader.GetInt32(0);
-                child.RecordingStarted = UnixTimeConverter.FromUnixTime(dataReader.GetInt64(2));
-                yield return child;
-            }
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
-        public Discovery WarWalking_GetByBssid(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Discovery> WarWalking_GetDiscoveriesByTour(Tour tour)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name)
         {
             throw new NotImplementedException();
@@ -2564,11 +2405,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public bool WarWalking_IsTourKnown(long hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WarWalking_UpdateDiscovery(Discovery discovery)
         {
             throw new NotImplementedException();
         }
