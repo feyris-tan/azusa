@@ -4,10 +4,8 @@ using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using System.Windows.Forms;
 using AzusaERP;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
-using moe.yo3explorer.azusa.Control.Licensing;
 using Renci.SshNet;
 
 namespace moe.yo3explorer.azusa
@@ -28,7 +26,6 @@ namespace moe.yo3explorer.azusa
                 instance = new AzusaContext();
                 instance.CultureInfo = CultureInfo.CurrentUICulture;
                 instance.RandomNumberGenerator = new Random();
-                instance.LicenseSeed = NetworkAdapterLicenseMapper.GetLicenseMapping();
                 instance.Plugins = new List<AzusaPlugin>();
                 instance.PluginLoadQueue = new Queue<AzusaPlugin>();
                 instance.ImageAcquisitionPlugins = new List<IImageAcquisitionPlugin>();
@@ -128,12 +125,13 @@ namespace moe.yo3explorer.azusa
         public WebServer WebServer { get; set; }
         public Icon Icon { get; set; }
         public SshClient SSH { get; set; }
-        public byte[] LicenseSeed { get; private set; }
         public List<AzusaPlugin> Plugins { get; private set; }
         public Queue<AzusaPlugin> PluginLoadQueue { get; private set; }
         public bool CatchModuleExceptions => false;
 
         public List<IImageAcquisitionPlugin> ImageAcquisitionPlugins { get; private set; }
+        public string LicenseKey { get; set; }
+        public int LicenseLength { get; set; }
     }
 
 }

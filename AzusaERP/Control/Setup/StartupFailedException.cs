@@ -17,18 +17,17 @@ namespace moe.yo3explorer.azusa.Control.Setup
             StreamingContext context) : base(info, context)
         {
         }
-
-        private StartupFailReason sfr;
+        
 
         public StartupFailedException(StartupFailReason sfr)
         {
-            this.sfr = sfr;
+            Data.Add("StartupFailReason", sfr);
         }
 
         public StartupFailedException(Exception innerException, StartupFailReason sfr) : 
             base(sfr.ToString(), innerException)
         {
-            this.sfr = sfr;
+            Data.Add("StartupFailReason", sfr);
         }
     }
 
@@ -38,6 +37,11 @@ namespace moe.yo3explorer.azusa.Control.Setup
         AzusaIniNotFound,
         NoDatabaseAvailable,
         IniBroken,
-        LicenseNotValid
+        LicenseNotValid,
+        LicenseFileNotFound,
+        LicenseNotInDatabase,
+        LicenseRevoked,
+        LicenseHasMultipleMatches,
+        NoError
     }
 }

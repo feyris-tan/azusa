@@ -225,8 +225,6 @@
     <Compile Include="Control\Galleria\DefaultGalleriaModel.cs" />
     <Compile Include="Control\JsonIO\UnixtimeToDatetimeJsonConverter.cs" />
     <Compile Include="Control\JsonIO\WeirdQuarkusDatetimeConverter.cs" />
-    <Compile Include="Control\Licensing\GuidUtils.cs" />
-    <Compile Include="Control\Licensing\LicenseValidationFailedException.cs" />
     <Compile Include="Control\Setup\PostgresqlModel.cs" />
     <Compile Include="Control\Setup\PropertyGridForm.cs">
       <SubType>Form</SubType>
@@ -271,7 +269,6 @@
     <Compile Include="IAzusaModule.cs" />
     <Compile Include="IImageAcquisitionPlugin.cs" />
     <Compile Include="IPostConnectionTask.cs" />
-    <Compile Include="Control\Licensing\LicenseState.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -363,7 +360,6 @@
       <DependentUpon>MyFigureCollection.cs</DependentUpon>
     </Compile>
     <Compile Include="OfflineReaders\MyFigureCollection\Entity\Figure.cs" />
-    <Compile Include="Control\Licensing\NetworkAdapterLicenseMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources1.Designer.cs">

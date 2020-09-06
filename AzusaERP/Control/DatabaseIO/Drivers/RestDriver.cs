@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using moe.yo3explorer.azusa.Control.Licensing;
+using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
@@ -42,22 +42,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 errorState = RestDriverErrorState.UrlUnspecified;
                 return;
             }
-            string licenseFileName = context.ReadIniKey("rest", "licenseFile", null);
-            if (licenseFileName == null)
+            
+            if (string.IsNullOrEmpty(context.LicenseKey))
             {
                 errorState = RestDriverErrorState.LicenseUnspecified;
-                return;
             }
-            FileInfo fi = new FileInfo(licenseFileName);
-            if (!fi.Exists)
-            {
-                errorState = RestDriverErrorState.LicenseFileDoesNotExist;
-                return;
-            }
-            byte[] buffer = File.ReadAllBytes(fi.FullName);
-            byte[] compressed = HashLib.HashFactory.Crypto.SHA3.CreateBlueMidnightWish224().ComputeBytes(buffer).GetBytes();
-            license = BitConverter.ToString(compressed);
-            license = license.Replace("-", "");
+            license = context.LicenseKey;
 
             webClient = new WebClient();
             webClient.BaseAddress = url;
@@ -68,7 +58,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             webClient.Headers.Add("Azusa-User-Domain-Name", Environment.UserDomainName);
             webClient.Headers.Add("Azusa-License", license);
             webClient.Headers.Add("Authorization", "Azusa-License");
-            webClient.Headers.Add("Azusa-License-Buffer-Size", buffer.Length.ToString());
+            webClient.Headers.Add("Azusa-License-Buffer-Size", context.LicenseLength.ToString());
         }
         
 
@@ -394,6 +384,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public bool TransactionSupported { get; }
+        public bool CanActivateLicense { get; }
+
         public void EndTransaction(bool sucessful)
         {
             throw new NotImplementedException();
@@ -433,12 +425,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public LicenseState CheckLicenseStatus(byte[] uid)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public DateTime? Sync_GetLatestUpdateForTable(string tableName)
         {
             throw new NotImplementedException();
@@ -738,6 +725,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public void RemoveMedia(Media currentMedia)
         {
             throw new NotImplementedException();
+        }
+
+        public StartupFailReason CheckLicenseStatus(string contextLicenseKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ActivateLicense(string contextLicenseKey)
+        {
+            throw new NotSupportedException();
         }
     }
 }

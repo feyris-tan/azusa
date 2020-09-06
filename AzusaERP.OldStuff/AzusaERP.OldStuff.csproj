@@ -66,6 +66,10 @@
       <DependentUpon>SelectComPortForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DexcomHistory\Entity\ManualDataEntity.cs" />
+    <Compile Include="Licensing\GuidUtils.cs" />
+    <Compile Include="Licensing\LicenseState.cs" />
+    <Compile Include="Licensing\LicenseValidationFailedException.cs" />
+    <Compile Include="Licensing\NetworkAdapterLicenseMapper.cs" />
     <Compile Include="MailArchive\Boundary\FolderService.cs" />
     <Compile Include="MailArchive\Boundary\MessageService.cs" />
     <Compile Include="MailArchive\Control\MailFetchTask.cs" />

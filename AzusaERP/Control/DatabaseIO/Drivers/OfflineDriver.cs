@@ -10,7 +10,7 @@ using System.Text;
 using System.Xml.Serialization;
 using libazustreamblob;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using moe.yo3explorer.azusa.Control.Licensing;
+using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
@@ -74,6 +74,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public bool TransactionSupported => false;
+        public bool CanActivateLicense => false;
 
         public void BeginTransaction()
         {
@@ -477,44 +478,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             transaction.Commit();
             transaction.Dispose();
         }
-
-        private SQLiteCommand checkLicense;
-        public LicenseState CheckLicenseStatus(byte[] uid)
-        {
-            string val = BitConverter.ToString(uid);
-            SQLiteConnection connection = GetConnectionForTable("licensing.fatclient_machines");
-
-            if (checkLicense == null)
-            {
-                checkLicense = connection.CreateCommand();
-                checkLicense.CommandText = "SELECT state FROM licensing.fatclient_machines WHERE uid=@uid";
-                checkLicense.Parameters.Add("@uid", DbType.String);
-            }
-
-            checkLicense.Parameters["@uid"].Value = val;
-            SQLiteDataReader dataReader = checkLicense.ExecuteReader();
-            bool known = dataReader.Read();
-            if (known)
-            {
-                int licenseState = dataReader.GetInt32(0);
-                dataReader.Dispose();
-                switch (licenseState)
-                {
-                    case 0:
-                        return LicenseState.LicenseNotActivated;
-                    case 1:
-                        return LicenseState.Valid;
-                    default:
-                        return LicenseState.UnknownLicenseState;
-                }
-            }
-            else
-            {
-                dataReader.Dispose();
-                return LicenseState.MachineHasNoLicense;
-            }
-        }
-
+        
         public DateTime? Sync_GetLatestUpdateForTable(string tableName)
         {
             SQLiteConnection connection = GetConnectionForTable(tableName);
@@ -1909,7 +1873,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public LicenseState CheckLicenseStatus()
+        public StartupFailReason CheckLicenseStatus(string contextLicenseKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ActivateLicense(string contextLicenseKey)
         {
             throw new NotImplementedException();
         }

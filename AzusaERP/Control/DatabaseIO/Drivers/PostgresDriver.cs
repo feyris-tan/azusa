@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using AzusaERP;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using moe.yo3explorer.azusa.Control.Licensing;
+using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.dex.Schema.Enums;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
@@ -1109,7 +1109,22 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             transaction = connection.BeginTransaction();
         }
 
-        public bool TransactionSupported { get; }
+        public bool TransactionSupported
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public bool CanActivateLicense
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public void EndTransaction(bool sucessful)
         {
             if (sucessful)
@@ -1288,83 +1303,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        private NpgsqlCommand checkLicense;
-        private NpgsqlCommand insertProbableLicense;
-        public LicenseState CheckLicenseStatus(byte[] uid)
-        {
-            string val = BitConverter.ToString(uid);
-
-            if (checkLicense == null)
-            {
-                checkLicense = connection.CreateCommand();
-                checkLicense.CommandText = "SELECT state FROM licensing.fatclient_machines WHERE uid=@uid";
-                checkLicense.Parameters.Add("@uid", NpgsqlDbType.Varchar);
-            }
-
-            checkLicense.Parameters["@uid"].Value = val;
-            NpgsqlDataReader dataReader = checkLicense.ExecuteReader();
-            bool known = dataReader.Read();
-            if (known)
-            {
-                int licenseState = dataReader.GetInt32(0);
-                dataReader.Dispose();
-                switch (licenseState)
-                {
-                    case 0:
-                        return LicenseState.LicenseNotActivated;
-                    case 1:
-                        return LicenseState.Valid;
-                    default:
-                        return LicenseState.UnknownLicenseState;
-                }
-            }
-            else
-            {
-                dataReader.Dispose();
-                if (insertProbableLicense == null)
-                {
-                    insertProbableLicense = connection.CreateCommand();
-                    insertProbableLicense.CommandText = 
-                        "INSERT INTO licensing.fatclient_machines " +
-                        "(uid,machinename,state,osversion,amd64cpu,amd64task,cpus,systemdir,pagesize," +
-                        " userdomainname,username,clrversion,path,debuggee) " +
-                        "VALUES " +
-                        "(@uid,@machinename,0,@osversion,@amd64cpu,@amd64task,@cpus,@systemdir,@pagesize," +
-                        " @userdomainname,@username,@clrversion,@path,@debuggee)";
-                    insertProbableLicense.Parameters.Add("@uid", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@machinename", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@osversion", NpgsqlDbType.Text);
-                    insertProbableLicense.Parameters.Add("@amd64cpu", NpgsqlDbType.Boolean);
-                    insertProbableLicense.Parameters.Add("@amd64task", NpgsqlDbType.Boolean);
-                    insertProbableLicense.Parameters.Add("@cpus", NpgsqlDbType.Integer);
-                    insertProbableLicense.Parameters.Add("@systemdir", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@pagesize", NpgsqlDbType.Integer);
-                    insertProbableLicense.Parameters.Add("@userdomainname", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@username", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@clrversion", NpgsqlDbType.Varchar);
-                    insertProbableLicense.Parameters.Add("@path", NpgsqlDbType.Text);
-                    insertProbableLicense.Parameters.Add("@debuggee", NpgsqlDbType.Boolean);
-                }
-
-                insertProbableLicense.Parameters["@uid"].Value = val;
-                insertProbableLicense.Parameters["@machinename"].Value = Environment.MachineName;
-                insertProbableLicense.Parameters["@osversion"].Value = Environment.OSVersion.VersionString;
-                insertProbableLicense.Parameters["@amd64cpu"].Value = Environment.Is64BitOperatingSystem;
-                insertProbableLicense.Parameters["@amd64task"].Value = Environment.Is64BitProcess;
-                insertProbableLicense.Parameters["@cpus"].Value = Environment.ProcessorCount;
-                insertProbableLicense.Parameters["@systemdir"].Value = Environment.SystemDirectory;
-                insertProbableLicense.Parameters["@pagesize"].Value = Environment.SystemPageSize;
-                insertProbableLicense.Parameters["@userdomainname"].Value = Environment.UserDomainName;
-                insertProbableLicense.Parameters["@username"].Value = Environment.UserName;
-                insertProbableLicense.Parameters["@clrversion"].Value = Environment.Version.ToString();
-                insertProbableLicense.Parameters["@path"].Value = Environment.GetEnvironmentVariable("PATH");
-                insertProbableLicense.Parameters["@debuggee"].Value = Debugger.IsAttached;
-                insertProbableLicense.ExecuteNonQuery();
-                return LicenseState.MachineHasNoLicense;
-            }
-        }
-
+        
         public DateTime? Sync_GetLatestUpdateForTable(string tableName)
         {
             throw new NotImplementedException();
@@ -2883,24 +2822,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        private NpgsqlCommand activateLicenseCommand;
-        public void ActivateLicense(byte[] contextLicenseSeed)
-        {
-            string val = BitConverter.ToString(contextLicenseSeed);
-
-            if (activateLicenseCommand == null)
-            {
-                activateLicenseCommand = connection.CreateCommand();
-                activateLicenseCommand.CommandText = "UPDATE licensing.fatclient_machines SET state = 1 WHERE uid = @uid";
-                activateLicenseCommand.Parameters.Add("@uid", NpgsqlDbType.Varchar);
-            }
-
-            activateLicenseCommand.Parameters["@uid"].Value = val;
-            activateLicenseCommand.ExecuteNonQuery();
-            
-        }
-
+        
         private int deletedMedia;
         private NpgsqlCommand removeMediaCommand;
         public void RemoveMedia(Media currentMedia)
@@ -2914,6 +2836,62 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             removeMediaCommand.Parameters["@id"].Value = currentMedia.Id;
             deletedMedia += removeMediaCommand.ExecuteNonQuery();
 
+        }
+
+        private NpgsqlCommand checkLicenseStatusCommand;
+        public StartupFailReason CheckLicenseStatus(string contextLicenseKey)
+        {
+            if (checkLicenseStatusCommand == null)
+            {
+                checkLicenseStatusCommand = connection.CreateCommand();
+                checkLicenseStatusCommand.CommandText = "SELECT * FROM web.rest_licenses WHERE license = @key";
+                checkLicenseStatusCommand.Parameters.Add("@key", NpgsqlDbType.Text);
+            }
+
+            checkLicenseStatusCommand.Parameters["@key"].Value = contextLicenseKey;
+            NpgsqlDataReader dataReader = checkLicenseStatusCommand.ExecuteReader();
+            if (!dataReader.Read())
+            {
+                dataReader.Close();
+                return StartupFailReason.LicenseNotInDatabase;
+            }
+
+            int id = dataReader.GetInt32(0);
+            string license = dataReader.GetString(1);
+            string owner = dataReader.GetString(2);
+            DateTime dateAdded = dataReader.GetDateTime(3);
+            bool banned = dataReader.GetBoolean(4);
+            
+
+            bool multipleRows = dataReader.Read();
+            dataReader.Close();
+            if (multipleRows)
+            {
+                return StartupFailReason.LicenseHasMultipleMatches;
+            }
+            if (banned)
+            {
+                return StartupFailReason.LicenseRevoked;
+            }
+
+            return StartupFailReason.NoError;
+        }
+
+        private NpgsqlCommand activateLicenseCommand;
+        public void ActivateLicense(string contextLicenseKey)
+        {
+            if (activateLicenseCommand == null)
+            {
+                activateLicenseCommand = connection.CreateCommand();
+                activateLicenseCommand.CommandText =
+                    "INSERT INTO web.rest_licenses (id,license,owner) VALUES ((SELECT MAX(id) FROM web.rest_licenses) + 1,@key,@owner)";
+                activateLicenseCommand.Parameters.Add("@key", NpgsqlDbType.Text);
+                activateLicenseCommand.Parameters.Add("@owner", NpgsqlDbType.Text);
+            }
+
+            activateLicenseCommand.Parameters["@key"].Value = contextLicenseKey;
+            activateLicenseCommand.Parameters["@owner"].Value = String.Format("{0}", Environment.MachineName);
+            activateLicenseCommand.ExecuteNonQuery();
         }
     }
 }

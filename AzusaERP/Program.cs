@@ -13,7 +13,6 @@ using AzusaERP;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Drivers;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
-using moe.yo3explorer.azusa.Control.Licensing;
 using moe.yo3explorer.azusa.Control.Setup;
 using Renci.SshNet;
 
@@ -76,6 +75,12 @@ namespace moe.yo3explorer.azusa
 
         private static void CreateLicenseFile()
         {
+            long ts = DateTime.Now.Ticks;
+            CreateLicenseFile(String.Format("AzusaLic_{0}_{1}.bin", Environment.MachineName, ts));
+        }
+
+        private static void CreateLicenseFile(string name)
+        {
             Random random = new Random();
             byte[] buffer = new byte[4096];
             random.NextBytes(buffer);
@@ -83,17 +88,32 @@ namespace moe.yo3explorer.azusa
             BinaryWriter bw = new BinaryWriter(ms);
             long ts = DateTime.Now.Ticks;
             bw.Write(7163340663742102081UL);
+
             bw.Write(1L);
             bw.Write(Environment.ProcessorCount);
             bw.Write(Environment.MachineName);
             bw.Write(Environment.UserName);
             bw.Write(Environment.UserDomainName);
             bw.Write(Guid.NewGuid().ToByteArray());
-            bw.Write(0L);
+
+            bw.Write(2L);
             bw.Write(ts);
+
+            bw.Write(3L);
+            NetworkInterface[] allNetworkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+            bw.Write(allNetworkInterfaces.Length);
+            foreach (NetworkInterface networkInterface in allNetworkInterfaces)
+            {
+                bw.Write((int)networkInterface.NetworkInterfaceType);
+                bw.Write(networkInterface.Description);
+                PhysicalAddress physicalAddress = networkInterface.GetPhysicalAddress();
+                byte[] addressBytes = physicalAddress.GetAddressBytes();
+                bw.Write((int) addressBytes.Length);
+                bw.Write(addressBytes);
+            }
+
             bw.Write(0L);
-            string fname = String.Format("AzusaLic_{0}_{1}.bin", Environment.MachineName, ts);
-            File.WriteAllBytes(fname, buffer);
+            File.WriteAllBytes(name, buffer);
         }
 
         private AzusaContext context;
@@ -128,6 +148,9 @@ namespace moe.yo3explorer.azusa
                         Console.WriteLine("Der Ordner {0} konnte nicht gefunden werden!", azusaIniSection["chdir"]);
 
             CreateSplashThread();
+
+            context.Splash.SetLabel("Lade Lizenzdatei...");
+            LoadLicense();
 
             context.Splash.SetLabel("Lade Icon...");
             string procFileName = Process.GetCurrentProcess().MainModule.FileName;
@@ -244,6 +267,26 @@ namespace moe.yo3explorer.azusa
 
             context.Splash.InvokeClose();
             return false;
+        }
+
+        private void LoadLicense()
+        {
+            string defaultLicenseFile = String.Format("Azusa_{0}_{1}.lic", Environment.MachineName, Environment.UserName);
+            string licenseFileName = context.ReadIniKey("azusa", "licensefile", defaultLicenseFile);
+            bool useDefaultLicense = defaultLicenseFile.Equals(licenseFileName);
+            FileInfo licenseFileInfo = new FileInfo(licenseFileName);
+            if (!licenseFileInfo.Exists)
+            {
+                if (!useDefaultLicense)
+                    throw new StartupFailedException(StartupFailReason.LicenseFileNotFound);
+
+                CreateLicenseFile(licenseFileName);
+            }
+
+            byte[] buffer = File.ReadAllBytes(licenseFileInfo.FullName);
+            byte[] compressed = HashLib.HashFactory.Crypto.SHA3.CreateBlueMidnightWish224().ComputeBytes(buffer).GetBytes();
+            context.LicenseKey = BitConverter.ToString(compressed).Replace("-", "");
+            context.LicenseLength = buffer.Length;
         }
 
         private void CreateSplashThread()
@@ -433,10 +476,16 @@ namespace moe.yo3explorer.azusa
             }
 
             context.Splash.SetLabel("Überprüfe Lizenz...");
-            LicenseState licenseState = context.DatabaseDriver.CheckLicenseStatus(context.LicenseSeed);
-            if (licenseState != LicenseState.Valid)
+            StartupFailReason licenseState = context.DatabaseDriver.CheckLicenseStatus(context.LicenseKey);
+            switch (licenseState)
             {
-                throw new StartupFailedException(new LicenseValidationFailedException(licenseState),StartupFailReason.LicenseNotValid);
+                case StartupFailReason.NoError:
+                    break;
+                case StartupFailReason.LicenseRevoked:
+                case StartupFailReason.LicenseNotInDatabase:
+                    throw new StartupFailedException(licenseState);
+                default:
+                    throw new NotImplementedException(licenseState.ToString());
             }
 
             context.Splash.SetLabel("Validiere Datenbank...");
@@ -511,10 +560,11 @@ namespace moe.yo3explorer.azusa
             context.DatabaseDriver = new OfflineDriver();
 
             context.Splash.SetLabel("Überprüfe Lizenz...");
-            LicenseState licenseState = context.DatabaseDriver.CheckLicenseStatus(context.LicenseSeed);
-            if (licenseState != LicenseState.Valid)
+            StartupFailReason licenseState = context.DatabaseDriver.CheckLicenseStatus(context.LicenseKey);
+            switch (licenseState)
             {
-                throw new LicenseValidationFailedException(licenseState);
+                default:
+                    throw new NotImplementedException(licenseState.ToString());
             }
         }
 

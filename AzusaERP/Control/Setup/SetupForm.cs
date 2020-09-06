@@ -11,7 +11,6 @@ using System.Windows.Forms;
 using AzusaERP;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Drivers;
-using moe.yo3explorer.azusa.Control.Licensing;
 using TagLib;
 using File = System.IO.File;
 
@@ -199,30 +198,36 @@ namespace moe.yo3explorer.azusa.Control.Setup
 
         private void diesesGerätLizensierenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            PostgresDriver databaseDriver = AzusaContext.GetInstance().DatabaseDriver as PostgresDriver;
-            if (postgresqlModel == null)
+            if (string.IsNullOrEmpty(context.LicenseKey))
             {
-                MessageBox.Show("Aktuelle Datenbankverbindung ist nicht lizensierbar!");
+                MessageBox.Show("Der Lizenzschlüssel wurde nicht bestimmt.");
                 return;
             }
 
-            if (context.LicenseSeed == null)
+            if (context.LicenseLength < 512)
             {
-                MessageBox.Show("Lizenzschlüssel konnte nicht ermittelt werden!");
+                MessageBox.Show("Die Lizenzdatei ist zu klein!");
                 return;
             }
 
-            LicenseState checkLicenseStatus = databaseDriver.CheckLicenseStatus(context.LicenseSeed);
-            switch (checkLicenseStatus)
+            if (!context.DatabaseDriver.CanActivateLicense)
             {
-                case LicenseState.LicenseNotActivated:
-                    databaseDriver.ActivateLicense(context.LicenseSeed);
-                    MessageBox.Show("Lizenz wurde aktiviert!");
-                    break;
-                default:
-                    MessageBox.Show(checkLicenseStatus.ToString());
-                    break;
+                string s = String.Format("Der aktuelle Datenbanktreiber ({0}) kann nicht verwendet werden, um die Lizenz zu aktivieren.", context.DatabaseDriver.GetType().Name);
+                MessageBox.Show(s);
+                return;
             }
+
+            try
+            {
+                context.DatabaseDriver.ActivateLicense(context.LicenseKey);
+                MessageBox.Show("Lizenz wurde aktiviert!");
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+            
+            this.Close();
         }
     }
 }

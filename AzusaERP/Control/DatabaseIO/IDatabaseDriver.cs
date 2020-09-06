@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
-using moe.yo3explorer.azusa.Control.Licensing;
+using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
@@ -68,6 +68,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note);
         void BeginTransaction();
         bool TransactionSupported { get; }
+        bool CanActivateLicense { get; }
         void EndTransaction(bool sucessful);
         List<DatabaseColumn> Sync_DefineTable(string tableName);
         bool Sync_DoesTableExist(string tableName);
@@ -76,7 +77,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         DbDataReader Sync_GetSyncReader(string tableName, DateTime? latestSynced);
         DbCommand Sync_GetWriteCommand(string tableName, List<DatabaseColumn> columns);
         void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage);
-        LicenseState CheckLicenseStatus(byte[] uid);
         DateTime? Sync_GetLatestUpdateForTable(string tableName);
         DbDataReader Sync_GetUpdateSyncReader(string tableName, DateTime? latestUpdate);
         void Sync_CopyUpdatesFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage, Queue<object> leftovers);
@@ -150,5 +150,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         Media[] FindAutofixableMetafiles();
         void Sync_AlterTable(string tableName, DatabaseColumn missingColumn);
         void RemoveMedia(Media currentMedia);
+        StartupFailReason CheckLicenseStatus(string contextLicenseKey);
+        void ActivateLicense(string contextLicenseKey);
     }
 }
