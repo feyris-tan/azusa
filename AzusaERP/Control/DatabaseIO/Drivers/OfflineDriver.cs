@@ -57,7 +57,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 SQLiteConnection connection = new SQLiteConnection(connectionBuilder.ToString());
                 connection.Open();
-                bool passworded = args[0].Equals("licensing");
+                bool passworded = args[0].Equals("web");
                 string sql = null;
                 if (!passworded)
                     sql = String.Format("ATTACH DATABASE '{0}' AS {1}", Path.Combine(rootDirectory.FullName, args[0] + ".db"),
@@ -425,6 +425,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (idColumn == null)
             {
                 idColumn = columns.Find(x => x.ColumnName.ToLowerInvariant().Equals("scalerid"));
+            }
+            if (idColumn == null)
+            {
+                idColumn = columns.Find(x => x.ColumnName.ToLowerInvariant().Equals("char_id"));
             }
             int successful = 0;
 
@@ -1873,9 +1877,34 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
+        private SQLiteCommand sqliteCommand;
         public StartupFailReason CheckLicenseStatus(string contextLicenseKey)
         {
-            throw new NotImplementedException();
+            if (sqliteCommand == null)
+            {
+                SQLiteConnection connection = GetConnectionForTable("web.rest_licenses");
+                sqliteCommand = connection.CreateCommand();
+                sqliteCommand.CommandText = "SELECT * FROM web.rest_licenses WHERE license=@license";
+                sqliteCommand.Parameters.Add("@license", DbType.String);
+            }
+
+            sqliteCommand.Parameters["@license"].Value = contextLicenseKey;
+            SQLiteDataReader dataReader = sqliteCommand.ExecuteReader();
+            if (dataReader.Read())
+            {
+                long licId = dataReader.GetInt64(0);
+                string license = dataReader.GetString(1);
+                string owner = dataReader.GetString(2);
+                DateTime dateAdded = dataReader.GetDateTime(3);
+                bool banned = dataReader.GetBoolean(4);
+                dataReader.Close();
+                return banned ? StartupFailReason.LicenseRevoked : StartupFailReason.NoError;
+            }
+            else
+            {
+                dataReader.Close();
+                return StartupFailReason.LicenseNotInDatabase;
+            }
         }
 
         public void ActivateLicense(string contextLicenseKey)

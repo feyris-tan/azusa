@@ -22,6 +22,12 @@ namespace moe.yo3explorer.azusa.Utilities
                 return;
 
             DirectoryInfo di = new DirectoryInfo(fbd.SelectedPath);
+            MakeM3u(di);
+            MessageBox.Show("Erledigt!");
+        }
+
+        internal static void MakeM3u(DirectoryInfo di)
+        {
             FileInfo[] fi = di.GetFiles();
             Array.Sort(fi, new FilenameComparer());
 
@@ -35,14 +41,13 @@ namespace moe.yo3explorer.azusa.Utilities
                         filenames.Add(subfile.Name);
                         break;
                     default:
-                        MessageBox.Show(String.Format("{0} ist nicht bekannt.",subfile.Extension));
+                        MessageBox.Show(String.Format("{0} ist nicht bekannt.", subfile.Extension));
                         break;
                 }
             }
 
             string m3u8Path = Path.Combine(di.FullName, di.Name + ".m3u8");
             File.WriteAllLines(m3u8Path, filenames.ToArray());
-            MessageBox.Show("Erledigt!");
         }
     }
 

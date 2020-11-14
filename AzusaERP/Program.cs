@@ -14,6 +14,7 @@ using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Drivers;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.Setup;
+using moe.yo3explorer.azusa.MediaLibrary.Control;
 using Renci.SshNet;
 
 namespace moe.yo3explorer.azusa
@@ -336,6 +337,7 @@ namespace moe.yo3explorer.azusa
 
             Type pluginType = typeof(AzusaPlugin);
             Type imageAcquisitionPluginType = typeof(IImageAcquisitionPlugin);
+            Type sidecarViewerPluginType = typeof(ISidecarDisplayControl);
 
             foreach (Type exportedType in exportedTypes)
             {
@@ -361,6 +363,12 @@ namespace moe.yo3explorer.azusa
                 {
                     IImageAcquisitionPlugin instance = (IImageAcquisitionPlugin)Activator.CreateInstance(exportedType);
                     context.ImageAcquisitionPlugins.Add(instance);
+                }
+                else if (sidecarViewerPluginType.IsAssignableFrom(exportedType))
+                {
+                    ISidecarDisplayControl instance = (ISidecarDisplayControl) Activator.CreateInstance(exportedType);
+                    Guid guid = instance.DisplayControlUuid;
+                    context.SidecarDisplayControls.Add(guid, exportedType);
                 }
             }
         }
@@ -563,6 +571,8 @@ namespace moe.yo3explorer.azusa
             StartupFailReason licenseState = context.DatabaseDriver.CheckLicenseStatus(context.LicenseKey);
             switch (licenseState)
             {
+                case StartupFailReason.NoError:
+                    break;
                 default:
                     throw new NotImplementedException(licenseState.ToString());
             }

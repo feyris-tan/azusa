@@ -551,7 +551,7 @@ namespace vgmdbDumper
                     ProductListProduct product = album.products[i];
                     if (!product.IsRelease())
                     {
-                        if (!string.IsNullOrEmpty(product.link))
+                        if (!string.IsNullOrEmpty(product.link) && !product.link.StartsWith("search"))
                         {
                             if (!TestForProduct(product.GetId()))
                                 InsertProduct(product);
@@ -974,6 +974,9 @@ namespace vgmdbDumper
                 updateProduct.Parameters.Add(new NpgsqlParameter("@name", DbType.String));
                 updateProduct.Parameters.Add(new NpgsqlParameter("@parent_franchise", DbType.Int32));
             }
+            
+            if (product.albums == null)
+                product.albums = new AlbumListAlbum[0];
 
             foreach (AlbumListAlbum album in product.albums)
             {
@@ -1000,10 +1003,23 @@ namespace vgmdbDumper
             }
 
             updateProduct.Parameters["@id"].Value = product.GetId();
-            updateProduct.Parameters["@added_date"].Value = product.meta.added_date;
-            updateProduct.Parameters["@added_user"].Value = product.meta.added_user;
+            if (product.meta.added_date != null)
+                updateProduct.Parameters["@added_date"].Value = product.meta.added_date;
+            else
+                updateProduct.Parameters["@added_date"].Value = DBNull.Value;
+
+            if (product.meta.added_user != null)
+                updateProduct.Parameters["@added_user"].Value = product.meta.added_user;
+            else
+                updateProduct.Parameters["@added_user"].Value = DBNull.Value;
+
             updateProduct.Parameters["@edited_date"].Value = product.meta.edited_date;
-            updateProduct.Parameters["@edited_user"].Value = product.meta.edited_user;
+
+            if (product.meta.edited_user != null)
+                updateProduct.Parameters["@edited_user"].Value = product.meta.edited_user;
+            else
+                updateProduct.Parameters["@edited_user"].Value = DBNull.Value;
+
             updateProduct.Parameters["@fetched_date"].Value = product.meta.fetched_date;
             updateProduct.Parameters["@ttl"].Value = product.meta.ttl;
             updateProduct.Parameters["@visitors"].Value = product.meta.visitors;

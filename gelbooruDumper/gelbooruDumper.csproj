@@ -39,6 +39,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\AzusaERP\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.HttpUtility, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\AzusaERP\packages\Mono.HttpUtility.1.0.0.1\lib\net40\Mono.HttpUtility.dll</HintPath>
+    </Reference>
     <Reference Include="Npgsql, Version=4.1.2.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\AzusaERP\packages\Npgsql.4.1.2\lib\net461\Npgsql.dll</HintPath>
     </Reference>
@@ -78,7 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GelbooruClient.cs" />
-    <Compile Include="index_php.cs" />
+    <Compile Include="Model\comments.cs" />
+    <Compile Include="Model\index_php.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -90,10 +94,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libazustreamblob\libazustreamblob.csproj">
-      <Project>{01ce14e8-ffa2-4be2-bd31-3696edde77f8}</Project>
-      <Name>libazustreamblob</Name>
-    </ProjectReference>
     <ProjectReference Include="..\libini\libini.csproj">
       <Project>{a6e030af-0153-43f5-bd58-43594cefe7f4}</Project>
       <Name>libini</Name>

@@ -20,3 +20,4 @@ DEADJOE
 /AzusaERP/libini/obj/Debug
 /AzusaERP/wikidumpParser/bin/Debug
 /AzusaERP/wikidumpParser/obj/Debug
+*.csproj.user

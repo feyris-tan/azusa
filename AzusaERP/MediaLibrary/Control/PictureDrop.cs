@@ -8,7 +8,7 @@ using File = System.IO.File;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Control
 {
-    public partial class PictureDrop : UserControl
+    public partial class PictureDrop : UserControl, ISidecarDisplayControl
     {
         const int MaxPictureSize = 900 * 1000;
 
@@ -106,6 +106,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
 
         private byte[] buffer;
         private MemoryStream ms;
+
+        public bool isComplete()
+        {
+            return buffer != null && buffer.Length > 0;
+        }
+
+        public Guid DisplayControlUuid => new Guid("EBF2D5F6-CF90-4E16-979C-CB8F73066AE0");
 
         public byte[] Data
         {
@@ -225,5 +232,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         {
 
         }
+
+        public int MediumId { get; set; }
     }
 }

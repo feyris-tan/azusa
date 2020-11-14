@@ -31,10 +31,10 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.dateiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.beendenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.plugInsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.plugInsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();            
+			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.mediaLibraryControl1 = new moe.yo3explorer.azusa.MediaLibrary.Boundary.MediaLibraryControl();
+			this.mediaLibraryControl1 = new moe.yo3explorer.azusa.MediaLibrary.Boundary.MediaLibraryControl();
             this.stammdatenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -66,6 +66,12 @@
             this.beendenToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.beendenToolStripMenuItem.Text = "Beenden";
             this.beendenToolStripMenuItem.Click += new System.EventHandler(this.beendenToolStripMenuItem_Click);
+            // 
+            // stammdatenToolStripMenuItem
+            // 
+            this.stammdatenToolStripMenuItem.Name = "stammdatenToolStripMenuItem";
+            this.stammdatenToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
+            this.stammdatenToolStripMenuItem.Text = "Stammdaten";
             // 
             // plugInsToolStripMenuItem
             // 
@@ -104,8 +110,8 @@
             this.stammdatenToolStripMenuItem.Name = "stammdatenToolStripMenuItem";
             this.stammdatenToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
             this.stammdatenToolStripMenuItem.Text = "Stammdaten";
-            // 
-            // MainForm
+            //             
+			// MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -134,7 +140,7 @@
         private System.Windows.Forms.ToolStripMenuItem dateiToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem beendenToolStripMenuItem;
         internal System.Windows.Forms.ToolStripMenuItem plugInsToolStripMenuItem;
-        private MediaLibrary.Boundary.MediaLibraryControl mediaLibraryControl1;
+		private MediaLibrary.Boundary.MediaLibraryControl mediaLibraryControl1;
         private System.Windows.Forms.ToolStripMenuItem stammdatenToolStripMenuItem;
     }
 }

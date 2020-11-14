@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Control
 {
-    public partial class BinaryFileDropper : UserControl
+    public partial class BinaryFileDropper : UserControl, ISidecarDisplayControl
     {
         public BinaryFileDropper()
         {
@@ -12,6 +12,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         }
 
         private byte[] buffer;
+
+        public bool isComplete()
+        {
+            return buffer != null && buffer.Length > 0;
+        }
+
+        public Guid DisplayControlUuid => new Guid("{3671208D-EB89-4D02-9081-EBA21BDC2E6F}");
 
         public byte[] Data
         {
@@ -86,5 +93,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
             }
         }
         private bool _enabled;
+
+        public int MediumId { get; set; }
     }
 }

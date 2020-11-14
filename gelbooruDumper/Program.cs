@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Encodings.Web;
 using AzusaERP;
-using libazustreamblob;
 using log4net;
+using Mono.Web;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -39,13 +37,11 @@ namespace gelbooruDumper
             ncsb.Database = ini["postgresql"]["database"];
             ncsb.Password = ini["postgresql"]["password"];
             ncsb.Username = ini["postgresql"]["username"];
+            ncsb.SearchPath = "dump_gb";
+            ncsb.ApplicationName = "gelbooruDumper";
             connection = new NpgsqlConnection(ncsb.ToString());
             connection.Open();
-
-            DirectoryInfo blobDir = new DirectoryInfo(ini["gb"]["blobPath"]);
-            if (!blobDir.Exists)
-                blobDir.Create();
-            streamBlob = new AzusaStreamBlob(blobDir, true);
+            
             gelbooru = new GelbooruClient();
 
             log.Info("Great. Now all the actors are assembled.");
@@ -60,13 +56,11 @@ namespace gelbooruDumper
 
             log.Info("All done!");
             connection.Dispose();
-            streamBlob.Dispose();
         }
 
         private NpgsqlConnection connection;
         private Ini ini;
         private ILog log;
-        private AzusaStreamBlob streamBlob;
         private GelbooruClient gelbooru;
         private NpgsqlTransaction transaction;
 
@@ -75,24 +69,82 @@ namespace gelbooruDumper
             if (CountTags() == 0)
             {
                 posts posts = gelbooru.Search("");
-                HandlePosts(posts);
+                HandlePosts(posts,-1);
                 return true;
             }
 
-            if (ImageScraping())
-                return true;
-
-            string unscrapedTag = TestForUnscrapedTag();
-            if (!string.IsNullOrEmpty(unscrapedTag))
+            int? unscrapedComments = FindUnscrapedComments();
+            if (unscrapedComments != null)
             {
-                posts posts = gelbooru.Search(unscrapedTag);
-                HandlePosts(posts);
-                MarkTagAsScraped(unscrapedTag);
+                comments comments = gelbooru.GetComments(unscrapedComments.Value);
+                HandleComments(comments);
+                MarkCommentsAsScraped(unscrapedComments.Value);
+                return true;
+            }
+            
+            Tuple<string,int> unscrapedTag = TestForUnscrapedTag();
+            if (!string.IsNullOrEmpty(unscrapedTag.Item1))
+            {
+                string url = HttpUtility.UrlEncode(unscrapedTag.Item1);
+                posts posts = gelbooru.Search(url);
+                HandlePosts(posts,unscrapedTag.Item2);
+                MarkTagAsScraped(unscrapedTag.Item1);
                 return true;
             }
 
 
             return false;
+        }
+
+        private void HandleComments(comments comments)
+        {
+            foreach (commentsComment comment in comments.comment)
+            {
+                InsertComment(comment);
+            }
+        }
+
+        private NpgsqlCommand insertCommentCommand;
+        private void InsertComment(commentsComment comment)
+        {
+            if (insertCommentCommand == null)
+            {
+                insertCommentCommand = connection.CreateCommand();
+                insertCommentCommand.CommandText =
+                    "INSERT INTO comments (id, post_id, creator_id, created_at, body) " +
+                    "VALUES " +
+                    "(@id, @postid,@creatorid, @createdat, @body)";
+                insertCommentCommand.Parameters.Add("@id", NpgsqlDbType.Bigint);
+                insertCommentCommand.Parameters.Add("@postid", NpgsqlDbType.Integer);
+                insertCommentCommand.Parameters.Add("@creatorid", NpgsqlDbType.Integer);
+                insertCommentCommand.Parameters.Add("@createdat", NpgsqlDbType.Timestamp);
+                insertCommentCommand.Parameters.Add("@body", NpgsqlDbType.Text);
+            }
+
+            insertCommentCommand.Parameters["@id"].Value = Convert.ToInt64(comment.id);
+            insertCommentCommand.Parameters["@postid"].Value = Convert.ToInt32(comment.post_id);
+            insertCommentCommand.Parameters["@creatorid"].Value = GetCreator(Convert.ToInt32(comment.creator_id), comment.creator);
+            insertCommentCommand.Parameters["@createdat"].Value = DateTime.ParseExact(comment.created_at, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            insertCommentCommand.Parameters["@body"].Value = comment.body;
+            insertCommentCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand getCreatorCommand;
+        private int GetCreator(int creatorId, string commentCreator)
+        {
+            if (getCreatorCommand == null)
+            {
+                getCreatorCommand = connection.CreateCommand();
+                getCreatorCommand.CommandText = "INSERT INTO creators (id, name) VALUES (@id, @name) ON CONFLICT DO NOTHING";
+                getCreatorCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
+                getCreatorCommand.Parameters.Add("@name", NpgsqlDbType.Text);
+            }
+
+            getCreatorCommand.Parameters["@id"].Value = creatorId;
+            getCreatorCommand.Parameters["@name"].Value = commentCreator;
+            getCreatorCommand.ExecuteNonQuery();
+
+            return creatorId;
         }
 
         private NpgsqlCommand markTagAsScrapedCommand;
@@ -101,7 +153,7 @@ namespace gelbooruDumper
             if (markTagAsScrapedCommand == null)
             {
                 markTagAsScrapedCommand = connection.CreateCommand();
-                markTagAsScrapedCommand.CommandText = "UPDATE dump_gb_tags SET scraped = TRUE WHERE tag = @tag";
+                markTagAsScrapedCommand.CommandText = "UPDATE tags SET scraped = TRUE WHERE tag = @tag";
                 markTagAsScrapedCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
             }
 
@@ -110,121 +162,28 @@ namespace gelbooruDumper
             if (executeNonQuery != 1)
                 throw new AmbiguousMatchException();
         }
-
-        private NpgsqlCommand updateImage;
-        private NpgsqlCommand findUnscrapedImage;
-        private bool ImageScraping()
-        {
-            if (findUnscrapedImage == null)
-            {
-                findUnscrapedImage = connection.CreateCommand();
-                findUnscrapedImage.CommandText =
-                    "SELECT id, fileurl FROM dump_gb_posts WHERE downloaded = FALSE AND skipdownload = FALSE";
-
-                if (ini["gb"]["sfwonly"] == "1")
-                {
-                    findUnscrapedImage.CommandText =
-                        "SELECT id, fileurl FROM dump_gb_posts WHERE downloaded = FALSE AND skipdownload = FALSE AND rating = 's'";
-                }
-            }
-
-            NpgsqlDataReader dataReader = findUnscrapedImage.ExecuteReader();
-            if (!dataReader.Read())
-            {
-                dataReader.Dispose();
-                return false;
-            }
-
-            int id = dataReader.GetInt32(0);
-            string fileurl = dataReader.GetString(1);
-            dataReader.Dispose();
-
-            if (updateImage == null)
-            {
-                updateImage = connection.CreateCommand();
-                updateImage.CommandText =
-                    "UPDATE dump_gb_posts SET downloaded = @downloaded, skipdownload = @skipped WHERE id = @id";
-                updateImage.Parameters.Add("@downloaded", NpgsqlDbType.Boolean);
-                updateImage.Parameters.Add("@skipped", NpgsqlDbType.Boolean);
-                updateImage.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            updateImage.Parameters["@id"].Value = id;
-            if (!IsBlacklisted(GetTagsForPost(id)))
-            {
-                byte[] downloadImage = gelbooru.DownloadImage(fileurl);
-                if (!streamBlob.Obfuscation)
-                    throw new InvalidOperationException();
-                streamBlob.Put(1, 1, id, downloadImage);
-                updateImage.Parameters["@downloaded"].Value = true;
-                updateImage.Parameters["@skipped"].Value = false;
-            }
-            else
-            {
-                updateImage.Parameters["@downloaded"].Value = false;
-                updateImage.Parameters["@skipped"].Value = true;
-            }
-
-            updateImage.ExecuteNonQuery();
-            return true;
-        }
-
-        private NpgsqlCommand getTagsForPostCommand;
-        private List<string> GetTagsForPost(int postId)
-        {
-            if (getTagsForPostCommand == null)
-            {
-                getTagsForPostCommand = connection.CreateCommand();
-                getTagsForPostCommand.CommandText =
-                    "SELECT tag FROM dump_gb_posttags posttag LEFT JOIN dump_gb_tags tag ON tag.id = posttag.tagid WHERE postid = @postid";
-                getTagsForPostCommand.Parameters.Add("@postid", NpgsqlDbType.Integer);
-            }
-
-            getTagsForPostCommand.Parameters["@postid"].Value = postId;
-            NpgsqlDataReader dataReader = getTagsForPostCommand.ExecuteReader();
-            List<string> result = new List<string>();
-            while (dataReader.Read())
-                result.Add(dataReader.GetString(0));
-            dataReader.Dispose();
-            return result;
-        }
-
-        private bool IsBlacklisted(List<string> tags)
-        {
-            if (!ini.ContainsKey("blacklist"))
-                return false;
-
-            IniSection blacklistSection = ini["blacklist"];
-            foreach (string tag in tags)
-            {
-                if (!blacklistSection.ContainsKey(tag))
-                    continue;
-
-                int i = Convert.ToInt32(blacklistSection[tag]);
-                if (i != 0)
-                    return true;
-            }
-
-            return false;
-        }
-
+        
         private NpgsqlCommand testForUnscrapedTagCommand;
-
-        private string TestForUnscrapedTag()
+        private Tuple<string,int> TestForUnscrapedTag()
         {
             if (testForUnscrapedTagCommand == null)
             {
                 testForUnscrapedTagCommand = connection.CreateCommand();
-                testForUnscrapedTagCommand.CommandText = "SELECT tag FROM dump_gb_tags WHERE scraped = FALSE AND tag != ''";
+                testForUnscrapedTagCommand.CommandText = "SELECT tag, id FROM tags WHERE scraped = FALSE AND tag != ''";
             }
             NpgsqlDataReader dataReader = testForUnscrapedTagCommand.ExecuteReader();
-            string result = null;
             if (dataReader.Read())
             {
-                result = dataReader.GetString(0);
+                string tag = dataReader.GetString(0);
+                int id = dataReader.GetInt32(1);
+                dataReader.Dispose();
+                return new Tuple<string, int>(tag, id);
             }
-            dataReader.Dispose();
-            return result;
+            else
+            {
+                dataReader.Dispose();
+                return null;
+            }
         }
 
         private NpgsqlCommand insertPostTagRelationCommand;
@@ -233,7 +192,7 @@ namespace gelbooruDumper
             if (insertPostTagRelationCommand == null)
             {
                 insertPostTagRelationCommand = connection.CreateCommand();
-                insertPostTagRelationCommand.CommandText = "INSERT INTO dump_gb_posttags (postid,tagid) VALUES (@post,@tag) ON CONFLICT DO NOTHING";
+                insertPostTagRelationCommand.CommandText = "INSERT INTO posttags (postid,tagid) VALUES (@post,@tag) ON CONFLICT DO NOTHING";
                 insertPostTagRelationCommand.Parameters.Add("@post", NpgsqlDbType.Integer);
                 insertPostTagRelationCommand.Parameters.Add("@tag", NpgsqlDbType.Integer);
             }
@@ -250,7 +209,7 @@ namespace gelbooruDumper
             if (testForTagCommand == null)
             {
                 testForTagCommand = connection.CreateCommand();
-                testForTagCommand.CommandText = "SELECT id FROM dump_gb_tags WHERE tag=@tag";
+                testForTagCommand.CommandText = "SELECT id FROM tags WHERE tag=@tag";
                 testForTagCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
             }
 
@@ -268,7 +227,7 @@ namespace gelbooruDumper
             if (insertTagCommand == null)
             {
                 insertTagCommand = connection.CreateCommand();
-                insertTagCommand.CommandText = "INSERT INTO dump_gb_tags (tag) VALUES (@tag) RETURNING id";
+                insertTagCommand.CommandText = "INSERT INTO tags (tag) VALUES (@tag) RETURNING id";
                 insertTagCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
             }
 
@@ -282,18 +241,18 @@ namespace gelbooruDumper
         }
         
         private NpgsqlCommand handlePostCommand;
-        private void HandlePost(postsPost post)
+        private void HandlePost(postsPost post, int source_tags)
         {
             log.Info("Found new post: " + post.id);
             if (handlePostCommand == null)
             {
                 handlePostCommand = connection.CreateCommand();
                 handlePostCommand.CommandText =
-                    "INSERT INTO dump_gb_posts" +
-                    "(id,height,score,fileurl,parentid,sampleurl,samplewidth,sampleheight,previewurl,rating,width,change,md5,creatorid,haschildren,createdat,status,source,hasnotes,hascomments,previewwidth,previewheight) " +
+                    "INSERT INTO posts" +
+                    "(id,height,score,fileurl,parentid,sampleurl,samplewidth,sampleheight,previewurl,rating,width,change,md5,creatorid,haschildren,createdat,status,source,hasnotes,hascomments,previewwidth,previewheight,source_tag) " +
                     "VALUES " +
                     "(@id,@height,@score,@fileurl,@parentid,@sampleurl,@samplewidth,@sampleheight,@previewurl,@rating,@width,@change," +
-                    " @md5,@creatorid,@haschildren,@createdat,@status,@source,@hasnotes,@hascomments,@previewwidth,@previewheight)";
+                    " @md5,@creatorid,@haschildren,@createdat,@status,@source,@hasnotes,@hascomments,@previewwidth,@previewheight,@sourcetag)";
                 handlePostCommand.Parameters.Add("@id",NpgsqlDbType.Integer);
                 handlePostCommand.Parameters.Add("@height",NpgsqlDbType.Integer);
                 handlePostCommand.Parameters.Add("@score",NpgsqlDbType.Integer);
@@ -316,6 +275,7 @@ namespace gelbooruDumper
                 handlePostCommand.Parameters.Add("@hascomments",NpgsqlDbType.Boolean);
                 handlePostCommand.Parameters.Add("@previewwidth",NpgsqlDbType.Integer);
                 handlePostCommand.Parameters.Add("@previewheight",NpgsqlDbType.Integer);
+                handlePostCommand.Parameters.Add("@sourcetag", NpgsqlDbType.Integer);
             }
 
             int postId = Convert.ToInt32(post.id);
@@ -344,6 +304,7 @@ namespace gelbooruDumper
             handlePostCommand.Parameters["@hascomments"].Value = Convert.ToBoolean(post.has_comments);
             handlePostCommand.Parameters["@previewwidth"].Value = Convert.ToInt32(post.preview_width);
             handlePostCommand.Parameters["@previewheight"].Value = Convert.ToInt32(post.preview_height);
+            handlePostCommand.Parameters["@sourcetag"].Value = source_tags;
             handlePostCommand.ExecuteNonQuery();
 
             foreach (string tag in post.tags.Split(' '))
@@ -372,7 +333,7 @@ namespace gelbooruDumper
             if (countTagsCommand == null)
             {
                 countTagsCommand = connection.CreateCommand();
-                countTagsCommand.CommandText = "SELECT COUNT(*) FROM dump_gb_tags";
+                countTagsCommand.CommandText = "SELECT COUNT(*) FROM tags";
             }
 
             NpgsqlDataReader dataReader = countTagsCommand.ExecuteReader();
@@ -388,7 +349,7 @@ namespace gelbooruDumper
             if (testForPostCommand == null)
             {
                 testForPostCommand = connection.CreateCommand();
-                testForPostCommand.CommandText = "SELECT dateAdded FROM dump_gb_posts WHERE id=@id";
+                testForPostCommand.CommandText = "SELECT dateAdded FROM posts WHERE id=@id";
                 testForPostCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -399,16 +360,55 @@ namespace gelbooruDumper
             return result;
         }
 
-        private void HandlePosts(posts posts)
+        private void HandlePosts(posts posts, int sourcetag)
         {
-            foreach (postsPost post in posts.post)
+            if (posts.post != null)
             {
-                int postId = Convert.ToInt32(post.id);
-                if (!TestForPost(postId))
+                foreach (postsPost post in posts.post)
                 {
-                    HandlePost(post);
+                    int postId = Convert.ToInt32(post.id);
+                    if (!TestForPost(postId))
+                    {
+                        HandlePost(post, sourcetag);
+                    }
                 }
             }
+        }
+
+        private NpgsqlCommand findUnscrapedCommentsNpgsqlCommand;
+        private int? FindUnscrapedComments()
+        {
+            if (findUnscrapedCommentsNpgsqlCommand == null)
+            {
+                findUnscrapedCommentsNpgsqlCommand = connection.CreateCommand();
+                findUnscrapedCommentsNpgsqlCommand.CommandText =
+                    "SELECT id FROM posts WHERE hascomments = TRUE AND scraped_comments = FALSE";
+            }
+
+            NpgsqlDataReader dataReader = findUnscrapedCommentsNpgsqlCommand.ExecuteReader();
+            int? result = null;
+            if (dataReader.Read())
+            {
+                result = dataReader.GetInt32(0);
+            }
+            dataReader.Close();
+            return result;
+        }
+
+        private NpgsqlCommand markCommentsAsScraped;
+        private void MarkCommentsAsScraped(int id)
+        {
+            if (markCommentsAsScraped == null)
+            {
+                markCommentsAsScraped = connection.CreateCommand();
+                markCommentsAsScraped.CommandText = "UPDATE posts SET scraped_comments = TRUE WHERE id=@id";
+                markCommentsAsScraped.Parameters.Add("@id", NpgsqlDbType.Integer);
+            }
+
+            markCommentsAsScraped.Parameters["@id"].Value = id;
+            int result = markCommentsAsScraped.ExecuteNonQuery();
+            if (result != 1)
+                throw new Exception("unexpected sql result");
         }
     }
 }

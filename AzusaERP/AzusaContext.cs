@@ -29,6 +29,7 @@ namespace moe.yo3explorer.azusa
                 instance.Plugins = new List<AzusaPlugin>();
                 instance.PluginLoadQueue = new Queue<AzusaPlugin>();
                 instance.ImageAcquisitionPlugins = new List<IImageAcquisitionPlugin>();
+                instance.SidecarDisplayControls = new Dictionary<Guid, Type>();
             }
             
             instance.NumOperations++;
@@ -129,6 +130,7 @@ namespace moe.yo3explorer.azusa
         public Queue<AzusaPlugin> PluginLoadQueue { get; private set; }
         public bool CatchModuleExceptions => false;
 
+        public Dictionary<Guid,Type> SidecarDisplayControls { get; private set; }
         public List<IImageAcquisitionPlugin> ImageAcquisitionPlugins { get; private set; }
         public string LicenseKey { get; set; }
         public int LicenseLength { get; set; }

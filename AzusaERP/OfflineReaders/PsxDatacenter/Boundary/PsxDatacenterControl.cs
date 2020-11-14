@@ -57,6 +57,8 @@ namespace moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Boundary
             IDatabaseDriver database = context.DatabaseDriver;
             DataGridViewRow row = dataGridView1.SelectedRows[0];
             PsxDatacenterPreview preview = (PsxDatacenterPreview)row.DataBoundItem;
+            if (row.DataBoundItem == null)
+                return;
 
             if (pictureBox1.BackgroundImage != null)
                 pictureBox1.BackgroundImage.Dispose();
@@ -66,8 +68,9 @@ namespace moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Boundary
             galleria1.GalleriaModel = new EmptyGalleriaModel();
             textBox1.Text = String.Empty;
 
-            if (!preview.HasAdditionalData)
-                return;
+            if (preview != null)
+                if (!preview.HasAdditionalData)
+                    return;
 
             PsxDatacenterGame game = database.PsxDc_GetSpecificGame(preview.Id);
             propertyGrid1.SelectedObject = game;

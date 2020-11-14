@@ -589,6 +589,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productCover.DataChanged = true;
             this.productCover.Dock = System.Windows.Forms.DockStyle.Fill;
             this.productCover.Location = new System.Drawing.Point(0, 0);
+            this.productCover.MediumId = 0;
             this.productCover.Name = "productCover";
             this.productCover.Size = new System.Drawing.Size(187, 166);
             this.productCover.TabIndex = 0;
@@ -700,6 +701,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productScreenshot.DataChanged = true;
             this.productScreenshot.Dock = System.Windows.Forms.DockStyle.Fill;
             this.productScreenshot.Location = new System.Drawing.Point(0, 0);
+            this.productScreenshot.MediumId = 0;
             this.productScreenshot.Name = "productScreenshot";
             this.productScreenshot.Size = new System.Drawing.Size(187, 166);
             this.productScreenshot.TabIndex = 0;
@@ -1271,6 +1273,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaCdText.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mediaCdText.Enabled = false;
             this.mediaCdText.Location = new System.Drawing.Point(0, 0);
+            this.mediaCdText.MediumId = 0;
             this.mediaCdText.Name = "mediaCdText";
             this.mediaCdText.Size = new System.Drawing.Size(187, 173);
             this.mediaCdText.TabIndex = 0;
@@ -1360,6 +1363,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaMds.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mediaMds.Enabled = false;
             this.mediaMds.Location = new System.Drawing.Point(3, 3);
+            this.mediaMds.MediumId = 0;
             this.mediaMds.Name = "mediaMds";
             this.mediaMds.Size = new System.Drawing.Size(181, 167);
             this.mediaMds.TabIndex = 0;
@@ -1395,7 +1399,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.filesystemContextMenuStrip.Name = "filesystemContextMenuStrip";
             this.filesystemContextMenuStrip.Size = new System.Drawing.Size(217, 48);
             this.filesystemContextMenuStrip.Text = "Filesystem";
-            this.filesystemContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.filesystemContextMenuStrip_Opening);
             // 
             // imageParsenToolStripMenuItem
             // 
@@ -1792,14 +1795,11 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem;
         private System.Windows.Forms.TabPage mediaTabFilesystem;
         private System.Windows.Forms.TreeView mediaFilesystemTreeView;
-        private System.Windows.Forms.ContextMenuStrip filesystemContextMenuStrip;
-        private System.Windows.Forms.ToolStripMenuItem imageParsenToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog filesystemIsoParseOpenFileDialog;
         private System.Windows.Forms.ImageList filesystemImageList;
         private System.Windows.Forms.ToolStripMenuItem metadatenExportierenToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem batchImportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bandcampKollektionImportierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem defekteM3UDateienReparierenToolStripMenuItem;
@@ -1811,5 +1811,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem regalVervollständigenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem produktVervollständigenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m3UEditorÖffnenToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip filesystemContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem imageParsenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
     }
 }
