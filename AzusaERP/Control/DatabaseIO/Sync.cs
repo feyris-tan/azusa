@@ -177,6 +177,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
             if (idColumn != null)
                 return idColumn;
 
+            idColumn = columns.Find(x => x.ColumnName.ToLowerInvariant().Equals("serial"));
+            if (idColumn != null)
+                return idColumn;
+
             throw new NotImplementedException(String.Format("No ID column detected!"));
         }
     }

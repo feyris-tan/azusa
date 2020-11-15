@@ -47,6 +47,16 @@ namespace moe.yo3explorer.azusa
                         p.context.Splash.InvokeClose();
                         Migration1to2.Migrate();
                         return;
+                    case "--upgrade2to3":
+                        Program p23 = new Program();
+                        p23.context = AzusaContext.GetInstance();
+                        p23.CreateSplashThread();
+                        p23.context.Ini = new Ini("azusa.ini");
+                        p23.LoadLicense();
+                        p23.ConnectOnline();
+                        p23.context.Splash.InvokeClose();
+                        Migration2to3.Migrate();
+                        return;
                     default:
                         return;
                 }

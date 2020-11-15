@@ -175,7 +175,7 @@ namespace vndbDumper
 
         private void Connection_Notification(object sender, NpgsqlNotificationEventArgs e)
         {
-            logger.Info(String.Format("PostgreSQL Notification: {0}", e.AdditionalInformation));
+            logger.Info(String.Format("PostgreSQL Notification: {0}", e.Payload));
         }
 
         private void Connection_Notice(object sender, NpgsqlNoticeEventArgs e)

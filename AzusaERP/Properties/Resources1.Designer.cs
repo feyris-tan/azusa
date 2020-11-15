@@ -229,6 +229,16 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap link_break {
+            get {
+                object obj = ResourceManager.GetObject("link_break", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap media_optical {
             get {
                 object obj = ResourceManager.GetObject("media_optical", resourceCulture);

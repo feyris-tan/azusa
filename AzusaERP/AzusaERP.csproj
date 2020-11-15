@@ -206,7 +206,22 @@
   <ItemGroup>
     <Compile Include="AzusaContext.cs" />
     <Compile Include="AzusaPlugin.cs" />
+    <Compile Include="Control\DatabaseIO\Migrations\Migration2to3.cs" />
+    <Compile Include="MediaLibrary\Control\AttachmentEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\AttachmentEditor.Designer.cs">
+      <DependentUpon>AttachmentEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\AttachmentTextEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\AttachmentTextEditor.Designer.cs">
+      <DependentUpon>AttachmentTextEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="MediaLibrary\Control\ISidecarDisplayControl.cs" />
+    <Compile Include="MediaLibrary\Entity\Attachment.cs" />
+    <Compile Include="MediaLibrary\Entity\AttachmentType.cs" />
     <Compile Include="Utilities\BandcampImporter\ArbitraryStreamFileAbstraction.cs" />
     <Compile Include="Utilities\BandcampImporter\BandcampAlbumEntry.cs" />
     <Compile Include="Utilities\BandcampImporter\BandcampImportWorker.cs" />
@@ -385,6 +400,7 @@
     <None Include="Resources\money_yen.png" />
     <None Include="Resources\money_dollar.png" />
     <None Include="Resources\money_pound.png" />
+    <None Include="Resources\link_break.png" />
     <Content Include="Resources\Vocadb.FindSongRelatedAlbum.sql" />
     <Compile Include="Splash.cs">
       <SubType>Form</SubType>
@@ -447,6 +463,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Control\Galleria\Galleria.resx">
       <DependentUpon>Galleria.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MediaLibrary\Control\AttachmentEditor.resx">
+      <DependentUpon>AttachmentEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MediaLibrary\Control\AttachmentTextEditor.resx">
+      <DependentUpon>AttachmentTextEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.resx">
       <DependentUpon>GelboooruControl.cs</DependentUpon>

@@ -12,5 +12,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         byte[] Data { get; set; }
         bool isComplete();
         int MediumId { get; set; }
+        System.Windows.Forms.Control ToControl();
+        void ForceEnabled();
+        event SidecarChange OnDataChanged;
     }
+
+    public delegate void SidecarChange(byte[] data, bool complete, int mediumId);
 }

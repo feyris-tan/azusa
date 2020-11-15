@@ -1691,6 +1691,31 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
+        public IEnumerable<AttachmentType> GetAllMediaAttachmentTypes()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Attachment> GetAllMediaAttachments(Media currentMedia)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateAttachment(Attachment attachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertAttachment(Attachment attachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteAttachment(Attachment attachment)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<Country> GetAllCountries()
         {
             SQLiteConnection connection = GetConnectionForTable("azusa.countries");

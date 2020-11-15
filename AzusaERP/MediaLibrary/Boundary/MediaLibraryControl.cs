@@ -1272,5 +1272,11 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             Controls.Remove(menuStrip1);
         }
+
+        private void weitereAnhängeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AttachmentEditor attachmentEditor = new AttachmentEditor(currentMedia, context);
+            attachmentEditor.ShowDialog(FindForm());
+        }
     }
 }

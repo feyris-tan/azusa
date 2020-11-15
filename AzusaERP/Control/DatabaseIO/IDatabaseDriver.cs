@@ -113,5 +113,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void RemoveMedia(Media currentMedia);
         StartupFailReason CheckLicenseStatus(string contextLicenseKey);
         void ActivateLicense(string contextLicenseKey);
+
+        IEnumerable<AttachmentType> GetAllMediaAttachmentTypes();
+        IEnumerable<Attachment> GetAllMediaAttachments(Media currentMedia);
+        void UpdateAttachment(Attachment attachment);
+        void InsertAttachment(Attachment attachment);
+        void DeleteAttachment(Attachment attachment);
     }
 }

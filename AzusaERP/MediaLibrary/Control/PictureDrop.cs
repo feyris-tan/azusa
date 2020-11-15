@@ -143,6 +143,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
                     pictureBox1.BackgroundImage = null;
                 }
                 DataChanged = true;
+                OnDataChanged?.Invoke(buffer, isComplete(), MediumId);
             }
             get
             {
@@ -234,5 +235,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         }
 
         public int MediumId { get; set; }
+        public System.Windows.Forms.Control ToControl()
+        {
+            return this;
+        }
+
+        public void ForceEnabled()
+        {
+            
+        }
+
+        public event SidecarChange OnDataChanged;
     }
 }

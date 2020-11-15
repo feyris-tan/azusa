@@ -38,10 +38,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
                     label1.Text = "No data";
                 }
 
-                if (DataChanged != null)
-                {
-                    DataChanged(this, Data);
-                }
+                DataChanged?.Invoke(this, Data);
+                OnDataChanged?.Invoke(Data, isComplete(), MediumId);
             }
         }
 
@@ -95,5 +93,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         private bool _enabled;
 
         public int MediumId { get; set; }
+        public System.Windows.Forms.Control ToControl()
+        {
+            return this;
+        }
+
+        public void ForceEnabled()
+        {
+            Enabled = true;
+        }
+
+        public event SidecarChange OnDataChanged;
     }
 }

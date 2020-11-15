@@ -157,6 +157,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.metadatenExportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m3UEditorÖffnenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.weitereAnhängeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metadataAndDumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -1549,9 +1550,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem,
             this.metadatenExportierenToolStripMenuItem,
             this.metadatenExportenUndAlsNeuenDumpSetzenToolStripMenuItem,
-            this.m3UEditorÖffnenToolStripMenuItem});
+            this.m3UEditorÖffnenToolStripMenuItem,
+            this.weitereAnhängeToolStripMenuItem});
             this.mediaMoreOptions.Name = "mediaMoreOptions";
-            this.mediaMoreOptions.Size = new System.Drawing.Size(390, 136);
+            this.mediaMoreOptions.Size = new System.Drawing.Size(390, 158);
             // 
             // setMetadataAndDump
             // 
@@ -1594,6 +1596,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.m3UEditorÖffnenToolStripMenuItem.Size = new System.Drawing.Size(389, 22);
             this.m3UEditorÖffnenToolStripMenuItem.Text = "M3U-Editor öffnen";
             this.m3UEditorÖffnenToolStripMenuItem.Click += new System.EventHandler(this.m3UEditorÖffnenToolStripMenuItem_Click);
+            // 
+            // weitereAnhängeToolStripMenuItem
+            // 
+            this.weitereAnhängeToolStripMenuItem.Name = "weitereAnhängeToolStripMenuItem";
+            this.weitereAnhängeToolStripMenuItem.Size = new System.Drawing.Size(389, 22);
+            this.weitereAnhängeToolStripMenuItem.Text = "Weitere Anhänge";
+            this.weitereAnhängeToolStripMenuItem.Click += new System.EventHandler(this.weitereAnhängeToolStripMenuItem_Click);
             // 
             // metadataAndDumpOpenFileDialog
             // 
@@ -1814,5 +1823,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ContextMenuStrip filesystemContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem imageParsenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem weitereAnhängeToolStripMenuItem;
     }
 }

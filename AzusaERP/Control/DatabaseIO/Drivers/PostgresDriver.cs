@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using AzusaERP;
+using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
@@ -2234,6 +2235,146 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             activateLicenseCommand.Parameters["@key"].Value = contextLicenseKey;
             activateLicenseCommand.Parameters["@owner"].Value = String.Format("{0}", Environment.MachineName);
             activateLicenseCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand getAllMediaAttachmentTypesCommand;
+        public IEnumerable<AttachmentType> GetAllMediaAttachmentTypes()
+        {
+            if (getAllMediaAttachmentTypesCommand == null)
+            {
+                getAllMediaAttachmentTypesCommand = connection.CreateCommand();
+                getAllMediaAttachmentTypesCommand.CommandText = "SELECT * FROM azusa.media_attachment_types";
+            }
+
+            NpgsqlDataReader dataReader = getAllMediaAttachmentTypesCommand.ExecuteReader();
+            while (dataReader.Read())
+            {
+                AttachmentType child = new AttachmentType();
+                child.id = dataReader.GetInt32(0);
+                child.dateadded = dataReader.GetDateTime(1);
+                child.name = dataReader.GetString(2);
+                child.displayControlUuid = dataReader.GetGuid(3);
+                yield return child;
+            }
+            dataReader.Close();
+        }
+
+        private NpgsqlCommand getAllMediaAttachmentsCommand;
+        public IEnumerable<Attachment> GetAllMediaAttachments(Media currentMedia)
+        {
+            if (getAllMediaAttachmentsCommand == null)
+            {
+                getAllMediaAttachmentsCommand = connection.CreateCommand();
+                getAllMediaAttachmentsCommand.CommandText = "SELECT * FROM azusa.media_attachments WHERE mediaid = @mid";
+                getAllMediaAttachmentsCommand.Parameters.Add("@mid", NpgsqlDbType.Integer);
+            }
+
+            getAllMediaAttachmentsCommand.Parameters["@mid"].Value = currentMedia.Id;
+            NpgsqlDataReader dataReader = getAllMediaAttachmentsCommand.ExecuteReader();
+            while (dataReader.Read())
+            {
+                Attachment child = new Attachment();
+                child._MediaId = dataReader.GetInt32(0);
+                child._TypeId = dataReader.GetInt32(1);
+                child._Buffer = dataReader.GetByteArray(2);
+                child._DateAdded = dataReader.GetDateTime(3);
+
+                if (!dataReader.IsDBNull(4))
+                    child._DateUpdated = dataReader.GetDateTime(4);
+
+                child._Complete = dataReader.GetBoolean(5);
+                child._Serial = dataReader.GetInt64(6);
+                yield return child;
+            }
+            dataReader.Close();
+        }
+
+        private NpgsqlCommand updateAttachmentCommand;
+        public void UpdateAttachment(Attachment attachment)
+        {
+            if (updateAttachmentCommand == null)
+            {
+                updateAttachmentCommand = connection.CreateCommand();
+                updateAttachmentCommand.CommandText =
+                    "UPDATE azusa.media_attachments " +
+                    "SET buffer = @buffer, completed = @completed, dateupdated = @dateupdated " +
+                    "WHERE mediaid = @mediaid AND typeid = @typeid";
+                updateAttachmentCommand.Parameters.Add("@buffer", NpgsqlDbType.Bytea);
+                updateAttachmentCommand.Parameters.Add("@completed", NpgsqlDbType.Boolean);
+                updateAttachmentCommand.Parameters.Add("@dateupdated", NpgsqlDbType.Timestamp);
+                updateAttachmentCommand.Parameters.Add("@mediaid", NpgsqlDbType.Integer);
+                updateAttachmentCommand.Parameters.Add("@typeid", NpgsqlDbType.Integer);
+            }
+
+            updateAttachmentCommand.Parameters["@buffer"].Value = attachment._Buffer;
+            updateAttachmentCommand.Parameters["@completed"].Value = attachment._Complete;
+            updateAttachmentCommand.Parameters["@dateupdated"].Value = attachment._DateUpdated;
+            updateAttachmentCommand.Parameters["@mediaid"].Value = attachment._MediaId;
+            updateAttachmentCommand.Parameters["@typeid"].Value = attachment._TypeId;
+            updateAttachmentCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand insertAttachmentCommand;
+        public void InsertAttachment(Attachment attachment)
+        {
+            if (insertAttachmentCommand == null)
+            {
+                insertAttachmentCommand = connection.CreateCommand();
+                insertAttachmentCommand.CommandText =
+                    "INSERT INTO azusa.media_attachments (mediaid,typeid,buffer,completed) VALUES (@mediaid,@typeid,@buffer,@completed)";
+                insertAttachmentCommand.Parameters.Add("@buffer", NpgsqlDbType.Bytea);
+                insertAttachmentCommand.Parameters.Add("@completed", NpgsqlDbType.Boolean);
+                insertAttachmentCommand.Parameters.Add("@mediaid", NpgsqlDbType.Integer);
+                insertAttachmentCommand.Parameters.Add("@typeid", NpgsqlDbType.Integer);
+            }
+            insertAttachmentCommand.Parameters["@buffer"].Value = attachment._Buffer;
+            insertAttachmentCommand.Parameters["@completed"].Value = attachment._Complete;
+            insertAttachmentCommand.Parameters["@mediaid"].Value = attachment._MediaId;
+            insertAttachmentCommand.Parameters["@typeid"].Value = attachment._TypeId;
+            insertAttachmentCommand.ExecuteNonQuery();
+        }
+
+        private NpgsqlCommand deleteAttachmentCommand;
+        public void DeleteAttachment(Attachment attachment)
+        {
+            if (deleteAttachmentCommand == null)
+            {
+                deleteAttachmentCommand = connection.CreateCommand();
+                deleteAttachmentCommand.CommandText =
+                    "DELETE FROM azusa.media_attachments WHERE mediaid = @mediaid AND typeid = @typeid";
+                deleteAttachmentCommand.Parameters.Add("@mediaid", NpgsqlDbType.Integer);
+                deleteAttachmentCommand.Parameters.Add("@typeid", NpgsqlDbType.Integer);
+            }
+            deleteAttachmentCommand.Parameters["@mediaid"].Value = attachment._MediaId;
+            deleteAttachmentCommand.Parameters["@typeid"].Value = attachment._TypeId;
+            deleteAttachmentCommand.ExecuteNonQuery();
+        }
+
+        public IEnumerable<AttachmentMigrationCandidate> GetAttachmentMigrationCandidates()
+        {
+            NpgsqlCommand command = connection.CreateCommand();
+            command.CommandText = "SELECT cicm, mhddlog, scsiinfo, priv, jedecid, id FROM azusa.media";
+            NpgsqlDataReader dataReader = command.ExecuteReader();
+            while (dataReader.Read())
+            {
+                AttachmentMigrationCandidate child = new AttachmentMigrationCandidate();
+                if (!dataReader.IsDBNull(0))
+                    child.CICM = Encoding.UTF8.GetBytes(dataReader.GetString(0));
+                if (!dataReader.IsDBNull(1))
+                    child.MHddLog = dataReader.GetByteArray(1);
+                if (!dataReader.IsDBNull(2))
+                    child.ScsiInfo = Encoding.UTF8.GetBytes(dataReader.GetString(2));
+                if (!dataReader.IsDBNull(3))
+                    child.Priv = dataReader.GetByteArray(3);
+                if (!dataReader.IsDBNull(4))
+                    child.JedecId = dataReader.GetByteArray(4);
+                if (child.ContainsData())
+                {
+                    child.MediaId = dataReader.GetInt32(5);
+                    yield return child;
+                }
+            }
+            dataReader.Close();
         }
     }
 }
