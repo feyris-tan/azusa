@@ -13,27 +13,21 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         private void jPYEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 128.99).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 123.91).ToString();
         }
 
         private void uSDEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 1.14).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 1.18).ToString();
         }
 
         private void gBPEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 0.89).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 0.90).ToString();
         }
-
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
-        {
-            if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) * 0.5).ToString();
-        }
-
+        
         public double? Value
         {
             get

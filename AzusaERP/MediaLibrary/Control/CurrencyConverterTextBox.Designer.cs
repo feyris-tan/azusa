@@ -34,7 +34,6 @@
             this.jPYEURToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uSDEURToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gBPEURToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,38 +52,33 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.jPYEURToolStripMenuItem,
             this.uSDEURToolStripMenuItem,
-            this.gBPEURToolStripMenuItem,
-            this.toolStripMenuItem2});
+            this.gBPEURToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(133, 92);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(137, 70);
             // 
             // jPYEURToolStripMenuItem
             // 
+            this.jPYEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_yen;
             this.jPYEURToolStripMenuItem.Name = "jPYEURToolStripMenuItem";
-            this.jPYEURToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.jPYEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.jPYEURToolStripMenuItem.Text = "JPY -> EUR";
             this.jPYEURToolStripMenuItem.Click += new System.EventHandler(this.jPYEURToolStripMenuItem_Click);
             // 
             // uSDEURToolStripMenuItem
             // 
+            this.uSDEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_dollar;
             this.uSDEURToolStripMenuItem.Name = "uSDEURToolStripMenuItem";
-            this.uSDEURToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.uSDEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.uSDEURToolStripMenuItem.Text = "USD -> EUR";
             this.uSDEURToolStripMenuItem.Click += new System.EventHandler(this.uSDEURToolStripMenuItem_Click);
             // 
             // gBPEURToolStripMenuItem
             // 
+            this.gBPEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_pound;
             this.gBPEURToolStripMenuItem.Name = "gBPEURToolStripMenuItem";
-            this.gBPEURToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.gBPEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.gBPEURToolStripMenuItem.Text = "GBP -> EUR";
             this.gBPEURToolStripMenuItem.Click += new System.EventHandler(this.gBPEURToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(132, 22);
-            this.toolStripMenuItem2.Text = "50%";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // CurrencyConverterTextBox
             // 
@@ -107,6 +101,5 @@
         private System.Windows.Forms.ToolStripMenuItem jPYEURToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uSDEURToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gBPEURToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
     }
 }

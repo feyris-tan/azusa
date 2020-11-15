@@ -155,7 +155,7 @@ namespace moe.yo3explorer.azusa.Properties {
         ///where 
         ///	((product.picture) IS NULL 
         ///     and (product.consistent = FALSE) 
-        ///     and (shelf.&quot;ignoreForStatistics&quot; = FALSE)
+        ///     and (shelf.ignoreForStatistics = FALSE)
         ///    ) ähnelt.
         /// </summary>
         internal static string GetTotalMissingCovers_Postgre {
@@ -174,8 +174,8 @@ namespace moe.yo3explorer.azusa.Properties {
         ///		((media.graphdata) IS NULL or (media.graphdata = &apos;&apos;))
         ///	and (product.consistent = FALSE) 
         ///	and (mediaType.graphData = TRUE)
-        ///	and ((mediaType.&quot;ignoreForStatistics&quot; = FALSE) 
-        ///	  or (shelf.&quot;ignoreForStatistics&quot; = FALSE))
+        ///	and ((mediaType.ignoreForStatistics = FALSE) 
+        ///	  or (shelf.ignoreForStatistics = FALSE))
         ///		)
         /// ähnelt.
         /// </summary>
@@ -189,7 +189,7 @@ namespace moe.yo3explorer.azusa.Properties {
         ///   Sucht eine lokalisierte Zeichenfolge, die select COUNT(*)
         ///from azusa.products products
         ///join azusa.shelves shelves on products.inshelf = shelves.id
-        ///where shelves.&quot;screenshotRequired&quot; = TRUE
+        ///where shelves.screenshotRequired = TRUE
         ///and (products.screenshot IS NULL or LENGTH(products.screenshot) = 0) ähnelt.
         /// </summary>
         internal static string GetTotalMissingScreenshots_Postgre {
@@ -208,7 +208,7 @@ namespace moe.yo3explorer.azusa.Properties {
         ///where (media.dumppath IS NULL or media.dumppath = &apos;&apos;) 
         ///  and products.consistent = FALSE
         ///  and products.name IS NOT NULL
-        ///  and azusa.mediatypes.&quot;ignoreForStatistics&quot; = FALSE ähnelt.
+        ///  and azusa.mediatypes.ignoreForStatistics = FALSE ähnelt.
         /// </summary>
         internal static string GetTotalUndumpedMedia_Postgre {
             get {
@@ -232,6 +232,36 @@ namespace moe.yo3explorer.azusa.Properties {
         internal static System.Drawing.Bitmap media_optical {
             get {
                 object obj = ResourceManager.GetObject("media_optical", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap money_dollar {
+            get {
+                object obj = ResourceManager.GetObject("money_dollar", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap money_pound {
+            get {
+                object obj = ResourceManager.GetObject("money_pound", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap money_yen {
+            get {
+                object obj = ResourceManager.GetObject("money_yen", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -320,7 +350,7 @@ namespace moe.yo3explorer.azusa.Properties {
         ///    root.notes,
         ///    publisher.name
         ///
-        ///FROM dump_vgmdb_albums root
+        ///FROM dump_vgmdb.albums root
         ///LEFT JOIN dump_vgmdb.album_types type ON root.typeid = type.id
         ///LEFT JOIN dump_vgmdb.album_classification classification ON root.classificationid = classification.id
         ///LEFT JOIN dump_vgmdb.album_mediaformat mediaformat ON root.mediaformatid = mediaformat.id
