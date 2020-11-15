@@ -72,8 +72,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             return connections[args[0]];
         }
-
-        public bool TransactionSupported => false;
+        
         public bool CanActivateLicense => false;
 
         public void BeginTransaction()
@@ -96,110 +95,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotSupportedException();
         }
         
-        public IEnumerable<DateTime> Dexcom_GetDates()
-        {
-            SQLiteConnection connection = GetConnectionForTable("dexcom.history");
-            SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT DISTINCT date FROM dexcom.history ORDER BY date ASC";
-            SQLiteDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetDateTime(0);
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
-        public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
-        {
-            SQLiteConnection connection = GetConnectionForTable("dexcom.history");
-            SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM dexcom.history WHERE date=@date";
-            cmd.Parameters.Add("@date", DbType.Date);
-            cmd.Parameters["@date"].Value = day.Date;
-            SQLiteDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                DateTime date = dataReader.GetDateTime(0);
-                DateTime time = dataReader.GetDateTime(1);
-                DateTime timestamp = new DateTime(date.Ticks + time.Ticks);
-                DexTimelineEntry timelineEntry = new DexTimelineEntry();
-                timelineEntry.Timestamp = timestamp;
-                if (!dataReader.IsDBNull(2))
-                    timelineEntry.SensorFiltered = (uint)dataReader.GetInt32(2);
-                if (!dataReader.IsDBNull(3))
-                    timelineEntry.SensorUnfiltered = (uint)dataReader.GetInt32(3);
-                if (!dataReader.IsDBNull(4))
-                    timelineEntry.Rssi = (uint)dataReader.GetInt32(4);
-                if (!dataReader.IsDBNull(5))
-                    timelineEntry.Glucose = (uint)dataReader.GetInt32(5);
-                if (!dataReader.IsDBNull(6))
-                    timelineEntry.TrendArrow = (TrendArrow)dataReader.GetInt16(6);
-                if (!dataReader.IsDBNull(7))
-                    timelineEntry.SessionState = (SessionState)dataReader.GetInt16(7);
-                if (!dataReader.IsDBNull(8))
-                    timelineEntry.MeterGlucose = (uint)dataReader.GetInt16(8);
-                if (!dataReader.IsDBNull(9))
-                    timelineEntry.EventType = (EventType)dataReader.GetInt16(9);
-                if (!dataReader.IsDBNull(10))
-                    timelineEntry.Carbs = dataReader.GetDouble(10);
-                if (!dataReader.IsDBNull(11))
-                    timelineEntry.Insulin = dataReader.GetDouble(11);
-
-                if (!dataReader.IsDBNull(12))
-                {
-                    byte temp = dataReader.GetByte(12);
-                    if (timelineEntry.EventType == EventType.Exercise)
-                        timelineEntry.ExerciseEvent = (ExerciseSubType)temp;
-                    else if (timelineEntry.EventType == EventType.Health)
-                        timelineEntry.HealthEvent = (HealthSubType)temp;
-                }
-
-                if (!dataReader.IsDBNull(13))
-                    timelineEntry.SpecialGlucoseValue = (SpecialGlucoseValue)dataReader.GetInt32(13);
-                yield return timelineEntry;
-            }
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
-        public bool Dexcom_InsertTimestamp(DexTimelineEntry entry)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void Dexcom_ManualGlucoseValueStore(DateTime timestamp, short value, string unit)
-        {
-            throw new NotSupportedException();
-        }
-
-        public bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note)
-        {
-            throw new NotSupportedException();
-        }
-
-        private SQLiteCommand testForTimestamp;
-        public bool Dexcom_TestForTimestamp(DateTime theDate, DateTime theTime)
-        {
-            if (testForTimestamp == null)
-            {
-                testForTimestamp = GetConnectionForTable("dexcom.history").CreateCommand();
-                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom.history WHERE date=@date AND time=@time";
-                testForTimestamp.Parameters.Add("@date", DbType.Date);
-                testForTimestamp.Parameters.Add("@time", DbType.Time);
-            }
-
-            testForTimestamp.Parameters["@date"].Value = theDate.Date;
-            testForTimestamp.Parameters["@time"].Value = theTime.TimeOfDay;
-            SQLiteDataReader dataReader = testForTimestamp.ExecuteReader();
-            bool result = dataReader.Read();
-            dataReader.Close();
-            return result;
-        }
-
         public void Dispose()
         {
             azuStreamBlob.Dispose();
@@ -216,19 +111,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         private Random rngInternal;
-
-        private Random RNG
-        {
-            get
-            {
-                if (rngInternal == null)
-                {
-                    rngInternal = new Random();
-                }
-                return rngInternal;
-            }
-        }
-
+        
         private DbType GuessSqliteDbType(string s)
         {
             switch (s)
@@ -379,12 +262,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public DbCommand Sync_GetWriteCommand(string tableName, List<DatabaseColumn> columns)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader,
             SyncLogMessageCallback onMessage)
         {
@@ -583,51 +461,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             cmd.Dispose();
             syncReader.Dispose();
         }
-
-        private SQLiteCommand notebookGetText;
-        public string Notebook_GetRichText(int noteId)
-        {
-            if (notebookGetText == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("notebook.notes");
-                notebookGetText = connection.CreateCommand();
-                notebookGetText.CommandText = "SELECT richtext FROM notebook.notes WHERE id=@id";
-                notebookGetText.Parameters.Add("@id", DbType.Int32);
-            }
-
-            notebookGetText.Parameters["@id"].Value = noteId;
-            SQLiteDataReader dataReader = notebookGetText.ExecuteReader();
-            dataReader.Read();
-            string result;
-            if (dataReader.IsDBNull(0))
-                result = "";
-            else
-                result = dataReader.GetString(0);
-            dataReader.Dispose();
-            return result;
-        }
-
-        private SQLiteCommand updateNotebookNote;
-        public void Notebook_UpdateNote(int currentNoteId, string text)
-        {
-            if (updateNotebookNote == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("notebook.notes");
-                updateNotebookNote = connection.CreateCommand();
-                updateNotebookNote.CommandText =
-                    "UPDATE notebook.notes SET richText=@richText, dateUpdated=@dateUpdated WHERE id=@id";
-                updateNotebookNote.Parameters.Add("@richText", DbType.String);
-                updateNotebookNote.Parameters.Add("@dateUpdated", DbType.DateTime);
-                updateNotebookNote.Parameters.Add("@id", DbType.Int32);
-            }
-
-            updateNotebookNote.Parameters["@richText"].Value = text;
-            updateNotebookNote.Parameters["@dateUpdated"].Value = DateTime.Now;
-            updateNotebookNote.Parameters["@id"].Value = currentNoteId;
-            if (updateNotebookNote.ExecuteNonQuery() != 1)
-                throw new Exception("update failed");
-        }
-
+        
         private SQLiteCommand vgmdbSearchTrackTranslation;
         public IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text)
         {
@@ -1787,17 +1621,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             dataReader.Dispose();
         }
-
-        public DexTimelineEntry Dexcom_GetLatestGlucoseEntry()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void CreateSchema(string schemaName)
         {
             throw new NotImplementedException();
@@ -1807,52 +1631,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public bool IsAllowedSyncSource()
-        {
-            return false;
-        }
-
-        public bool IsAllowedSyncTarget()
-        {
-            return true;
-        }
-
-        public object GetConnectionObject()
-        {
-            return connections;
-        }
-
-        public string GetConnectionString()
-        {
-            return null;
-        }
-
-        public void InsertDiscArchivatorDisc(long discid, string path, string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public DiscStatus GetDiscArchivatorDisc(long discid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetDiscArchivatorAzusaLink(long discid, int mediumId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public Media[] findBrokenBandcampImports()
         {
             throw new NotImplementedException();
@@ -2022,32 +1801,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public int GetFirstMediaTypeId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Media> Sync_GetAllMedia()
-        {
-            throw new NotImplementedException();
-        }
-
-        public DateTime Sync_GetLatestCountryDate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Country> Sync_GetAllCountriesAfter(DateTime latest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Sync_InsertCountry(Country country)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         private SQLiteCommand getMediaByIdCommand;
         public Media GetMediaById(int o)
         {
@@ -2112,24 +1866,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (!ndr.IsDBNull(18))
                 m.FauxHash = ndr.GetInt64(18);
-
-            if (!ndr.IsDBNull(19))
-                m.DiscId = ndr.GetInt64(19);
-
-            if (!ndr.IsDBNull(20))
-                m.CICM = ndr.GetString(20);
-
-            if (!ndr.IsDBNull(21))
-                m.MHddLog = ndr.GetByteArray(21);
-
-            if (!ndr.IsDBNull(22))
-                m.ScsiInfo = ndr.GetString(22);
-
-            if (!ndr.IsDBNull(23))
-                m.Priv = ndr.GetByteArray(23);
-
-            if (!ndr.IsDBNull(24))
-                m.JedecId = ndr.GetByteArray(24);
 
             ndr.Dispose();
             return m;
@@ -2269,68 +2005,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             dataReader.Dispose();
             cmd.Dispose();
         }
-
-        public int MailArchive_GetLatestMessageId()
-        {
-            throw new NotImplementedException();
-        }
         
-        public bool MailArchive_TestForFolder(long folderId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MailArchive_TestForMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_ErasePhoto(string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] SedgeTree_GetDataByVersion(int version)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int? SedgeTree_GetLatestVersion()
-        {
-            SQLiteConnection connection = GetConnectionForTable("sedgetree.versioning");
-            SQLiteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT MAX(id) FROM sedgetree.versioning";
-            SQLiteDataReader dataReader = cmd.ExecuteReader();
-            int? result = null;
-            if (dataReader.Read())
-            {
-                result = dataReader.GetInt32(0);
-            }
-            dataReader.Dispose();
-            dataReader.Close();
-            return result;
-        }
-        
-        public void SedgeTree_InsertPhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_InsertVersion(byte[] buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SedgeTree_TestForPhoto(string toString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_UpdatePhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
-        }
-
         public void SetCover(Product product)
         {
             throw new NotSupportedException();
@@ -2392,21 +2067,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotSupportedException();
         }
         
-        public int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool WarWalking_IsAccessPointKnown(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool WarWalking_IsTourKnown(long hash)
-        {
-            throw new NotImplementedException();
-        }
-
         public AzusaStreamBlob GetStreamBlob()
         {
             return azuStreamBlob;

@@ -1,7 +1,6 @@
 # What's this?
 You've stumbled upon something I call "Azusa", an application I use to manage my lifestyle.
 I'm a collector of all sorts of media, and I use this application to manage the media I collected, and also make sure of its integrity.
-I'm not only a media collector, I'm also diabetic - so another feature of this program is to grab data off a certain model of CGM sensor.
 
 To most people, this probably won't be of much use as this is specifially tailored to my needs. But maybe there is someone on the internet (or someone who finds this is the arctic code vault) who finds this interesting.
 

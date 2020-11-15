@@ -320,7 +320,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                     case ".bin":
                         if (fileExtensionDictionary.HasExtension(".3ds") && fileInfo.Length < 1024)
                         {
-                            if (fileInfo.Name.ToLowerInvariant().EndsWith("-priv.bin"))
+                            /*if (fileInfo.Name.ToLowerInvariant().EndsWith("-priv.bin"))
                             {
                                 mediaById.Priv = File.ReadAllBytes(fileInfo.FullName);
                                 databaseDriver.UpdateMedia(mediaById);
@@ -334,7 +334,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                                 databaseDriver.UpdateMedia(mediaById);
                                 AttemptDelete(fileInfo);
                                 continue;
-                            }
+                            }*/
                         }
                         if (!string.IsNullOrEmpty(mediaById.DumpStorageSpacePath))
                             continue;

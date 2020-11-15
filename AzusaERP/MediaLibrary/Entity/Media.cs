@@ -25,12 +25,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public byte[] MdsContent { get; set; }
         public DateTime DateUpdated { get; set; }
         public long FauxHash { get; set; }
-        public long? DiscId { get; set; }
-        public string CICM { get; set; }
-        public byte[] MHddLog { get; set; }
-        public string ScsiInfo { get; set; }
-        public byte[] Priv { get; set; }
-        public byte[] JedecId { get; set; }
 
         public void SetDumpFile(FileInfo fi)
         {

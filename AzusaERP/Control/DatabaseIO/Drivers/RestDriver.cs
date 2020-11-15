@@ -73,61 +73,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public void SedgeTree_InsertVersion(byte[] buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int? SedgeTree_GetLatestVersion()
-        {
-            string rawJson = webClient.DownloadString("/sedgetree/latestVersion");
-            if (string.IsNullOrEmpty(rawJson))
-                return null;
-
-            return Int32.Parse(rawJson);
-        }
-
-        public byte[] SedgeTree_GetDataByVersion(int version)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SedgeTree_TestForPhoto(string toString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool WarWalking_IsTourKnown(long hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name)
-        {
-            throw new NotImplementedException();
-        }
         
-        public bool WarWalking_IsAccessPointKnown(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public void SedgeTree_UpdatePhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_ErasePhoto(string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_InsertPhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool ConnectionIsValid()
         {
             if (RestDriverErrorState != RestDriverErrorState.NoError)
@@ -320,70 +266,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             List<Country> list = JsonConvert.DeserializeObject<List<Country>>(rawJson);
             return list;
         }
-
-        public IEnumerable<DateTime> Dexcom_GetDates()
-        {
-            string rawJson = webClient.DownloadString("/cgm/dates");
-            List<long> list = JsonConvert.DeserializeObject<List<long>>(rawJson);
-            list.Sort();
-            foreach (long l in list)
-                yield return UnixTimeConverter.FromUnixTime(l / 1000);
-            yield break;
-        }
-
-        public bool Dexcom_InsertTimestamp(DexTimelineEntry entry)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Dexcom_TestForTimestamp(DateTime theDate, DateTime theTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
-        {
-            string rawJson = webClient.DownloadString(String.Format("/cgm/timeline/{0}", day.ToUnixTime()));
-            List<DexTimelineEntry> list = JsonConvert.DeserializeObject<List<DexTimelineEntry>>(rawJson);
-            return list;
-        }
-
-        public int MailArchive_GetLatestMessageId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MailArchive_TestForMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MailArchive_TestForFolder(long folderId)
-        {
-            throw new NotImplementedException();
-        }
         
-        public bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dexcom_ManualGlucoseValueStore(DateTime timestamp, short value, string unit)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note)
-        {
-            throw new NotImplementedException();
-        }
-
         public void BeginTransaction()
         {
             throw new NotImplementedException();
         }
 
-        public bool TransactionSupported { get; }
         public bool CanActivateLicense { get; }
 
         public void EndTransaction(bool sucessful)
@@ -415,12 +303,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public DbCommand Sync_GetWriteCommand(string tableName, List<DatabaseColumn> columns)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage)
         {
             throw new NotImplementedException();
@@ -441,17 +324,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-        
-        public string Notebook_GetRichText(int noteId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Notebook_UpdateNote(int currentNoteId, string text)
-        {
-            throw new NotImplementedException();
-        }
-
+    
         public IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text)
         {
             throw new NotImplementedException();
@@ -642,67 +515,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public DexTimelineEntry Dexcom_GetLatestGlucoseEntry()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope)
-        {
-            throw new NotImplementedException();
-        }
-
         public void CreateSchema(string schemaName)
         {
             throw new NotImplementedException();
         }
 
         public void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsAllowedSyncSource()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsAllowedSyncTarget()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetConnectionObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetConnectionString()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void InsertDiscArchivatorDisc(long discid, string path, string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public DiscStatus GetDiscArchivatorDisc(long discid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetDiscArchivatorAzusaLink(long discid, int mediumId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
         {
             throw new NotImplementedException();
         }

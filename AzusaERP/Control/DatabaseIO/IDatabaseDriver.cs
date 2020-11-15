@@ -18,17 +18,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
 {
     public interface IDatabaseDriver : IDisposable
     {
-        void SedgeTree_InsertVersion(byte[] buffer);
-        Nullable<int> SedgeTree_GetLatestVersion();
-        byte[] SedgeTree_GetDataByVersion(int version);
-        bool SedgeTree_TestForPhoto(string toString);
-
-        bool WarWalking_IsTourKnown(long hash);
-        int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name);
-        bool WarWalking_IsAccessPointKnown(string bssid);
-        void SedgeTree_UpdatePhoto(byte[] data, string personId);
-        void SedgeTree_ErasePhoto(string personId);
-        void SedgeTree_InsertPhoto(byte[] data, string personId);
         bool ConnectionIsValid();
         List<string> GetAllPublicTableNames();
         List<string> GetAllTableNames();
@@ -56,18 +45,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void UpdateMedia(Media media);
         int CreateMediaAndReturnId(int productId, string name);
         IEnumerable<Country> GetAllCountries();
-        IEnumerable<DateTime> Dexcom_GetDates();
-        bool Dexcom_InsertTimestamp(DexTimelineEntry entry);
-        bool Dexcom_TestForTimestamp(DateTime theDate, DateTime theTime);
-        IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day);
-        int MailArchive_GetLatestMessageId();
-        bool MailArchive_TestForMessage(int uid);
-        bool MailArchive_TestForFolder(long folderId);
-        bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt);
-        void Dexcom_ManualGlucoseValueStore(DateTime timestamp, short value, string unit);
-        void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note);
         void BeginTransaction();
-        bool TransactionSupported { get; }
         bool CanActivateLicense { get; }
         void EndTransaction(bool sucessful);
         List<DatabaseColumn> Sync_DefineTable(string tableName);
@@ -75,14 +53,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void Sync_CreateTable(string tableName, List<DatabaseColumn> columns);
         DateTime? Sync_GetLastSyncDateForTable(string tableName);
         DbDataReader Sync_GetSyncReader(string tableName, DateTime? latestSynced);
-        DbCommand Sync_GetWriteCommand(string tableName, List<DatabaseColumn> columns);
         void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage);
         DateTime? Sync_GetLatestUpdateForTable(string tableName);
         DbDataReader Sync_GetUpdateSyncReader(string tableName, DateTime? latestUpdate);
         void Sync_CopyUpdatesFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage, Queue<object> leftovers);
-
-        string Notebook_GetRichText(int noteId);
-        void Notebook_UpdateNote(int currentNoteId, string text);
 
         IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text);
         IEnumerable<int> Vgmdb_FindAlbumsByArbituraryProducts(string text);
@@ -130,21 +104,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
 
         IEnumerable<GelbooruTag> Gelbooru_GetAllTags();
         IEnumerable<int> Gelbooru_GetPostsByTag(int tagId);
-        DexTimelineEntry Dexcom_GetLatestGlucoseEntry();
-        IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope);
         void CreateSchema(string schemaName);
         void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName);
-
-        bool IsAllowedSyncSource();
-        bool IsAllowedSyncTarget();
-        object GetConnectionObject();
-        string GetConnectionString();
-
-        void InsertDiscArchivatorDisc(long discid, string path, string name);
-        DiscStatus GetDiscArchivatorDisc(long discid);
-        void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value);
-        void SetDiscArchivatorAzusaLink(long discid, int mediumId);
-        IEnumerable<DiscStatus> GetDiscArchivatorEntries();
 
         Media[] findBrokenBandcampImports();
         Media[] FindAutofixableMetafiles();

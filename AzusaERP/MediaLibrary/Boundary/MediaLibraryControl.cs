@@ -931,11 +931,14 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             CompletionAssistant();
 
-            Invoke((MethodInvoker)delegate
+            if (IsHandleCreated)
             {
-                foreach (var lockable in lockables)
-                    lockable.Enabled = true;
-            });
+                Invoke((MethodInvoker) delegate
+                {
+                    foreach (var lockable in lockables)
+                        lockable.Enabled = true;
+                });
+            }
         }
 
         private void CompletionAssistant()

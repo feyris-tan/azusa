@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -51,66 +50,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             connection = new NpgsqlConnection(ncsb.ToString());
             connection.Open();
-        }
-
-        public void SedgeTree_InsertVersion(byte[] buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int? SedgeTree_GetLatestVersion()
-        {
-            NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT MAX(id) FROM sedgetree.versioning";
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            int? result = null;
-            if (dataReader.Read())
-            {
-                result = dataReader.GetInt32(0);
-            }
-            dataReader.Dispose();
-            dataReader.Close();
-            return result;
-        }
-
-        public byte[] SedgeTree_GetDataByVersion(int version)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SedgeTree_TestForPhoto(string toString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool WarWalking_IsTourKnown(long hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int WarWalking_InsertTourAndReturnId(long hash, int recordStart, string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool WarWalking_IsAccessPointKnown(string bssid)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public void SedgeTree_UpdatePhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_ErasePhoto(string personId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SedgeTree_InsertPhoto(byte[] data, string personId)
-        {
-            throw new NotImplementedException();
         }
 
         public bool ConnectionIsValid()
@@ -631,24 +570,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(18))
                 m.FauxHash = ndr.GetInt64(18);
 
-            if (!ndr.IsDBNull(19))
-                m.DiscId = ndr.GetInt64(19);
-
-            if (!ndr.IsDBNull(20))
-                m.CICM = ndr.GetString(20);
-
-            if (!ndr.IsDBNull(21))
-                m.MHddLog = ndr.GetByteArray(21);
-
-            if (!ndr.IsDBNull(22))
-                m.ScsiInfo = ndr.GetString(22);
-
-            if (!ndr.IsDBNull(23))
-                m.Priv = ndr.GetByteArray(23);
-
-            if (!ndr.IsDBNull(24))
-                m.JedecId = ndr.GetByteArray(24);
-
             ndr.Dispose();
             return m;
         }
@@ -675,8 +596,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                                                  "    cdtext=@cdtext, logfile=@logfile," +
                                                  "    mediadescriptorsidecar=@mediadescriptorsidecar," +
                                                  "    issealed=@issealed, dateupdated=@dateupdated," +
-                                                 "    fauxhash=@fauxhash, discid=@discid," +
-                                                 "    cicm=@cicm, mhddlog=@mhddlog, scsiinfo=@scsiinfo, priv=@priv, jedecid=@jedecId " +
+                                                 "    fauxhash=@fauxhash " + 
                                                  "WHERE id=@id";
                 updateMediaCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -694,12 +614,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 updateMediaCommand.Parameters.Add("@issealed", NpgsqlDbType.Boolean);
                 updateMediaCommand.Parameters.Add("@dateupdated", NpgsqlDbType.Timestamp);
                 updateMediaCommand.Parameters.Add("@fauxhash", NpgsqlDbType.Bigint);
-                updateMediaCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
-                updateMediaCommand.Parameters.Add("@cicm", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@mhddlog", NpgsqlDbType.Bytea);
-                updateMediaCommand.Parameters.Add("@scsiinfo", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@priv", NpgsqlDbType.Bytea);
-                updateMediaCommand.Parameters.Add("@jedecId", NpgsqlDbType.Bytea);
                 updateMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -747,24 +661,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             updateMediaCommand.Parameters["@dateupdated"].Value = DateTime.Now;
             updateMediaCommand.Parameters["@fauxhash"].Value = media.FauxHash;
 
-            if (media.DiscId.HasValue)
-                updateMediaCommand.Parameters["@discid"].Value = media.DiscId.Value;
-
-            if (!string.IsNullOrEmpty(media.CICM))
-                updateMediaCommand.Parameters["@cicm"].Value = media.CICM;
-
-            if (media.MHddLog != null)
-                updateMediaCommand.Parameters["@mhddlog"].Value = media.MHddLog;
-
-            if (!string.IsNullOrEmpty(media.ScsiInfo))
-                updateMediaCommand.Parameters["@scsiinfo"].Value = media.ScsiInfo;
-
-            if (media.Priv != null)
-                updateMediaCommand.Parameters["@priv"].Value = media.Priv;
-
-            if (media.JedecId != null)
-                updateMediaCommand.Parameters["@jedecId"].Value = media.JedecId;
-
             updateMediaCommand.Parameters["@id"].Value = media.Id;
             int result = updateMediaCommand.ExecuteNonQuery();
             if (result != 1)
@@ -803,26 +699,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             return result;
         }
 
-        public IEnumerable<Media> Sync_GetAllMedia()
-        {
-            throw new NotImplementedException();
-        }
-
-        public DateTime Sync_GetLatestCountryDate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Country> Sync_GetAllCountriesAfter(DateTime latest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Sync_InsertCountry(Country country)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<Country> GetAllCountries()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
@@ -852,271 +728,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             dataReader.Dispose();
             cmd.Dispose();
         }
-
-        public IEnumerable<DateTime> Dexcom_GetDates()
-        {
-            NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT DISTINCT date FROM dexcom.history ORDER BY date ASC";
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                DateTime day = dataReader.GetDateTime(0);
-                if (day <= DateTime.Today.Date)
-                    yield return day;
-            }
-
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
-        private NpgsqlCommand dexcomInsertTimestamp;
-        public bool Dexcom_InsertTimestamp(DexTimelineEntry entry)
-        {
-            if (dexcomInsertTimestamp == null)
-            {
-                dexcomInsertTimestamp = connection.CreateCommand();
-                dexcomInsertTimestamp.CommandText =
-                    "INSERT INTO dexcom.history " +
-                    "(date, time, filtered, unfiltered, rssi, glucose, trend, \"sessionState\", \"meterGlucose\", \"eventType\", carbs, insulin, \"eventSubType\", \"specialGlucoseValue\") " +
-                    "VALUES " +
-                    "(@date, @time, @filtered, @unfiltered, @rssi, @glucose, @trend, @sessionState, @meterGlucose, @eventType, @carbs, " +
-                    " @insulin, @eventSubType, @specialGlucoseValue)";
-                dexcomInsertTimestamp.Parameters.Add("@date", NpgsqlDbType.Date);
-                dexcomInsertTimestamp.Parameters.Add("@time", NpgsqlDbType.Time);
-                dexcomInsertTimestamp.Parameters.Add("@filtered", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@unfiltered", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@rssi", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@glucose", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@trend", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@sessionState", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@meterGlucose", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@eventType", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@carbs", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@insulin", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@eventSubType", NpgsqlDbType.Integer);
-                dexcomInsertTimestamp.Parameters.Add("@specialGlucoseValue", NpgsqlDbType.Integer);
-            }
-
-            dexcomInsertTimestamp.Parameters["@date"].Value = entry.Timestamp.Date;
-            dexcomInsertTimestamp.Parameters["@time"].Value = entry.Timestamp.TimeOfDay;
-
-            if (entry.SensorFilteredSpecified)
-                dexcomInsertTimestamp.Parameters["@filtered"].Value = (int)entry.SensorFiltered.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@filtered"].Value = DBNull.Value;
-
-            if (entry.SensorUnfilteredSpecified)
-                dexcomInsertTimestamp.Parameters["@unfiltered"].Value = (int)entry.SensorUnfiltered.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@unfiltered"].Value = DBNull.Value;
-
-            if (entry.RssiSpecified)
-                dexcomInsertTimestamp.Parameters["@rssi"].Value = (int)entry.Rssi.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@rssi"].Value = DBNull.Value;
-
-            if (entry.GlucoseSpecified)
-                dexcomInsertTimestamp.Parameters["@glucose"].Value = (int)entry.Glucose.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@glucose"].Value = DBNull.Value;
-
-            if (entry.TrendArrowSpecified)
-                dexcomInsertTimestamp.Parameters["@trend"].Value = (int)entry.TrendArrow.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@trend"].Value = DBNull.Value;
-
-            if (entry.SessionStateSpecified)
-                dexcomInsertTimestamp.Parameters["@sessionState"].Value = (int) entry.SessionState.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@sessionState"].Value = DBNull.Value;
-
-            if (entry.MeterGlucoseSpecified)
-                dexcomInsertTimestamp.Parameters["@meterGlucose"].Value = (int)entry.MeterGlucose.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@meterGlucose"].Value = DBNull.Value;
-
-            if (entry.EventTypeSpecified)
-                dexcomInsertTimestamp.Parameters["@eventType"].Value = (int)entry.EventType.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@eventType"].Value = DBNull.Value;
-
-            dexcomInsertTimestamp.Parameters["@carbs"].Value = DBNull.Value;
-            dexcomInsertTimestamp.Parameters["@eventSubType"].Value = DBNull.Value;
-            dexcomInsertTimestamp.Parameters["@insulin"].Value = DBNull.Value;
-            switch (entry.EventType)
-            {
-                case EventType.Carbs:
-                    dexcomInsertTimestamp.Parameters["@carbs"].Value = entry.Carbs.Value;
-                    break;
-                case EventType.Exercise:
-                    dexcomInsertTimestamp.Parameters["@eventSubType"].Value = (int)entry.ExerciseEvent.Value;
-                    break;
-                case EventType.Health:
-                    dexcomInsertTimestamp.Parameters["@eventSubType"].Value = (int) entry.HealthEvent.Value;
-                    break;
-                case EventType.Insulin:
-                    dexcomInsertTimestamp.Parameters["@insulin"].Value = entry.Insulin;
-                    break;
-                case null:
-                    break;
-                default:
-                    throw new NotImplementedException(String.Format(entry.EventType.Value.ToString()));
-            }
-
-            if (entry.SpecialGlucoseValueSpecified)
-                dexcomInsertTimestamp.Parameters["@specialGlucoseValue"].Value = (int) entry.SpecialGlucoseValue.Value;
-            else
-                dexcomInsertTimestamp.Parameters["@specialGlucoseValue"].Value = DBNull.Value;
-
-            return dexcomInsertTimestamp.ExecuteNonQuery() == 1;
-        }
-
-        private NpgsqlCommand testForTimestamp;
-        public bool Dexcom_TestForTimestamp(DateTime theDate, DateTime theTime)
-        {
-            if (testForTimestamp == null)
-            {
-                testForTimestamp = connection.CreateCommand();
-                testForTimestamp.CommandText = "SELECT dateAdded FROM dexcom.history WHERE date=@date AND time=@time";
-                testForTimestamp.Parameters.Add("@date", NpgsqlDbType.Date);
-                testForTimestamp.Parameters.Add("@time", NpgsqlDbType.Time);
-            }
-
-            testForTimestamp.Parameters["@date"].Value = theDate.Date;
-            testForTimestamp.Parameters["@time"].Value = theTime.TimeOfDay;
-            NpgsqlDataReader dataReader = testForTimestamp.ExecuteReader();
-            bool result = dataReader.Read();
-            dataReader.Close();
-            return result;
-        }
-
-        public IEnumerable<DexTimelineEntry> Dexcom_GetTimelineEntries(DateTime day)
-        {
-            NpgsqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM dexcom.history WHERE date=@date";
-            cmd.Parameters.Add("@date", NpgsqlDbType.Date);
-            cmd.Parameters["@date"].Value = day.Date;
-            NpgsqlDataReader dataReader = cmd.ExecuteReader();
-            while (dataReader.Read())
-            {
-                DateTime date = dataReader.GetDateTime(0);
-                TimeSpan time = dataReader.GetTimeSpan(1);
-                DateTime timestamp = new DateTime(date.Ticks + time.Ticks);
-                DexTimelineEntry timelineEntry = new DexTimelineEntry();
-                timelineEntry.Timestamp = timestamp;
-                if (!dataReader.IsDBNull(2))
-                    timelineEntry.SensorFiltered = (uint)dataReader.GetInt32(2);
-                if (!dataReader.IsDBNull(3))
-                    timelineEntry.SensorUnfiltered = (uint) dataReader.GetInt32(3);
-                if (!dataReader.IsDBNull(4))
-                    timelineEntry.Rssi = (uint) dataReader.GetInt32(4);
-                if (!dataReader.IsDBNull(5))
-                    timelineEntry.Glucose = (uint) dataReader.GetInt32(5);
-                if (!dataReader.IsDBNull(6))
-                    timelineEntry.TrendArrow = (TrendArrow)dataReader.GetInt16(6);
-                if (!dataReader.IsDBNull(7))
-                    timelineEntry.SessionState = (SessionState) dataReader.GetInt16(7);
-                if (!dataReader.IsDBNull(8))
-                    timelineEntry.MeterGlucose = (uint)dataReader.GetInt16(8);
-                if (!dataReader.IsDBNull(9))
-                    timelineEntry.EventType = (EventType) dataReader.GetInt16(9);
-                if (!dataReader.IsDBNull(10))
-                    timelineEntry.Carbs = dataReader.GetDouble(10);
-                if (!dataReader.IsDBNull(11))
-                    timelineEntry.Insulin = dataReader.GetDouble(11);
-
-                if (!dataReader.IsDBNull(12))
-                {
-                    byte temp = dataReader.GetByte(12);
-                    if (timelineEntry.EventType == EventType.Exercise)
-                        timelineEntry.ExerciseEvent = (ExerciseSubType) temp;
-                    else if (timelineEntry.EventType == EventType.Health)
-                        timelineEntry.HealthEvent = (HealthSubType) temp;
-                }
-
-                if (!dataReader.IsDBNull(13))
-                    timelineEntry.SpecialGlucoseValue = (SpecialGlucoseValue)dataReader.GetInt32(13);
-                yield return timelineEntry;
-            }
-            dataReader.Dispose();
-            cmd.Dispose();
-        }
-
-        public int MailArchive_GetLatestMessageId()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MailArchive_TestForMessage(int uid)
-        {
-            throw new NotImplementedException();
-        }
         
-        public bool MailArchive_TestForFolder(long folderId)
-        {
-            throw new NotImplementedException();
-        }
-        
-
-        private NpgsqlCommand manualGlucoseValueTestForTimestampCommand;
-        public bool Dexcom_ManualGlucoseValueTestForTimestamp(DateTime dt)
-        {
-            if (manualGlucoseValueTestForTimestampCommand == null)
-            {
-                manualGlucoseValueTestForTimestampCommand = connection.CreateCommand();
-                manualGlucoseValueTestForTimestampCommand.CommandText =
-                    "SELECT pid FROM dexcom.manualdata WHERE ts=@ts";
-                manualGlucoseValueTestForTimestampCommand.Parameters.Add("@ts", NpgsqlDbType.Timestamp);
-            }
-
-            manualGlucoseValueTestForTimestampCommand.Parameters["@ts"].Value = dt;
-            NpgsqlDataReader ndr = manualGlucoseValueTestForTimestampCommand.ExecuteReader();
-            bool result = ndr.Read();
-            ndr.Dispose();
-            return result;
-        }
-
-        private NpgsqlCommand manualGlucoseValueStoreCommand;
-        public void Dexcom_ManualGlucoseValueStore(DateTime timestamp, short value, string unit)
-        {
-            if (manualGlucoseValueStoreCommand == null)
-            {
-                manualGlucoseValueStoreCommand = connection.CreateCommand();
-                manualGlucoseValueStoreCommand.CommandText = "INSERT INTO dexcom.manualdata (pid,ts,messwert,einheit,hide,minuteModifier,remark) VALUES (@pid,@timestamp,@value,@unit,FALSE,0,'')";
-                manualGlucoseValueStoreCommand.Parameters.Add("@timestamp", NpgsqlDbType.Timestamp);
-                manualGlucoseValueStoreCommand.Parameters.Add("@value", NpgsqlDbType.Integer);
-                manualGlucoseValueStoreCommand.Parameters.Add("@unit", NpgsqlDbType.Varchar);
-                manualGlucoseValueStoreCommand.Parameters.Add("@pid", NpgsqlDbType.Bigint);
-            }
-
-            manualGlucoseValueStoreCommand.Parameters["@timestamp"].Value = timestamp;
-            manualGlucoseValueStoreCommand.Parameters["@value"].Value = value;
-            manualGlucoseValueStoreCommand.Parameters["@unit"].Value = unit;
-            manualGlucoseValueStoreCommand.Parameters["@pid"].Value = DateTime.Now.Ticks;
-            Thread.Sleep(1);
-            int result = manualGlucoseValueStoreCommand.ExecuteNonQuery();
-            if (result != 1)
-                throw new Exception("insert failed");
-        }
-
-        public void Dexcom_ManualGlucoseValueUpdate(int id, byte be, byte novorapid, byte levemir, string note)
-        {
-            throw new NotImplementedException();
-        }
-
         public void BeginTransaction()
         {
             transaction = connection.BeginTransaction();
         }
-
-        public bool TransactionSupported
-        {
-            get
-            {
-                return true;
-            }
-        }
-
+        
         public bool CanActivateLicense
         {
             get
@@ -1293,12 +910,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 return cmd.ExecuteReader();
             }
         }
-
-        public DbCommand Sync_GetWriteCommand(string tableName, List<DatabaseColumn> columns)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void Sync_CopyFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage)
         {
             throw new NotImplementedException();
@@ -1325,49 +937,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-        
-        private NpgsqlCommand notebookGetText;
-        public string Notebook_GetRichText(int noteId)
-        {
-            if (notebookGetText == null)
-            {
-                notebookGetText = connection.CreateCommand();
-                notebookGetText.CommandText = "SELECT richtext FROM notebook.notes WHERE id=@id";
-                notebookGetText.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            notebookGetText.Parameters["@id"].Value = noteId;
-            NpgsqlDataReader dataReader = notebookGetText.ExecuteReader();
-            dataReader.Read();
-            string result;
-            if (dataReader.IsDBNull(0))
-                result = "";
-            else
-                result = dataReader.GetString(0);
-            dataReader.Dispose();
-            return result;
-        }
-
-        private NpgsqlCommand updateNotebookNote;
-        public void Notebook_UpdateNote(int currentNoteId, string text)
-        {
-            if (updateNotebookNote == null)
-            {
-                updateNotebookNote = connection.CreateCommand();
-                updateNotebookNote.CommandText =
-                    "UPDATE notebook_notes SET richText=@richText, dateUpdated=@dateUpdated WHERE id=@id";
-                updateNotebookNote.Parameters.Add("@richText", NpgsqlDbType.Text);
-                updateNotebookNote.Parameters.Add("@dateUpdated", NpgsqlDbType.Timestamp);
-                updateNotebookNote.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            updateNotebookNote.Parameters["@richText"].Value = text;
-            updateNotebookNote.Parameters["@dateUpdated"].Value = DateTime.Now;
-            updateNotebookNote.Parameters["@id"].Value = currentNoteId;
-            if (updateNotebookNote.ExecuteNonQuery() != 1)
-                throw new Exception("update failed");
-        }
-
+     
         private NpgsqlCommand vgmdbSearchTrackTranslation;
         public IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text)
         {
@@ -2513,71 +2083,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             dataReader.Dispose();
         }
-
-        private NpgsqlCommand dexcomGetLatestGlucose;
-        public DexTimelineEntry Dexcom_GetLatestGlucoseEntry()
-        {
-            if (dexcomGetLatestGlucose == null)
-            {
-                dexcomGetLatestGlucose = connection.CreateCommand();
-                dexcomGetLatestGlucose.CommandText = "SELECT * FROM dexcom.history WHERE glucose IS NOT NULL ORDER BY date DESC, time DESC";
-            }
-
-            NpgsqlDataReader dataReader = dexcomGetLatestGlucose.ExecuteReader();
-            DexTimelineEntry result = null;
-            if (dataReader.Read())
-            {
-                DateTime date = dataReader.GetDateTime(0);
-                TimeSpan time = dataReader.GetTimeSpan(1);
-                DateTime timestamp = new DateTime(date.Ticks + time.Ticks);
-                result = new DexTimelineEntry();
-                result.Timestamp = timestamp;
-                result.SensorFiltered = (uint)dataReader.GetInt32(2);
-                result.SensorUnfiltered = (uint) dataReader.GetInt32(3);
-                result.Rssi = (uint) dataReader.GetInt32(4);
-                result.Glucose = (uint) dataReader.GetInt32(5);
-            }
-
-            dataReader.Dispose();
-            return result;
-        }
-
-        private NpgsqlCommand dexcomGetGlucoseEntriesAfterCommand;
-        public IEnumerable<DexTimelineEntry> Dexcom_GetGlucoseEntriesAfter(DateTime scope)
-        {
-            if (dexcomGetGlucoseEntriesAfterCommand == null)
-            {
-                dexcomGetGlucoseEntriesAfterCommand = connection.CreateCommand();
-                dexcomGetGlucoseEntriesAfterCommand.CommandText =
-                    "SELECT * FROM dexcom.history WHERE glucose IS NOT NULL AND date>=@scope";
-                dexcomGetGlucoseEntriesAfterCommand.Parameters.Add("@scope", NpgsqlDbType.Date);
-            }
-
-            dexcomGetGlucoseEntriesAfterCommand.Parameters["@scope"].Value = scope.Date;
-            NpgsqlDataReader dataReader = dexcomGetGlucoseEntriesAfterCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                DateTime date = dataReader.GetDateTime(0);
-                TimeSpan time = dataReader.GetTimeSpan(1);
-                DateTime timestamp = new DateTime(date.Ticks + time.Ticks);
-                DexTimelineEntry timelineEntry = new DexTimelineEntry();
-                timelineEntry.Timestamp = timestamp;
-
-                if (!dataReader.IsDBNull(2))
-                    timelineEntry.SensorFiltered = (uint)dataReader.GetInt32(2);
-
-                if(!dataReader.IsDBNull(3))
-                    timelineEntry.SensorUnfiltered = (uint)dataReader.GetInt32(3);
-
-                if (!dataReader.IsDBNull(4))
-                    timelineEntry.Rssi = (uint)dataReader.GetInt32(4);
-
-                timelineEntry.Glucose = (uint)dataReader.GetInt32(5);
-                yield return timelineEntry;
-            }
-            dataReader.Dispose();
-        }
-
+        
         private void AssertNoEvilString(string schemaName)
         {
             bool[] hits = new bool[10];
@@ -2620,169 +2126,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             command2.ExecuteNonQuery();
             command2.Dispose();
         }
-
-        public bool IsAllowedSyncSource()
-        {
-            return true;
-        }
-
-        public bool IsAllowedSyncTarget()
-        {
-            return false;
-        }
-
-        public object GetConnectionObject()
-        {
-            return connection;
-        }
-
-        public string GetConnectionString()
-        {
-            return connection.ConnectionString;
-        }
-
-        private NpgsqlCommand insertDiscArchivatorDiscCommand;
-        public void InsertDiscArchivatorDisc(long discid, string path, string name)
-        {
-            if (insertDiscArchivatorDiscCommand == null)
-            {
-                insertDiscArchivatorDiscCommand = connection.CreateCommand();
-                insertDiscArchivatorDiscCommand.CommandText =
-                    "INSERT INTO discarchivator.discs (discid,path,name) VALUES (@discid,@path,@name)";
-                insertDiscArchivatorDiscCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
-                insertDiscArchivatorDiscCommand.Parameters.Add("@path", NpgsqlDbType.Text);
-                insertDiscArchivatorDiscCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
-            }
-
-            insertDiscArchivatorDiscCommand.Parameters["@discid"].Value = discid;
-            insertDiscArchivatorDiscCommand.Parameters["@path"].Value = path;
-            insertDiscArchivatorDiscCommand.Parameters["@name"].Value = name;
-            insertDiscArchivatorDiscCommand.ExecuteNonQuery();
-        }
-
-        private NpgsqlCommand getDiscArchivatorDiscCommand;
-        public DiscStatus GetDiscArchivatorDisc(long discid)
-        {
-            if (getDiscArchivatorDiscCommand == null)
-            {
-                getDiscArchivatorDiscCommand = connection.CreateCommand();
-                getDiscArchivatorDiscCommand.CommandText = "SELECT * FROM discarchivator.discs WHERE discid=@discid";
-                getDiscArchivatorDiscCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
-            }
-
-            getDiscArchivatorDiscCommand.Parameters["@discid"].Value = discid;
-
-            DiscStatus discStatus = null;
-            NpgsqlDataReader dataReader = getDiscArchivatorDiscCommand.ExecuteReader();
-            if (dataReader.Read())
-            {
-                discStatus = ReadDiscStatusRow(dataReader);
-            }
-            dataReader.Close();
-            return discStatus;
-        }
-
-        private static DiscStatus ReadDiscStatusRow(NpgsqlDataReader dataReader)
-        {
-            DiscStatus discStatus;
-            discStatus = new DiscStatus();
-            discStatus.DiscId = dataReader.GetInt64(0);
-            discStatus.DateAdded = dataReader.GetDateTime(1);
-            discStatus.PgSerial = dataReader.GetInt32(2);
-            discStatus.Path = new DirectoryInfo(dataReader.GetString(3));
-            discStatus.Dumped = dataReader.GetBoolean(4);
-            discStatus.Ripped = dataReader.GetBoolean(5);
-            discStatus.Name = dataReader.GetString(6);
-            discStatus.Completed = dataReader.GetBoolean(7);
-            discStatus.AzusaLinked = dataReader.GetBoolean(8);
-            return discStatus;
-        }
-
-        private NpgsqlCommand setDiscArchivatorPropertyCommand;
-        public void SetDiscArchivatorProperty(long discid, DiscStatusProperty property, bool value)
-        {
-            if (setDiscArchivatorPropertyCommand == null)
-            {
-                setDiscArchivatorPropertyCommand = connection.CreateCommand();
-                setDiscArchivatorPropertyCommand.CommandText = "UPDATE discarchivator.discs " +
-                                                               "SET dumped = @dumped, " +
-                                                               "    ripped = @ripped, " +
-                                                               "    completed = @completed " +
-                                                               "WHERE discid=@discid";
-                setDiscArchivatorPropertyCommand.Parameters.Add("@dumped", NpgsqlDbType.Boolean);
-                setDiscArchivatorPropertyCommand.Parameters.Add("@ripped", NpgsqlDbType.Boolean);
-                setDiscArchivatorPropertyCommand.Parameters.Add("@completed", NpgsqlDbType.Boolean);
-                setDiscArchivatorPropertyCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
-            }
-
-            setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = false;
-            setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = false;
-            setDiscArchivatorPropertyCommand.Parameters["@completed"].Value = false;
-            setDiscArchivatorPropertyCommand.Parameters["@discid"].Value = discid;
-            switch (property)
-            {
-                case DiscStatusProperty.Completed:
-                    setDiscArchivatorPropertyCommand.Parameters["@completed"].Value = true;
-                    setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = true;
-                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
-                    break;
-                case DiscStatusProperty.Dumped:
-                    setDiscArchivatorPropertyCommand.Parameters["@dumped"].Value = true;
-                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
-                    break;
-                case DiscStatusProperty.Ripped:
-                    setDiscArchivatorPropertyCommand.Parameters["@ripped"].Value = true;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            setDiscArchivatorPropertyCommand.ExecuteNonQuery();
-        }
-
-        private NpgsqlCommand setDiscArchivatorAzusaLinkCommand;
-        public void SetDiscArchivatorAzusaLink(long discid, int mediumId)
-        {
-            Media media = GetMediaById(mediumId);
-            media.DiscId = discid;
-            UpdateMedia(media);
-
-            if (setDiscArchivatorAzusaLinkCommand == null)
-            {
-                setDiscArchivatorAzusaLinkCommand = connection.CreateCommand();
-                setDiscArchivatorAzusaLinkCommand.CommandText =
-                    "UPDATE discarchivator.discs " +
-                    "SET azusalinked = TRUE, " +
-                    "    linkdate = @linkdate " +
-                    "WHERE discid=@discid";
-                setDiscArchivatorAzusaLinkCommand.Parameters.Add("@discid", NpgsqlDbType.Bigint);
-                setDiscArchivatorAzusaLinkCommand.Parameters.Add("@linkdate", NpgsqlDbType.Timestamp);
-            }
-
-            setDiscArchivatorAzusaLinkCommand.Parameters["@discid"].Value = discid;
-            setDiscArchivatorAzusaLinkCommand.Parameters["@linkdate"].Value = DateTime.Now;
-            int result = setDiscArchivatorAzusaLinkCommand.ExecuteNonQuery();
-            if (result != 1)
-                throw new Exception("unexpected update result");
-        }
-
-        private NpgsqlCommand getDiscArchivatorEntiresCommand;
-        public IEnumerable<DiscStatus> GetDiscArchivatorEntries()
-        {
-            if (getDiscArchivatorEntiresCommand == null)
-            {
-                getDiscArchivatorEntiresCommand = connection.CreateCommand();
-                getDiscArchivatorEntiresCommand.CommandText = "SELECT * FROM discarchivator.discs ORDER BY pgserial";
-            }
-
-            NpgsqlDataReader dataReader = getDiscArchivatorEntiresCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                yield return ReadDiscStatusRow(dataReader);
-            }
-            dataReader.Close();
-        }
-
+        
         public Media[] findBrokenBandcampImports()
         {
             NpgsqlCommand cmd = connection.CreateCommand();
@@ -2823,7 +2167,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
         
-        private int deletedMedia;
         private NpgsqlCommand removeMediaCommand;
         public void RemoveMedia(Media currentMedia)
         {
@@ -2834,8 +2177,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 removeMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
             removeMediaCommand.Parameters["@id"].Value = currentMedia.Id;
-            deletedMedia += removeMediaCommand.ExecuteNonQuery();
-
+            removeMediaCommand.ExecuteNonQuery();
         }
 
         private NpgsqlCommand checkLicenseStatusCommand;
