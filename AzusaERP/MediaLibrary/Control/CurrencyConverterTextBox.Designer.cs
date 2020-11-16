@@ -58,6 +58,7 @@
             // 
             // jPYEURToolStripMenuItem
             // 
+            this.jPYEURToolStripMenuItem.Enabled = false;
             this.jPYEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_yen;
             this.jPYEURToolStripMenuItem.Name = "jPYEURToolStripMenuItem";
             this.jPYEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
@@ -66,6 +67,7 @@
             // 
             // uSDEURToolStripMenuItem
             // 
+            this.uSDEURToolStripMenuItem.Enabled = false;
             this.uSDEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_dollar;
             this.uSDEURToolStripMenuItem.Name = "uSDEURToolStripMenuItem";
             this.uSDEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
@@ -74,6 +76,7 @@
             // 
             // gBPEURToolStripMenuItem
             // 
+            this.gBPEURToolStripMenuItem.Enabled = false;
             this.gBPEURToolStripMenuItem.Image = global::moe.yo3explorer.azusa.Properties.Resources.money_pound;
             this.gBPEURToolStripMenuItem.Name = "gBPEURToolStripMenuItem";
             this.gBPEURToolStripMenuItem.Size = new System.Drawing.Size(136, 22);

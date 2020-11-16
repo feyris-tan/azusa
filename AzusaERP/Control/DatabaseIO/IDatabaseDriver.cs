@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
+using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
@@ -47,6 +48,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         IEnumerable<Country> GetAllCountries();
         void BeginTransaction();
         bool CanActivateLicense { get; }
+        bool CanUpdateExchangeRates { get; }
         void EndTransaction(bool sucessful);
         List<DatabaseColumn> Sync_DefineTable(string tableName);
         bool Sync_DoesTableExist(string tableName);
@@ -119,5 +121,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void UpdateAttachment(Attachment attachment);
         void InsertAttachment(Attachment attachment);
         void DeleteAttachment(Attachment attachment);
+        string GetConnectionString();
+        AzusifiedCube GetLatestEuroExchangeRates();
+        void InsertEuroExchangeRate(AzusifiedCube cube);
     }
 }

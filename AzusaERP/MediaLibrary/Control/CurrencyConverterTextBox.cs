@@ -1,31 +1,40 @@
 ﻿using System;
 using System.Windows.Forms;
+using libeuroexchange.Model;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Control
 {
     public partial class CurrencyConverterTextBox : UserControl
     {
+        private AzusaContext context;
+        private AzusifiedCube cube;
+
         public CurrencyConverterTextBox()
         {
             InitializeComponent();
+            context = AzusaContext.GetInstance();
+            cube = context.DatabaseDriver.GetLatestEuroExchangeRates();
+            jPYEURToolStripMenuItem.Enabled = cube != null;
+            uSDEURToolStripMenuItem.Enabled = cube != null;
+            gBPEURToolStripMenuItem.Enabled = cube != null;
         }
 
         private void jPYEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 123.91).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / cube.JPY).ToString();
         }
 
         private void uSDEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 1.18).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / cube.USD).ToString();
         }
 
         private void gBPEURToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsNumeric)
-                textBox1.Text = (Convert.ToDouble(textBox1.Text) / 0.90).ToString();
+                textBox1.Text = (Convert.ToDouble(textBox1.Text) / cube.GBP).ToString();
         }
         
         public double? Value

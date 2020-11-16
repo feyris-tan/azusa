@@ -558,6 +558,10 @@
       <Project>{28df4b21-81b0-49a2-acee-450a07c6fd52}</Project>
       <Name>libazuworker</Name>
     </ProjectReference>
+    <ProjectReference Include="..\libeuroexchange\libeuroexchange.csproj">
+      <Project>{e9dd393f-aa7c-4d04-a193-2d568cc6879f}</Project>
+      <Name>libeuroexchange</Name>
+    </ProjectReference>
     <ProjectReference Include="..\libini\libini.csproj">
       <Project>{a6e030af-0153-43f5-bd58-43594cefe7f4}</Project>
       <Name>libini</Name>

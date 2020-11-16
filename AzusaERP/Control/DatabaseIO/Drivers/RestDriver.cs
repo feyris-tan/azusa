@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.dex;
@@ -272,7 +273,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public bool CanActivateLicense { get; }
+        public bool CanActivateLicense => false;
+        public bool CanUpdateExchangeRates => false;
 
         public void EndTransaction(bool sucessful)
         {
@@ -576,6 +578,21 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public void DeleteAttachment(Attachment attachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetConnectionString()
+        {
+            return null;
+        }
+
+        public AzusifiedCube GetLatestEuroExchangeRates()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertEuroExchangeRate(AzusifiedCube cube)
         {
             throw new NotImplementedException();
         }

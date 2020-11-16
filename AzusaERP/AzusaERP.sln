@@ -65,6 +65,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "colormatrix", "..\colormatr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "warcsplit", "..\warcsplit\warcsplit.csproj", "{4A255D6F-6489-48B8-83CE-FE9145647B8F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libeuroexchange", "..\libeuroexchange\libeuroexchange.csproj", "{E9DD393F-AA7C-4D04-A193-2D568CC6879F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -288,6 +290,14 @@ Global
 		{4A255D6F-6489-48B8-83CE-FE9145647B8F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A255D6F-6489-48B8-83CE-FE9145647B8F}.Release|x86.ActiveCfg = Release|Any CPU
 		{4A255D6F-6489-48B8-83CE-FE9145647B8F}.Release|x86.Build.0 = Release|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Debug|x86.Build.0 = Debug|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Release|x86.ActiveCfg = Release|Any CPU
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -319,6 +329,7 @@ Global
 		{F0A2FA1F-F4BD-4819-9A73-B46A47134176} = {57C9126F-FA51-4EC3-B8C6-47CC910F1742}
 		{AEF40384-239C-4370-8ADF-DA44242FD3CD} = {57C9126F-FA51-4EC3-B8C6-47CC910F1742}
 		{4A255D6F-6489-48B8-83CE-FE9145647B8F} = {57C9126F-FA51-4EC3-B8C6-47CC910F1742}
+		{E9DD393F-AA7C-4D04-A193-2D568CC6879F} = {F013E74A-57A6-4983-B4CE-D4745D111EE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D8276B76-EAB3-45EE-9A6D-87AB8FE33413}

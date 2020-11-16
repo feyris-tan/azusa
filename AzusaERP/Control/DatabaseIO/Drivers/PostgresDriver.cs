@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using AzusaERP;
+using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
@@ -742,6 +743,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 return true;
             }
         }
+
+        public bool CanUpdateExchangeRates => true;
 
         public void EndTransaction(bool sucessful)
         {
@@ -2348,6 +2351,60 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             deleteAttachmentCommand.Parameters["@mediaid"].Value = attachment._MediaId;
             deleteAttachmentCommand.Parameters["@typeid"].Value = attachment._TypeId;
             deleteAttachmentCommand.ExecuteNonQuery();
+        }
+
+        public string GetConnectionString()
+        {
+            return connection.ConnectionString;
+        }
+
+        private NpgsqlCommand getLatestEuroExchangeRatesCommand;
+        public AzusifiedCube GetLatestEuroExchangeRates()
+        {
+            if (getLatestEuroExchangeRatesCommand == null)
+            {
+                getLatestEuroExchangeRatesCommand = connection.CreateCommand();
+                getLatestEuroExchangeRatesCommand.CommandText = "SELECT * FROM azusa.euro_exchange_rates ORDER BY dateadded DESC";
+            }
+
+            NpgsqlDataReader dataReader = getLatestEuroExchangeRatesCommand.ExecuteReader();
+            if (dataReader.Read())
+            {
+                AzusifiedCube cube = new AzusifiedCube();
+                cube.DateAdded = dataReader.GetDateTime(0);
+                cube.CubeDate = dataReader.GetDateTime(1);
+                cube.USD = dataReader.GetDouble(2);
+                cube.JPY = dataReader.GetDouble(3);
+                cube.GBP = dataReader.GetDouble(4);
+                dataReader.Close();
+                return cube;
+            }
+            else
+            {
+                dataReader.Close();
+                return null;
+            }
+        }
+
+        private NpgsqlCommand insertEuroExchangeRateCommand;
+        public void InsertEuroExchangeRate(AzusifiedCube cube)
+        {
+            if (insertEuroExchangeRateCommand == null)
+            {
+                insertEuroExchangeRateCommand = connection.CreateCommand();
+                insertEuroExchangeRateCommand.CommandText =
+                    "INSERT INTO azusa.euro_exchange_rates (cubedate, usd, jpy, gbp) VALUES (@cubedate,@usd,@jpy,@gbp)";
+                insertEuroExchangeRateCommand.Parameters.Add("@cubedate", NpgsqlDbType.Date);
+                insertEuroExchangeRateCommand.Parameters.Add("@usd", NpgsqlDbType.Double);
+                insertEuroExchangeRateCommand.Parameters.Add("@jpy", NpgsqlDbType.Double);
+                insertEuroExchangeRateCommand.Parameters.Add("@gbp", NpgsqlDbType.Double);
+            }
+
+            insertEuroExchangeRateCommand.Parameters["@cubedate"].Value = cube.CubeDate;
+            insertEuroExchangeRateCommand.Parameters["@usd"].Value = cube.USD;
+            insertEuroExchangeRateCommand.Parameters["@jpy"].Value = cube.JPY;
+            insertEuroExchangeRateCommand.Parameters["@gbp"].Value = cube.GBP;
+            insertEuroExchangeRateCommand.ExecuteNonQuery();
         }
 
         public IEnumerable<AttachmentMigrationCandidate> GetAttachmentMigrationCandidates()
