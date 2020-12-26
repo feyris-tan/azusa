@@ -16,6 +16,7 @@ using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.Utilities.BandcampImporter;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
+using moe.yo3explorer.azusa.Utilities.Ps1BatchImport;
 using NPlot;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
@@ -919,26 +920,36 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             complationAssistantThread.Start();
         }
 
-        private void WrapCompletionAssistant()
+        private void BlockUi()
         {
             System.Windows.Forms.Control[] lockables = new System.Windows.Forms.Control[]
                 {menuStrip1, tabControl1, productsListView, tabControl2, mediaTabPages};
-            Invoke((MethodInvoker) delegate
+            Invoke((MethodInvoker)delegate
             {
                 foreach (var lockable in lockables)
                     lockable.Enabled = false;
             });
+        }
 
-            CompletionAssistant();
-
+        private void UnblockUi()
+        {
+            System.Windows.Forms.Control[] lockables = new System.Windows.Forms.Control[]
+                {menuStrip1, tabControl1, productsListView, tabControl2, mediaTabPages};
             if (IsHandleCreated)
             {
-                Invoke((MethodInvoker) delegate
+                Invoke((MethodInvoker)delegate
                 {
                     foreach (var lockable in lockables)
                         lockable.Enabled = true;
                 });
             }
+        }
+
+        private void WrapCompletionAssistant()
+        {
+            BlockUi();
+            CompletionAssistant();
+            UnblockUi();
         }
 
         private void CompletionAssistant()
@@ -1278,5 +1289,114 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             AttachmentEditor attachmentEditor = new AttachmentEditor(currentMedia, context);
             attachmentEditor.ShowDialog(FindForm());
         }
+
+        #region PSX Batch Import
+        private void pSXISOBatchImportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string indirKey = context.ReadIniKey("psxbatchimport", "indir", "");
+            if (string.IsNullOrEmpty(indirKey))
+            {
+                MessageBox.Show("Eingabeverzeichnis nicht definiert.");
+                return;
+            }
+
+            string outdirKey = context.ReadIniKey("psxbatchimport", "outdir", "");
+            if (string.IsNullOrEmpty(outdirKey))
+            {
+                MessageBox.Show("Ausgabeverzeichnis nicht definiert");
+                return;
+            }
+
+            string potpriceKey = context.ReadIniKey("psxbatchimport", "potprice", "");
+            if (string.IsNullOrEmpty(potpriceKey))
+            {
+                MessageBox.Show("Pottpreis nicht defininiert");
+                return;
+            }
+
+            string purchaseDateKey = context.ReadIniKey("psxbatchimport", "purchased", "");
+            if (string.IsNullOrEmpty(purchaseDateKey))
+            {
+                MessageBox.Show("Kaufdatum nicht definiert");
+                return;
+            }
+
+            DirectoryInfo indir = new DirectoryInfo(indirKey);
+            if (!indir.Exists)
+            {
+                MessageBox.Show("Eingabeverzeichnis existiert nicht!");
+                return;
+            }
+
+            DirectoryInfo outdir = new DirectoryInfo(outdirKey);
+            if (!outdir.Exists)
+            {
+                MessageBox.Show("Ausgabeverzeichnis existiert nicht!");
+                return;
+            }
+
+            double potprice = -1;
+            bool potpriceValid = double.TryParse(potpriceKey, out potprice);
+            if (!potpriceValid)
+            {
+                MessageBox.Show("Pottpreis ist ungültig.");
+                return;
+            }
+
+            DateTime purchaseDate = DateTime.MinValue;
+            bool purchaseDateValid = DateTime.TryParse(purchaseDateKey, out purchaseDate);
+            if (!purchaseDateValid)
+            {
+                MessageBox.Show("Kaufdatum ist ungültig.");
+                return;
+            }
+
+            int countryId = context.ReadIniKey("psxbatchimport", "country", -1);
+            if (countryId == -1)
+            {
+                MessageBox.Show("Herkunftsland ist ungültig.");
+                return;
+            }
+
+            int platformId = context.ReadIniKey("psxbatchimport", "platform", -1);
+            if (platformId == -1)
+            {
+                MessageBox.Show("Plattform ist ungültig.");
+                return;
+            }
+
+            int supplierId = context.ReadIniKey("psxbatchimport", "supplier", -1);
+            if (supplierId == -1)
+            {
+                MessageBox.Show("Händler ist ungültig.");
+                return;
+            }
+
+            ThreadStart psxBatchImportThreadStart = new ThreadStart(() =>
+            {
+                BlockUi();
+                PsxBatchImport(indir, outdir, currentShelf, potprice, purchaseDate, countryId, platformId, supplierId);
+                Invoke((MethodInvoker) delegate { tabControl1_SelectedIndexChanged(sender, e); });
+                UnblockUi();
+            });
+
+            Thread psxBatchImporThread = new Thread(psxBatchImportThreadStart);
+            psxBatchImporThread.Priority = ThreadPriority.Lowest;
+            psxBatchImporThread.Name = "PSXISO Batch Import";
+            psxBatchImporThread.Start();
+        }
+
+        private void PsxBatchImport(DirectoryInfo indir, DirectoryInfo outDir, Shelf shelf, double potprice,
+            DateTime purchaseDate, int countryId, int plarformId, int supplierId)
+        {
+            Ps1BatchImport batchImport = new Ps1BatchImport();
+            batchImport.PurchaseDate = purchaseDate;
+            batchImport.CountryId = countryId;
+            batchImport.PlatformId = plarformId;
+            batchImport.SupplierId = supplierId;
+            batchImport.OutputDirectory = outDir;
+            batchImport.Run(indir, shelf, potprice);
+        }
+        #endregion
     }
 }

@@ -452,6 +452,11 @@
     </Compile>
     <Compile Include="OfflineReaders\VocaDB\Control\VocaDbSearchResultListViewItem.cs" />
     <Compile Include="OfflineReaders\VocaDB\Entity\VocadbTrackEntry.cs" />
+    <Compile Include="Utilities\Ps1BatchImport\DateTimeExtensions.cs" />
+    <Compile Include="Utilities\Ps1BatchImport\Game.cs" />
+    <Compile Include="Utilities\Ps1BatchImport\GameDisc.cs" />
+    <Compile Include="Utilities\Ps1BatchImport\PlaystationSkuDetector.cs" />
+    <Compile Include="Utilities\Ps1BatchImport\Ps1BatchImport.cs" />
     <Compile Include="WebServer.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -10,11 +10,17 @@ using libazusax360;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
+using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
 
 namespace moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary
 {
     internal static class FilesystemMetadataGatherer
     {
+        private static readonly byte[] cdromSyncBytes =
+        {
+            0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
+        };
+
         public static void Gather(Media medium, Stream infile)
         {
             string failed = "";
@@ -85,7 +91,41 @@ namespace moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary
             }
             failed += "GD-ROM\n";
 
+            infile.Position = 0;
+            byte[] firstSector = new byte[2352];
+            if (infile.Read(firstSector, 0, firstSector.Length) == firstSector.Length)
+            {
+                byte[] firstSectorSync = new byte[cdromSyncBytes.Length];
+                Array.Copy(firstSector, firstSectorSync, cdromSyncBytes.Length);
+                if (memcmp(cdromSyncBytes,firstSectorSync))
+                {
+                    byte mode = firstSector[15];
+                    if (mode == 1 || mode == 2)
+                    {
+                        infile.Position = 0;
+                        RawCdRomStream rawCdRomStream = new RawCdRomStream(infile);
+                        Gather(medium, rawCdRomStream);
+                        return;
+                    }
+                }
+            }
+            failed += "RAW CD-ROM";
+
             MessageBox.Show("Konnte kein Dateisystem erkennen. Versucht wurden:" + failed);
+        }
+
+        private static bool memcmp(byte[] l, byte[] r)
+        {
+            if (l.Length != r.Length)
+                return false;
+
+            for (int i = 0; i < l.Length; i++)
+            {
+                if (l[i] != r[i])
+                    return false;
+            }
+
+            return true;
         }
 
         public static void Gather(Media medium, DriveInfo driveInfo)

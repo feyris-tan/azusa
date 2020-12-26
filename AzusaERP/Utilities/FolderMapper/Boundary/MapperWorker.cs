@@ -9,6 +9,7 @@ using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.MediaLibrary.Boundary;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
+using moe.yo3explorer.azusa.Utilities.Ps1BatchImport;
 
 namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
 {
@@ -126,7 +127,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                 if (fileExtensionDictionary.CountExtensions(".iso") == 1)
                 {
                     FileInfo fileInfo = fileExtensionDictionary.GetFileFromExtension(".iso");
-                    string ps2sku = DetectPs2Sku(fileInfo);
+                    string ps2sku = PlaystationSkuDetector.DetectPs2Sku(fileInfo);
                     if (ps2sku != null)
                     {
                         ofd.FileName = ps2sku + "." + ofd.FileName;
@@ -502,45 +503,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                 return String.Format("{0} - {1}{2}", mpf.SelectedProduct.Name, mpf.SelectedMedia.MediaName, extension);
             }
         }
-
-        private string DetectPs2Sku(FileInfo isofile)
-        {
-            FileStream isoStream = isofile.OpenRead();
-            if (!CDReader.Detect(isoStream))
-                return null;
-            CDReader cdReader = new CDReader(isoStream, false, true);
-            if (!cdReader.FileExists("SYSTEM.CNF"))
-            {
-                cdReader.Dispose();
-                isoStream.Dispose();
-                return null;
-            }
-
-            SparseStream systemCnfStream = cdReader.OpenFile("SYSTEM.CNF", FileMode.Open, FileAccess.Read);
-            StreamReader systemCnfReader = new StreamReader(systemCnfStream, Encoding.ASCII);
-            string boot2 = null;
-            while (!systemCnfReader.EndOfStream)
-            {
-                boot2 = systemCnfReader.ReadLine();
-                if (boot2.ToUpperInvariant().StartsWith("BOOT"))
-                {
-                    break;
-                }
-            }
-            systemCnfReader.Dispose();
-            systemCnfStream.Dispose();
-
-            while (boot2.Contains("\\"))
-                boot2 = boot2.Substring(1);
-
-            if (boot2.EndsWith(";1"))
-                boot2 = boot2.Substring(0, boot2.Length - 2);
-
-            cdReader.Dispose();
-            isoStream.Dispose();
-            return boot2;
-        }
-
+        
         private FileInfo FindIsoFile(DirectoryInfo directoryInfo)
         {
             foreach (FileInfo fileInfo in directoryInfo.GetFiles())

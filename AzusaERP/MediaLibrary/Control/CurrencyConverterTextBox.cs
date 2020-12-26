@@ -13,7 +13,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Control
         {
             InitializeComponent();
             context = AzusaContext.GetInstance();
-            cube = context.DatabaseDriver.GetLatestEuroExchangeRates();
+            if (context != null)
+            {
+                if (context.DatabaseDriver != null)
+                {
+                    cube = context.DatabaseDriver.GetLatestEuroExchangeRates();
+                }
+            }
             jPYEURToolStripMenuItem.Enabled = cube != null;
             uSDEURToolStripMenuItem.Enabled = cube != null;
             gBPEURToolStripMenuItem.Enabled = cube != null;

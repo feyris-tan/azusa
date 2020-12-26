@@ -39,6 +39,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.defekteM3UDateienReparierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metafilesAutomatischErgänzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageOrdnerImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSXISOBatchImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vervollständigkeitsassistentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.allesVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regalVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -236,7 +237,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.bandcampKollektionImportierenToolStripMenuItem,
             this.defekteM3UDateienReparierenToolStripMenuItem,
             this.metafilesAutomatischErgänzenToolStripMenuItem,
-            this.imageOrdnerImportierenToolStripMenuItem});
+            this.imageOrdnerImportierenToolStripMenuItem,
+            this.pSXISOBatchImportToolStripMenuItem});
             this.batchImportToolStripMenuItem.Name = "batchImportToolStripMenuItem";
             this.batchImportToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.batchImportToolStripMenuItem.Text = "Import";
@@ -268,6 +270,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.imageOrdnerImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
             this.imageOrdnerImportierenToolStripMenuItem.Text = "Image Ordner importieren";
             this.imageOrdnerImportierenToolStripMenuItem.Click += new System.EventHandler(this.imageOrdnerImportierenToolStripMenuItem_Click);
+            // 
+            // pSXISOBatchImportToolStripMenuItem
+            // 
+            this.pSXISOBatchImportToolStripMenuItem.Name = "pSXISOBatchImportToolStripMenuItem";
+            this.pSXISOBatchImportToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.pSXISOBatchImportToolStripMenuItem.Text = "PSXISO Batch Import";
+            this.pSXISOBatchImportToolStripMenuItem.Click += new System.EventHandler(this.pSXISOBatchImportToolStripMenuItem_Click);
             // 
             // vervollständigkeitsassistentToolStripMenuItem
             // 
@@ -1824,5 +1833,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem imageParsenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem weitereAnhängeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSXISOBatchImportToolStripMenuItem;
     }
 }

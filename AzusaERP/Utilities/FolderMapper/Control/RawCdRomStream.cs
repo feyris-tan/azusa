@@ -198,5 +198,10 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Control
                 return fsource.Length / sector_size;
             }
         }
+
+        public override void Close()
+        {
+            fsource.Close();
+        }
     }
 }

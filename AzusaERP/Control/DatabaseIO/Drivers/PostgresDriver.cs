@@ -393,7 +393,12 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             cmd.Parameters["@name"].Value = product.Name;
             cmd.Parameters["@price"].Value = product.Price;
             cmd.Parameters["@boughtOn"].Value = product.BoughtOn;
-            cmd.Parameters["@sku"].Value = product.Sku;
+
+            if (string.IsNullOrEmpty(product.Sku))
+                cmd.Parameters["@sku"].Value = DBNull.Value;
+            else
+                cmd.Parameters["@sku"].Value = product.Sku;
+
             cmd.Parameters["@platform"].Value = product.PlatformId;
             cmd.Parameters["@supplier"].Value = product.SupplierId;
             cmd.Parameters["@countryOfOrigin"].Value = product.CountryOfOriginId;
@@ -439,7 +444,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 setScreenshotCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
-            setScreenshotCommand.Parameters["@screenshot"].Value = product.Screenshot;
+            if (product.Screenshot == null)
+                setScreenshotCommand.Parameters["@screenshot"].Value = DBNull.Value;
+            else
+                setScreenshotCommand.Parameters["@screenshot"].Value = product.Screenshot;
+
             setScreenshotCommand.Parameters["@id"].Value = product.Id;
             if (setScreenshotCommand.ExecuteNonQuery() != 1)
                 throw new Exception("update failed");
