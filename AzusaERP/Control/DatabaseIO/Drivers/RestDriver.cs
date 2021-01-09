@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
-using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
@@ -17,7 +15,6 @@ using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
-using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

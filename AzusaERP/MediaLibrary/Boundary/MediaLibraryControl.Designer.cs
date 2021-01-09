@@ -1622,7 +1622,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // dumpOpenFileDialog
             // 
             this.dumpOpenFileDialog.Filter = "Mediendatei (*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs;*.nsp;*" +
-    ".vpk)|*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs;*.nsp;*.vpk";
+    ".vpk;*.tar)|*.gz;*.mkv;*.iso;*.zip;*.mp3;*.chd;*.epub;*.m4a;*.xci;*.wbfs;*.nsp;*" +
+    ".vpk;*.tar";
             // 
             // filesystemIsoParseOpenFileDialog
             // 
