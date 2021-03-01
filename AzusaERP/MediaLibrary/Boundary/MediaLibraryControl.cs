@@ -13,6 +13,7 @@ using moe.yo3explorer.azusa.Control.FilesystemMetadata.Boundary;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
+using moe.yo3explorer.azusa.Utilities;
 using moe.yo3explorer.azusa.Utilities.BandcampImporter;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
@@ -1398,5 +1399,36 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             batchImport.Run(indir, shelf, potprice);
         }
         #endregion
+
+        private void dVDBoxImportierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TheAvengersImport tai = new TheAvengersImport();
+
+            string indirKey = context.ReadIniKey("dvdboximport", "indir", "");
+            if (string.IsNullOrEmpty(indirKey))
+            {
+                MessageBox.Show("Eingabeverzeichnis nicht definiert.");
+                return;
+            }
+
+            DirectoryInfo indir = new DirectoryInfo(indirKey);
+            if (!indir.Exists)
+            {
+                MessageBox.Show("Eingabeverzeichnis existiert nicht!");
+                return;
+            }
+
+            ThreadStart taiThreadStart = new ThreadStart(() =>
+            {
+                BlockUi();
+                tai.Run(indir, currentShelf);
+                UnblockUi();
+            });
+
+            Thread taiImportThread = new Thread(taiThreadStart);
+            taiImportThread.Priority = ThreadPriority.Lowest;
+            taiImportThread.Name = "DVD-Box Import";
+            taiImportThread.Start();
+        }
     }
 }

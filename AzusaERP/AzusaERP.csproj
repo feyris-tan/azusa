@@ -457,6 +457,7 @@
     <Compile Include="Utilities\Ps1BatchImport\GameDisc.cs" />
     <Compile Include="Utilities\Ps1BatchImport\PlaystationSkuDetector.cs" />
     <Compile Include="Utilities\Ps1BatchImport\Ps1BatchImport.cs" />
+    <Compile Include="Utilities\TheAvengersImport.cs" />
     <Compile Include="WebServer.cs" />
   </ItemGroup>
   <ItemGroup>

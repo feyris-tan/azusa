@@ -17,6 +17,8 @@ namespace moe.yo3explorer.azusa.Utilities.Ps1BatchImport
         public string CueContent { get; set; }
         public string Md5Content { get; set; }
         public string IbgContent { get; set; }
+        public FileInfo MdsFile { get; set; }
+        public byte[] MdsContent { get; set; }
 
         public string GuessSku()
         {

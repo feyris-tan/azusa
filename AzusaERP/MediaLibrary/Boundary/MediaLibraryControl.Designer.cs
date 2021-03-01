@@ -163,6 +163,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.dVDBoxImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -238,7 +239,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.defekteM3UDateienReparierenToolStripMenuItem,
             this.metafilesAutomatischErgänzenToolStripMenuItem,
             this.imageOrdnerImportierenToolStripMenuItem,
-            this.pSXISOBatchImportToolStripMenuItem});
+            this.pSXISOBatchImportToolStripMenuItem,
+            this.dVDBoxImportierenToolStripMenuItem});
             this.batchImportToolStripMenuItem.Name = "batchImportToolStripMenuItem";
             this.batchImportToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.batchImportToolStripMenuItem.Text = "Import";
@@ -1629,6 +1631,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.filesystemIsoParseOpenFileDialog.Filter = "ISO9660 (*.iso), DD (*.img), httpd-ack (*.gdi)|*.iso;*.img;*.gdi";
             // 
+            // dVDBoxImportierenToolStripMenuItem
+            // 
+            this.dVDBoxImportierenToolStripMenuItem.Name = "dVDBoxImportierenToolStripMenuItem";
+            this.dVDBoxImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.dVDBoxImportierenToolStripMenuItem.Text = "DVD-Box importieren";
+            this.dVDBoxImportierenToolStripMenuItem.Click += new System.EventHandler(this.dVDBoxImportierenToolStripMenuItem_Click);
+            // 
             // MediaLibraryControl
             // 
             this.AllowDrop = true;
@@ -1835,5 +1844,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem discScannenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem weitereAnhängeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSXISOBatchImportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dVDBoxImportierenToolStripMenuItem;
     }
 }
