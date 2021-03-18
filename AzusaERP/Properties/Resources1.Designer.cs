@@ -83,6 +83,16 @@ namespace moe.yo3explorer.azusa.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CD_16 {
+            get {
+                object obj = ResourceManager.GetObject("CD_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Find_VS {
             get {
                 object obj = ResourceManager.GetObject("Find_VS", resourceCulture);
@@ -343,6 +353,26 @@ namespace moe.yo3explorer.azusa.Properties {
         internal static System.Drawing.Bitmap RefreshDocViewHS {
             get {
                 object obj = ResourceManager.GetObject("RefreshDocViewHS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Save {
+            get {
+                object obj = ResourceManager.GetObject("Save", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SplitSubdocument {
+            get {
+                object obj = ResourceManager.GetObject("SplitSubdocument", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

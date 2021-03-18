@@ -23,7 +23,6 @@ using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using moe.yo3explorer.azusa.Properties;
-using moe.yo3explorer.azusa.Utilities.Dumping.Entity;
 using Npgsql;
 using Npgsql.Logging;
 using NpgsqlTypes;

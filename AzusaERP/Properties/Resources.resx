@@ -127,8 +127,11 @@
   <data name="VgmDbFindAlbumForList_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\vgmdbfindalbumforlist.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="GetTotalMissingScreenshots_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gettotalmissingscreenshots.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="VgmdbFindArbituraryLabelNamesByAlbumId_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\vgmdbfindarbiturarylabelnamesbyalbumid.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="GetTotalMissingCovers_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\gettotalmissingcovers.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="media_optical" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\media-optical.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -157,6 +160,9 @@
   <data name="GetMediaByProduct_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\getmediabyproduct.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="GetTotalMissingScreenshots_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\gettotalmissingscreenshots.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -172,9 +178,6 @@
   <data name="NavForward" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\NavForward.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="VgmDbGetReleaseEvent" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vgmdbgetreleaseevent.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
   <data name="Vocadb_FindSongRelatedAlbum" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\vocadb.findsongrelatedalbum.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
@@ -187,14 +190,23 @@
   <data name="openfolderHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\openfolderHS.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="GetTotalMissingCovers_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\gettotalmissingcovers.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="money_yen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\money_yen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Save" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Save.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="GetTotalMissingGraphData_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\gettotalmissinggraphdata.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="VndbSearch_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vndbsearch.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="accept" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\accept.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="money_dollar" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\money_dollar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="link_break" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\link_break.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="NavBack" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\NavBack.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -202,25 +214,22 @@
   <data name="MyFigureCollectionSearch_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\myfigurecollectionsearch.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="CD_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD_16.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="VndbSearch_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\vndbsearch.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="internet_web_browser" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\internet-web-browser.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="VgmdbFindArbituraryLabelNamesByAlbumId_Postgre" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vgmdbfindarbiturarylabelnamesbyalbumid.postgre.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="accept" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\accept.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="link_break" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\link_break.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="money_dollar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\money_dollar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="VgmDbGetReleaseEvent" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\vgmdbgetreleaseevent.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="money_pound" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\money_pound.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="money_yen" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\money_yen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="SplitSubdocument" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SplitSubdocument.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
