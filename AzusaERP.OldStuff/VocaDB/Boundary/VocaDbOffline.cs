@@ -4,9 +4,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using AzusaERP.OldStuff;
 using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Control;
 using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
-using moe.yo3explorer.azusa.Properties;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.VocaDB.Boundary
 {
@@ -29,8 +29,8 @@ namespace moe.yo3explorer.azusa.OfflineReaders.VocaDB.Boundary
         public void OnLoad()
         {
             context = AzusaContext.GetInstance();
-            imageList1.Images.Add(Resources.media_optical);
-            imageList1.Images.Add(Resources.internet_web_browser);
+            imageList1.Images.Add(Properties.Resources.media_optical);
+            imageList1.Images.Add(Properties.Resources.internet_web_browser);
         }
 
         public int Priority => 9;

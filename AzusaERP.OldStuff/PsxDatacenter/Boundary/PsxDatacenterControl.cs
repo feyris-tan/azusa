@@ -4,8 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using moe.yo3explorer.azusa.Control.DatabaseIO;
-using moe.yo3explorer.azusa.Control.Galleria;
+using AzusaERP.OldStuff;
 using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Boundary
@@ -81,7 +80,7 @@ namespace moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Boundary
             List<byte[]> screenshots = database.PsxDc_GetScreenshots(preview.Id).ToList();
             List<Image> images = screenshots.ConvertAll(x => Image.FromStream(new MemoryStream(x, false)));
 
-            DefaultGalleriaModel galleriaModel = new DefaultGalleriaModel();
+            Galleria.DefaultGalleriaModel galleriaModel = new Galleria.DefaultGalleriaModel();
             galleria1.GalleriaModel = galleriaModel;
             galleriaModel.AddRange(images);
         }
@@ -94,4 +93,5 @@ namespace moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Boundary
             }
         }
     }
+    
 }

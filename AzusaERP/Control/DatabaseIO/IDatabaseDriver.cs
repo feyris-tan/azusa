@@ -5,14 +5,7 @@ using System.Drawing;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
-using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO
 {
@@ -62,7 +55,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text);
         IEnumerable<int> Vgmdb_FindAlbumsByArbituraryProducts(string text);
         IEnumerable<int> Vgmdb_FindAlbumsByAlbumTitle(string text);
-        AlbumListEntry Vgmdb_FindAlbumForList(int id);
         Bitmap Vgmdb_GetAlbumCover(int entryId);
         IEnumerable<string> Vgmdb_FindProductNamesByAlbumId(int entryId);
         IEnumerable<string> Vgmdb_FindArtistNamesByAlbumId(int entryId);
@@ -76,9 +68,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         string Vgmdb_GetReleaseEvent(int albumId);
         IEnumerable<string> Vgmdb_FindReprints(int albumId);
         IEnumerable<Uri> Vgmdb_GetWebsites(int albumId);
-
-        IEnumerable<PsxDatacenterPreview> PsxDc_Search(string textBox);
-        PsxDatacenterGame PsxDc_GetSpecificGame(int previewId);
+        
         IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId);
 
         IEnumerable<SqlIndex> GetSqlIndexes();
@@ -87,23 +77,14 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void ForgetFilesystemContents(int currentMediaId);
         void AddFilesystemInfo(FilesystemMetadataEntity dirEntity);
         IEnumerable<FilesystemMetadataEntity> GetFilesystemMetadata(int currentMediaId, bool dirs);
-
-        IEnumerable<VndbSearchResult> Vndb_Search(string searchquery);
-        IEnumerable<VndbVnResult> Vndb_GetVnsByRelease(int searchResultRid);
-        VndbRelease Vndb_GetReleaseById(int releaseResultRid);
-        VndbVn Vndb_GetVnById(int vnResultVnid);
-
+        
         DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query);
-
-        IEnumerable<Figure> MyFigureCollection_Search(string query);
+        
         Image MyFigureCollection_GetPhoto(int wrappedFigureId);
-
-        IEnumerable<VocadbSearchResult> VocaDb_Search(string text);
+        
         Image Vocadb_GetAlbumCover(int id);
         List<string> VocaDb_FindAlbumNamesBySongNames(string text);
-        IEnumerable<VocadbTrackEntry> VocaDb_GetTracksByAlbum(int wrappedId);
-
-        IEnumerable<GelbooruTag> Gelbooru_GetAllTags();
+        
         IEnumerable<int> Gelbooru_GetPostsByTag(int tagId);
         void CreateSchema(string schemaName);
         void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName);

@@ -66,6 +66,15 @@
       <DependentUpon>SelectComPortForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DexcomHistory\Entity\ManualDataEntity.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Gelbooru\Boundary\GelboooruControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gelbooru\Boundary\GelboooruControl.Designer.cs">
+      <DependentUpon>GelboooruControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gelbooru\Control\GelbooruGalleriaModel.cs" />
+    <Compile Include="Gelbooru\Entity\GelbooruTag.cs" />
     <Compile Include="Licensing\GuidUtils.cs" />
     <Compile Include="Licensing\LicenseState.cs" />
     <Compile Include="Licensing\LicenseValidationFailedException.cs" />
@@ -76,12 +85,24 @@
     <Compile Include="MailArchive\Control\MailProtocolLogger.cs" />
     <Compile Include="MailArchive\Entity\Folder.cs" />
     <Compile Include="MailArchive\Entity\Mail.cs" />
+    <Compile Include="MockAzusaStreamBlob.cs" />
     <Compile Include="MockHashLib.cs" />
     <Compile Include="MockKeepass.cs" />
     <Compile Include="MockMailKit.cs" />
     <Compile Include="MockNewtonsoftJson.cs" />
     <Compile Include="MockNmeaParser.cs" />
     <Compile Include="MockNPlot.cs" />
+    <Compile Include="MockObjectListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MyFigureCollection\Boundary\FigureListViewItem.cs" />
+    <Compile Include="MyFigureCollection\Boundary\MyFigureCollection.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyFigureCollection\Boundary\MyFigureCollection.Designer.cs">
+      <DependentUpon>MyFigureCollection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyFigureCollection\Entity\Figure.cs" />
     <Compile Include="Notebook\Boundary\NotebookControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -93,6 +114,14 @@
     <Compile Include="PasswordManagement\Boundary\PasswordManagement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MockAzusa.cs" />
+    <Compile Include="PsxDatacenter\Boundary\PsxDatacenterControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PsxDatacenter\Boundary\PsxDatacenterControl.Designer.cs">
+      <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PsxDatacenter\Entity\PsxDatacenterGame.cs" />
+    <Compile Include="PsxDatacenter\Entity\PsxDatacenterPreview.cs" />
     <Compile Include="SedgeTree\Boundary\Calendar.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,6 +169,35 @@
     <Compile Include="SedgeTree\Entitiy\Family.cs" />
     <Compile Include="SedgeTree\Entitiy\Gender.cs" />
     <Compile Include="SedgeTree\Entitiy\Person.cs" />
+    <Compile Include="VgmDb\Boundary\VgmDbControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="VgmDb\Boundary\VgmDbControl.Designer.cs">
+      <DependentUpon>VgmDbControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VgmDb\Entity\Album.cs" />
+    <Compile Include="VgmDb\Entity\AlbumListEntry.cs" />
+    <Compile Include="VgmDb\Entity\Track.cs" />
+    <Compile Include="VnDb\Boundary\VnDbControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="VnDb\Boundary\VnDbControl.Designer.cs">
+      <DependentUpon>VnDbControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VnDb\Entity\VndbRelease.cs" />
+    <Compile Include="VnDb\Entity\VndbSearchResult.cs" />
+    <Compile Include="VnDb\Entity\VndbVn.cs" />
+    <Compile Include="VnDb\Entity\VndbVnAnime.cs" />
+    <Compile Include="VnDb\Entity\VndbVnResult.cs" />
+    <Compile Include="VocaDB\Boundary\VocaDbOffline.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="VocaDB\Boundary\VocaDbOffline.Designer.cs">
+      <DependentUpon>VocaDbOffline.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VocaDB\Control\VocaDbSearchResultListViewItem.cs" />
+    <Compile Include="VocaDB\Entity\VocadbSearchResult.cs" />
+    <Compile Include="VocaDB\Entity\VocadbTrackEntry.cs" />
     <Compile Include="WarWalking\Boundary\DiscoveryService.cs" />
     <Compile Include="WarWalking\Boundary\TourService.cs" />
     <Compile Include="WarWalking\Boundary\WarWalkingControl.cs">
@@ -170,8 +228,17 @@
     <EmbeddedResource Include="DexcomHistory\Control\SelectComPortForm.resx">
       <DependentUpon>SelectComPortForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Gelbooru\Boundary\GelboooruControl.resx">
+      <DependentUpon>GelboooruControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyFigureCollection\Boundary\MyFigureCollection.resx">
+      <DependentUpon>MyFigureCollection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Notebook\Boundary\NotebookControl.resx">
       <DependentUpon>NotebookControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PsxDatacenter\Boundary\PsxDatacenterControl.resx">
+      <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SedgeTree\Boundary\Calendar.resx">
       <DependentUpon>Calendar.cs</DependentUpon>
@@ -193,6 +260,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SedgeTree\Boundary\TreeDisplay.resx">
       <DependentUpon>TreeDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VgmDb\Boundary\VgmDbControl.resx">
+      <DependentUpon>VgmDbControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VnDb\Boundary\VnDbControl.resx">
+      <DependentUpon>VnDbControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VocaDB\Boundary\VocaDbOffline.resx">
+      <DependentUpon>VocaDbOffline.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WarWalking\Boundary\WarWalkingControl.resx">
       <DependentUpon>WarWalkingControl.cs</DependentUpon>

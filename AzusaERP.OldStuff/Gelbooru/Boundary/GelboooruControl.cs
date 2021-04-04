@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using AzusaERP;
-using libazustreamblob;
+using AzusaERP.OldStuff;
 using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Control;
 using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
 

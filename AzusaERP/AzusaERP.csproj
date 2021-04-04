@@ -278,14 +278,6 @@
     <Compile Include="Utilities\FolderMapper\Boundary\MapperWorker.cs" />
     <Compile Include="Utilities\FolderMapper\Control\FileExtensionDictionary.cs" />
     <Compile Include="Utilities\FolderMapper\Control\RawCdRomStream.cs" />
-    <Compile Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.Designer.cs">
-      <DependentUpon>GelboooruControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\Gelbooru\Control\GelbooruGalleriaModel.cs" />
-    <Compile Include="OfflineReaders\Gelbooru\Entity\GelbooruTag.cs" />
     <Compile Include="HastSetExtensions.cs" />
     <Compile Include="IAzusaWebHandler.cs" />
     <Compile Include="Control\DatabaseIO\IDatabaseDriver.cs" />
@@ -375,14 +367,6 @@
     <Compile Include="MediaLibrary\Entity\ProductInShelf.cs" />
     <Compile Include="MediaLibrary\Entity\Shelf.cs" />
     <Compile Include="MediaLibrary\Entity\Shop.cs" />
-    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\FigureListViewItem.cs" />
-    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.Designer.cs">
-      <DependentUpon>MyFigureCollection.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\MyFigureCollection\Entity\Figure.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources1.Designer.cs">
@@ -390,14 +374,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.Designer.cs">
-      <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\PsxDatacenter\Entity\PsxDatacenterGame.cs" />
-    <Compile Include="OfflineReaders\PsxDatacenter\Entity\PsxDatacenterPreview.cs" />
     <None Include="Resources\add.png" />
     <None Include="Resources\accept.png" />
     <None Include="Resources\CD_16.bmp" />
@@ -434,34 +410,6 @@
       <DependentUpon>M3uDrop.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\MakeM3uFromDirectory.cs" />
-    <Compile Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.Designer.cs">
-      <DependentUpon>VgmDbControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\VgmDb\Entity\Album.cs" />
-    <Compile Include="OfflineReaders\VgmDb\Entity\AlbumListEntry.cs" />
-    <Compile Include="OfflineReaders\VgmDb\Entity\Track.cs" />
-    <Compile Include="OfflineReaders\VnDb\Boundary\VnDbControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\VnDb\Boundary\VnDbControl.Designer.cs">
-      <DependentUpon>VnDbControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\VnDb\Entity\VndbRelease.cs" />
-    <Compile Include="OfflineReaders\VnDb\Entity\VndbSearchResult.cs" />
-    <Compile Include="OfflineReaders\VnDb\Entity\VndbVn.cs" />
-    <Compile Include="OfflineReaders\VnDb\Entity\VndbVnAnime.cs" />
-    <Compile Include="OfflineReaders\VnDb\Entity\VndbVnResult.cs" />
-    <Compile Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.Designer.cs">
-      <DependentUpon>VocaDbOffline.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OfflineReaders\VocaDB\Control\VocaDbSearchResultListViewItem.cs" />
-    <Compile Include="OfflineReaders\VocaDB\Entity\VocadbTrackEntry.cs" />
     <Compile Include="Utilities\Ps1BatchImport\DateTimeExtensions.cs" />
     <Compile Include="Utilities\Ps1BatchImport\Game.cs" />
     <Compile Include="Utilities\Ps1BatchImport\GameDisc.cs" />
@@ -485,9 +433,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MediaLibrary\Control\AttachmentTextEditor.resx">
       <DependentUpon>AttachmentTextEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\Gelbooru\Boundary\GelboooruControl.resx">
-      <DependentUpon>GelboooruControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -519,31 +464,16 @@
     <EmbeddedResource Include="MediaLibrary\Control\ScanForm.resx">
       <DependentUpon>ScanForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\MyFigureCollection\Boundary\MyFigureCollection.resx">
-      <DependentUpon>MyFigureCollection.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\PsxDatacenter\Boundary\PsxDatacenterControl.resx">
-      <DependentUpon>PsxDatacenterControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Splash.resx">
       <DependentUpon>Splash.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TextInputForm.resx">
       <DependentUpon>TextInputForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\VgmDb\Boundary\VgmDbControl.resx">
-      <DependentUpon>VgmDbControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\VnDb\Boundary\VnDbControl.resx">
-      <DependentUpon>VnDbControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OfflineReaders\VocaDB\Boundary\VocaDbOffline.resx">
-      <DependentUpon>VocaDbOffline.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Utilities\BDInfo\BdInfoControl.resx">
       <DependentUpon>BdInfoControl.cs</DependentUpon>
@@ -615,7 +545,6 @@
     <Content Include="Resources\VgmDbGetReleaseEvent.sql" />
     <Content Include="Resources\VndbSearch.Postgre.sql" />
     <Content Include="Resources\Vocadb.Search.Postgre.sql" />
-    <Compile Include="OfflineReaders\VocaDB\Entity\VocadbSearchResult.cs" />
     <None Include="Resources\Find_VS.png" />
     <Content Include="Resources\GetMediaByProduct.Postgre.sql" />
     <Content Include="Resources\GetProductsInShelf.Postgre.sql" />
@@ -624,7 +553,9 @@
     <Content Include="Resources\GetTotalMissingScreenshots.Postgre.sql" />
     <Content Include="Resources\GetTotalUndumpedMedia.Postgre.sql" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="OfflineReaders\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

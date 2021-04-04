@@ -1,5 +1,5 @@
-﻿using moe.yo3explorer.azusa.Control.Galleria;
-using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+﻿using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
+using AzusaERP.OldStuff;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.VgmDb.Boundary
 {

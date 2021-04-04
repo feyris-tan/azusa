@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using AzusaERP.OldStuff;
 using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Boundary

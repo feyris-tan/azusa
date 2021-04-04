@@ -51,9 +51,7 @@ namespace moe.yo3explorer.azusa
                     subform.Text = instance.Title;
                     subform.Show(this);
                 };
-
-                stammdatenToolStripMenuItem.DropDownItems.Add(tsb);
-                stammdatenToolStripMenuItem.Visible = true;
+                
             }
         }
         

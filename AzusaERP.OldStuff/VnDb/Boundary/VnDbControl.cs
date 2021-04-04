@@ -6,10 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using AzusaERP;
+using AzusaERP.OldStuff;
 using BrightIdeasSoftware;
-using moe.yo3explorer.azusa.Control.DatabaseIO;
-using moe.yo3explorer.azusa.Control.Galleria;
-using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.VnDb.Boundary
@@ -126,7 +124,7 @@ namespace moe.yo3explorer.azusa.OfflineReaders.VnDb.Boundary
                 propertyGrid1.SelectedObject = vn;
                 if (vn.Screens.Count > 0)
                 {
-                    DefaultGalleriaModel galleriaModel = new DefaultGalleriaModel();
+                    Galleria.DefaultGalleriaModel galleriaModel = new Galleria.DefaultGalleriaModel();
                     galleria1.GalleriaModel = galleriaModel;
                     galleriaModel.AddRange(vn.Screens);
                 }

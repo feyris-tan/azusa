@@ -9,12 +9,6 @@ using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -338,12 +332,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public AlbumListEntry Vgmdb_FindAlbumForList(int id)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public Bitmap Vgmdb_GetAlbumCover(int entryId)
         {
             throw new NotImplementedException();
@@ -408,17 +397,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<PsxDatacenterPreview> PsxDc_Search(string textBox)
-        {
-            throw new NotImplementedException();
-        }
-
-        public PsxDatacenterGame PsxDc_GetSpecificGame(int previewId)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId)
         {
             throw new NotImplementedException();
@@ -448,47 +427,17 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<VndbSearchResult> Vndb_Search(string searchquery)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<VndbVnResult> Vndb_GetVnsByRelease(int searchResultRid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public VndbRelease Vndb_GetReleaseById(int releaseResultRid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public VndbVn Vndb_GetVnById(int vnResultVnid)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query)
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<Figure> MyFigureCollection_Search(string query)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public Image MyFigureCollection_GetPhoto(int wrappedFigureId)
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<VocadbSearchResult> VocaDb_Search(string text)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public Image Vocadb_GetAlbumCover(int id)
         {
             throw new NotImplementedException();
@@ -498,17 +447,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public IEnumerable<VocadbTrackEntry> VocaDb_GetTracksByAlbum(int wrappedId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<GelbooruTag> Gelbooru_GetAllTags()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public IEnumerable<int> Gelbooru_GetPostsByTag(int tagId)
         {
             throw new NotImplementedException();

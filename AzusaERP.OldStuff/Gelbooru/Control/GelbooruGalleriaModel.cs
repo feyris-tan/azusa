@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using System.IO;
-using libazustreamblob;
-using moe.yo3explorer.azusa.Control.Galleria;
+using AzusaERP.OldStuff;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Control
 {

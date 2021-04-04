@@ -4,24 +4,14 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using AzusaERP;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
-using moe.yo3explorer.azusa.dex;
-using moe.yo3explorer.azusa.dex.Schema.Enums;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.MyFigureCollection.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.PsxDatacenter.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
-using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using moe.yo3explorer.azusa.Properties;
 using Npgsql;
 using Npgsql.Logging;
@@ -1009,55 +999,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             ndr.Dispose();
         }
-
-        private NpgsqlCommand vgmFindAlbumForList;
-        public AlbumListEntry Vgmdb_FindAlbumForList(int id)
-        {
-            if (vgmFindAlbumForList == null)
-            {
-                vgmFindAlbumForList = connection.CreateCommand();
-                vgmFindAlbumForList.CommandText = Resources.VgmDbFindAlbumForList_Postgre;
-                vgmFindAlbumForList.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vgmFindAlbumForList.Parameters["@id"].Value = id;
-            NpgsqlDataReader dataReader = vgmFindAlbumForList.ExecuteReader();
-            AlbumListEntry result = null;
-            if (dataReader.Read())
-            {
-                result = new AlbumListEntry();
-                result.id = dataReader.GetInt32(0);
-                result.catalog = dataReader.GetString(1);
-                if (!dataReader.IsDBNull(2))
-                    result.date = dataReader.GetDateTime(2);
-                else
-                    result.date = null;
-
-                if (!dataReader.IsDBNull(3))
-                    result.typeName = dataReader.GetString(3);
-
-                if (!dataReader.IsDBNull(4))
-                    result.classificationName = dataReader.GetString(4);
-
-                if (!dataReader.IsDBNull(5))
-                    result.mediaformatName = dataReader.GetString(5);
-
-                if (!dataReader.IsDBNull(6))
-                    result.name = dataReader.GetString(6);
-
-                if (!dataReader.IsDBNull(7))
-                    result.publishformatName = dataReader.GetString(7);
-
-                if (!dataReader.IsDBNull(8))
-                    result.notes = dataReader.GetString(8);
-
-                if (!dataReader.IsDBNull(9))
-                    result.publisher = dataReader.GetString(9);
-            }
-            dataReader.Dispose();
-            return result;
-        }
-
+        
         private NpgsqlCommand vgmdbGetAlbumCover;
         public Bitmap Vgmdb_GetAlbumCover(int entryId)
         {
@@ -1353,70 +1295,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             dataReader.Dispose();
         }
-
-        private NpgsqlCommand psxdcSearchCommand;
-        public IEnumerable<PsxDatacenterPreview> PsxDc_Search(string textBox)
-        {
-            if (psxdcSearchCommand == null)
-            {
-                psxdcSearchCommand = connection.CreateCommand();
-                psxdcSearchCommand.CommandText =
-                    "SELECT id, platform,sku,title,additionals FROM dump_psxdatacenter.games WHERE title LIKE @p1 OR commontitle LIKE @p1 OR sku LIKE @p2";
-                psxdcSearchCommand.Parameters.Add("@p1", NpgsqlDbType.Varchar);
-                psxdcSearchCommand.Parameters.Add("@p2", NpgsqlDbType.Varchar);
-            }
-
-            psxdcSearchCommand.Parameters["@p1"].Value = String.Format("%{0}%", textBox);
-            psxdcSearchCommand.Parameters["@p2"].Value = String.Format("{0}%", textBox);
-            NpgsqlDataReader dataReader = psxdcSearchCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                PsxDatacenterPreview child = new PsxDatacenterPreview();
-                child.Id = dataReader.GetInt32(0);
-                child.Platform = dataReader.GetString(1);
-                child.SKU = dataReader.GetString(2);
-                child.Title = dataReader.GetString(3);
-                child.HasAdditionalData = dataReader.GetBoolean(4);
-                yield return child;
-            }
-            dataReader.Dispose();
-        }
-
-        private NpgsqlCommand psxdatacenterGetGameCommand;
-        public PsxDatacenterGame PsxDc_GetSpecificGame(int previewId)
-        {
-            if (psxdatacenterGetGameCommand == null)
-            {
-                psxdatacenterGetGameCommand = connection.CreateCommand();
-                psxdatacenterGetGameCommand.CommandText = Resources.PsxDatacenterGetGame_Postgre;
-                psxdatacenterGetGameCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            psxdatacenterGetGameCommand.Parameters["@id"].Value = previewId;
-            NpgsqlDataReader dataReader = psxdatacenterGetGameCommand.ExecuteReader();
-            if (!dataReader.Read())
-            {
-                dataReader.Dispose();
-                return null;
-            }
-            PsxDatacenterGame result = new PsxDatacenterGame();
-            result.Platform = dataReader.GetString(0);
-            result.SKU = dataReader.GetString(1);
-            result.Title = dataReader.GetString(2);
-            result.Languages = dataReader.GetString(3);
-            result.CommonTitle = dataReader.GetString(4);
-            result.Region = dataReader.GetString(5);
-            result.Genre = dataReader.GetString(6);
-            result.DeveloperId = dataReader.GetString(7);
-            result.PublisherId = dataReader.GetString(8);
-            result.DateRelease = dataReader.GetDateTime(9);
-            result.Cover = dataReader.GetByteArray(10);
-            result.Description = dataReader.GetString(11);
-            result.Barcode = dataReader.GetString(12);
-            dataReader.Dispose();
-            return result;
-        }
-
+        
         private NpgsqlCommand psxDatacenterGetScreenshots;
         public IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId)
         {
@@ -1574,307 +1453,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
             dataReader.Close();
         }
-
-        private NpgsqlCommand vndbSearchCommand;
-        public IEnumerable<VndbSearchResult> Vndb_Search(string searchquery)
-        {
-            if (vndbSearchCommand == null)
-            {
-                vndbSearchCommand = connection.CreateCommand();
-                vndbSearchCommand.CommandText = Resources.VndbSearch_Postgre;
-                vndbSearchCommand.Parameters.Add("@query", NpgsqlDbType.Varchar);
-            }
-
-            vndbSearchCommand.Parameters["@query"].Value = searchquery;
-            NpgsqlDataReader reader = vndbSearchCommand.ExecuteReader();
-            while (reader.Read())
-            {
-                VndbSearchResult result = new VndbSearchResult();
-                result.RID = reader.GetInt32(0);
-                result.Title = reader.GetString(1);
-                if (!reader.IsDBNull(2))
-                    result.GTIN = reader.GetString(2);
-                if (!reader.IsDBNull(3))
-                    result.SKU = reader.GetString(3);
-                yield return result;
-            }
-            reader.Dispose();
-        }
-
-        private NpgsqlCommand getVnByReleaseCommand;
-        public IEnumerable<VndbVnResult> Vndb_GetVnsByRelease(int searchResultRid)
-        {
-            if (getVnByReleaseCommand == null)
-            {
-                getVnByReleaseCommand = connection.CreateCommand();
-                getVnByReleaseCommand.CommandText = "SELECT * FROM dump_vndb.release_vns root WHERE rid=@id";
-                getVnByReleaseCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            getVnByReleaseCommand.Parameters["@id"].Value = searchResultRid;
-            NpgsqlDataReader dataReader = getVnByReleaseCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                VndbVnResult vnResult = new VndbVnResult();
-                vnResult.RID = dataReader.GetInt32(0);
-                vnResult.VNID = dataReader.GetInt32(1);
-                vnResult.Title = dataReader.GetString(2);
-                if (!dataReader.IsDBNull(3))
-                    vnResult.Original = dataReader.GetString(3);
-                vnResult.DateAdded = dataReader.GetDateTime(4);
-                yield return vnResult;
-            }
-
-            dataReader.Dispose();
-        }
-
-        private NpgsqlCommand vndbGetReleaseByIdCommand;
-        private NpgsqlCommand vndbGetReleaseLanguageById;
-        private NpgsqlCommand vndbGetReleaseMediaById;
-        private NpgsqlCommand vndbGetReleasePlatformById;
-        private NpgsqlCommand vndbGetReleaseProducersById;
-        public VndbRelease Vndb_GetReleaseById(int releaseResultRid)
-        {
-            if (vndbGetReleaseByIdCommand == null)
-            {
-                vndbGetReleaseByIdCommand = connection.CreateCommand();
-                vndbGetReleaseByIdCommand.CommandText = "SELECT * FROM dump_vndb.release WHERE id=@id";
-                vndbGetReleaseByIdCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetReleaseByIdCommand.Parameters["@id"].Value = releaseResultRid;
-            NpgsqlDataReader dataReader = vndbGetReleaseByIdCommand.ExecuteReader();
-            if (!dataReader.Read())
-            {
-                dataReader.Dispose();
-                return null;
-            }
-            VndbRelease result = new VndbRelease();
-            result.Title = dataReader.GetString(1);
-
-            if (!dataReader.IsDBNull(2))
-                result.OriginalTitle = dataReader.GetString(2);
-
-            result.Released = dataReader.GetDate(3).ToString();
-            result.Type = dataReader.GetString(4);
-            result.IsPatch = dataReader.GetBoolean(5);
-            result.IsFreeware = dataReader.GetBoolean(6);
-            result.IsDoujin = dataReader.GetBoolean(7);
-
-            if (!dataReader.IsDBNull(8))
-                result.Website = dataReader.GetString(8);
-
-            if (!dataReader.IsDBNull(9))
-                result.Notes = dataReader.GetString(9);
-
-            if (!dataReader.IsDBNull(10))
-                result.AgeRestriction = dataReader.GetInt32(10);
-
-            if (!dataReader.IsDBNull(11))
-                result.GTIN = dataReader.GetString(11);
-
-            if (!dataReader.IsDBNull(12))
-                result.SKU = dataReader.GetString(12);
-
-            if (!dataReader.IsDBNull(13))
-                result.Resolution = dataReader.GetString(13);
-            dataReader.Dispose();
-
-            if (vndbGetReleaseLanguageById == null)
-            {
-                vndbGetReleaseLanguageById = connection.CreateCommand();
-                vndbGetReleaseLanguageById.CommandText = "SELECT lang FROM dump_vndb.release_languages WHERE rid=@id";
-                vndbGetReleaseLanguageById.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetReleaseLanguageById.Parameters["@id"].Value = releaseResultRid;
-            dataReader = vndbGetReleaseLanguageById.ExecuteReader();
-            StringBuilder sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0},", dataReader.GetString(0));
-            dataReader.Dispose();
-            result.Language = sb.ToString();
-
-            if (vndbGetReleaseMediaById == null)
-            {
-                vndbGetReleaseMediaById = connection.CreateCommand();
-                vndbGetReleaseMediaById.CommandText =
-                    "SELECT medium, qty FROM dump_vndb.release_media WHERE rid=@id AND qty IS NOT NULL";
-                vndbGetReleaseMediaById.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetReleaseMediaById.Parameters["@id"].Value = releaseResultRid;
-            dataReader = vndbGetReleaseMediaById.ExecuteReader();
-            sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0}x {1},", dataReader.GetInt32(1), dataReader.GetString(0));
-            dataReader.Dispose();
-            result.Media = sb.ToString();
-
-            if (vndbGetReleasePlatformById == null)
-            {
-                vndbGetReleasePlatformById = connection.CreateCommand();
-                vndbGetReleasePlatformById.CommandText = "SELECT platform FROM dump_vndb.release_platforms WHERE rid=@id";
-                vndbGetReleasePlatformById.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetReleasePlatformById.Parameters["@id"].Value = releaseResultRid;
-            dataReader = vndbGetReleasePlatformById.ExecuteReader();
-            sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0},", dataReader.GetString(0));
-            dataReader.Dispose();
-            result.Platforms = sb.ToString();
-
-            if (vndbGetReleaseProducersById == null)
-            {
-                vndbGetReleaseProducersById = connection.CreateCommand();
-                vndbGetReleaseProducersById.CommandText =
-                    "SELECT DISTINCT name FROM dump_vndb.release_producers WHERE rid=@id";
-                vndbGetReleaseProducersById.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetReleaseProducersById.Parameters["@id"].Value = releaseResultRid;
-            dataReader = vndbGetReleaseProducersById.ExecuteReader();
-            sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0},", dataReader.GetString(0));
-            dataReader.Dispose();
-            result.Producers = sb.ToString();
-
-            return result;
-        }
-
-        private NpgsqlCommand vndbGetVn;
-        private NpgsqlCommand vndbGetVnAnime;
-        private NpgsqlCommand vndbGetVnPlatforms;
-        private NpgsqlCommand vndbGetVnRelations;
-        private NpgsqlCommand vndbGetVnScreens;
-        private NpgsqlCommand vndbGetVnLanguages;
-        public VndbVn Vndb_GetVnById(int vnResultVnid)
-        {
-            if (vndbGetVn == null)
-            {
-                vndbGetVn = connection.CreateCommand();
-                vndbGetVn.CommandText = "SELECT * FROM dump_vndb.vn WHERE id=@id";
-                vndbGetVn.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVn.Parameters["@id"].Value = vnResultVnid;
-            NpgsqlDataReader dataReader = vndbGetVn.ExecuteReader();
-            dataReader.Read();
-            VndbVn result = new VndbVn();
-            result.Title = dataReader.GetString(3);
-
-            if (!dataReader.IsDBNull(4))
-                result.OriginalTitle = dataReader.GetString(4);
-
-            if (!dataReader.IsDBNull(5))
-                result.ReleaseDate = dataReader.GetDate(5).ToString();
-
-            if (!dataReader.IsDBNull(6))
-                result.Alias = dataReader.GetString(6);
-
-            if (!dataReader.IsDBNull(7))
-                result.Length = dataReader.GetInt32(7);
-
-            if (!dataReader.IsDBNull(8))
-                result.Description = dataReader.GetString(8);
-
-            if (!dataReader.IsDBNull(9))
-                result.WikipediaLink = dataReader.GetString(9);
-
-            if (!dataReader.IsDBNull(12))
-                result.Image = dataReader.GetPicture(12);
-
-            result.ImageNSFW = dataReader.GetBoolean(13);
-            result.Popularity = dataReader.GetDouble(14);
-            result.Rating = dataReader.GetDouble(15);
-            dataReader.Close();
-
-            if (vndbGetVnAnime == null)
-            {
-                vndbGetVnAnime = connection.CreateCommand();
-                vndbGetVnAnime.CommandText = "SELECT * FROM dump_vndb.vn_anime WHERE vnid=@id";
-                vndbGetVnAnime.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVnAnime.Parameters["@id"].Value = vnResultVnid;
-            dataReader = vndbGetVnAnime.ExecuteReader();
-            if (dataReader.Read())
-            {
-                VndbVnAnime anime = new VndbVnAnime();
-                anime.TitleRomanji = dataReader.GetString(5);
-                anime.TitleKanji = dataReader.GetString(6);
-                anime.Year = dataReader.GetInt32(7);
-                result.Anime = anime;
-            }
-            dataReader.Close();
-
-            if (vndbGetVnPlatforms == null)
-            {
-                vndbGetVnPlatforms = connection.CreateCommand();
-                vndbGetVnPlatforms.CommandText = "SELECT platform FROM dump_vndb.vn_platforms WHERE vnid=@id";
-                vndbGetVnPlatforms.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVnPlatforms.Parameters["@id"].Value = vnResultVnid;
-            dataReader = vndbGetVnPlatforms.ExecuteReader();
-            StringBuilder sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0} ", dataReader.GetString(0));
-            dataReader.Close();
-            result.Platform = sb.ToString();
-
-            if (vndbGetVnRelations == null)
-            {
-                vndbGetVnRelations = connection.CreateCommand();
-                vndbGetVnRelations.CommandText = "SELECT relation,title FROM dump_vndb.vn_relation WHERE srcid=@id";
-                vndbGetVnRelations.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVnRelations.Parameters["@id"].Value = vnResultVnid;
-            dataReader = vndbGetVnRelations.ExecuteReader();
-            List<string> relations = new List<string>();
-            while (dataReader.Read())
-                relations.Add(String.Format("{0}: {1}", dataReader.GetString(0), dataReader.GetString(1)));
-            if (relations.Count > 0)
-                result.Relations = relations.ToArray();
-            dataReader.Close();
-
-            if (vndbGetVnScreens == null)
-            {
-                vndbGetVnScreens = connection.CreateCommand();
-                vndbGetVnScreens.CommandText = "SELECT image FROM dump_vndb.vn_screens WHERE vnid=@id";
-                vndbGetVnScreens.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVnScreens.Parameters["@id"].Value = vnResultVnid;
-            dataReader = vndbGetVnScreens.ExecuteReader();
-            result.Screens = new List<Image>();
-            while (dataReader.Read())
-                if (!dataReader.IsDBNull(0))
-                    result.Screens.Add(dataReader.GetPicture(0));
-            dataReader.Close();
-
-            if (vndbGetVnLanguages == null)
-            {
-                vndbGetVnLanguages = connection.CreateCommand();
-                vndbGetVnLanguages.CommandText = "SELECT language FROM dump_vndb.vn_languages WHERE vnid=@id";
-                vndbGetVnLanguages.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vndbGetVnLanguages.Parameters["@id"].Value = vnResultVnid;
-            dataReader = vndbGetVnLanguages.ExecuteReader();
-            sb = new StringBuilder();
-            while (dataReader.Read())
-                sb.AppendFormat("{0} ", dataReader.GetString(0));
-            result.Languages = sb.ToString();
-            dataReader.Close();
-
-            return result;
-        }
-
+        
         public DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query)
         {
             NpgsqlCommand command = connection.CreateCommand();
@@ -1883,48 +1462,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             command.Parameters.Add(new NpgsqlParameter(column.ParameterName, column.DbType));
             command.Parameters[column.ParameterName].Value = query;
             return command.ExecuteReader();
-        }
-
-        private NpgsqlCommand myFigureCollectionSearchCommand;
-        public IEnumerable<Figure> MyFigureCollection_Search(string query)
-        {
-            if (myFigureCollectionSearchCommand == null)
-            {
-                myFigureCollectionSearchCommand = connection.CreateCommand();
-                myFigureCollectionSearchCommand.CommandText = Resources.MyFigureCollectionSearch_Postgre;
-                myFigureCollectionSearchCommand.Parameters.Add("@query", NpgsqlDbType.Varchar);
-            }
-            query = "%" + query + "%";
-            myFigureCollectionSearchCommand.Parameters["@query"].Value = query;
-            NpgsqlDataReader dataReader = myFigureCollectionSearchCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                Figure child = new Figure();
-                child.ID = dataReader.GetInt32(0);
-                if (!dataReader.IsDBNull(1))
-                    child.RootName = dataReader.GetString(1);
-
-                if (!dataReader.IsDBNull(2))
-                    child.CategoryName = dataReader.GetString(2);
-
-                if (!dataReader.IsDBNull(3))
-                    child.Barcode = dataReader.GetString(3);
-
-                if (!dataReader.IsDBNull(4))
-                    child.Name = dataReader.GetString(4);
-
-                if (!dataReader.IsDBNull(5))
-                    child.ReleaseDate = dataReader.GetDateTime(5);
-
-                if (!dataReader.IsDBNull(6))
-                    child.Price = dataReader.GetDouble(6);
-
-                if (!dataReader.IsDBNull(7))
-                    child.Thumbnail = dataReader.GetByteArray(7);
-
-                yield return child;
-            }
-            dataReader.Dispose();
         }
 
         private NpgsqlCommand myFigureCollectionGetPhotoCommand;
@@ -1948,37 +1485,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             npgsqlDataReader.Dispose();
             return result;
         }
-
-        private NpgsqlCommand vocadbSearchCommand;
-        public IEnumerable<VocadbSearchResult> VocaDb_Search(string text)
-        {
-            text = "%" + text + "%";
-            if (vocadbSearchCommand == null)
-            {
-                vocadbSearchCommand = connection.CreateCommand();
-                vocadbSearchCommand.CommandText = Resources.Vocadb_Search_Postgre;
-                vocadbSearchCommand.Parameters.Add("@query", NpgsqlDbType.Varchar);
-            }
-            vocadbSearchCommand.Parameters["@query"].Value = text;
-            NpgsqlDataReader dataReader = vocadbSearchCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                VocadbSearchResult result = new VocadbSearchResult();
-                result.Id = dataReader.GetInt32(0);
-                result.Name = dataReader.GetString(1);
-                result.ArtistString = dataReader.GetString(2);
-                result.DiscType = dataReader.GetString(3);
-                if (!dataReader.IsDBNull(4))
-                    result.ReleaseDate = dataReader.GetDateTime(4);
-
-                if (!dataReader.IsDBNull(5))
-                    result.CatalogNumber = dataReader.GetString(5);
-
-                yield return result;
-            }
-            dataReader.Dispose();
-        }
-
+        
         private NpgsqlCommand vocadbGetAlbumCoverCommand;
         public Image Vocadb_GetAlbumCover(int id)
         {
@@ -2019,63 +1526,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             dataReader.Dispose();
             return result;
         }
-
-        private NpgsqlCommand vocadbGetTracksByAlbumCommand;
-        public IEnumerable<VocadbTrackEntry> VocaDb_GetTracksByAlbum(int wrappedId)
-        {
-            if (vocadbGetTracksByAlbumCommand == null)
-            {
-                vocadbGetTracksByAlbumCommand = connection.CreateCommand();
-                vocadbGetTracksByAlbumCommand.CommandText =
-                    "SELECT * FROM dump_vocadb.albumtracks WHERE albumid = @id ORDER BY albumid ASC, discnumber ASC, tracknumber ASC";
-                vocadbGetTracksByAlbumCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
-            }
-
-            vocadbGetTracksByAlbumCommand.Parameters["@id"].Value = wrappedId;
-            NpgsqlDataReader dataReader = vocadbGetTracksByAlbumCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                VocadbTrackEntry child = new VocadbTrackEntry();
-                child.Id = dataReader.GetInt32(0);
-                child.DateAdded = dataReader.GetDateTime(1);
-                child.Name = dataReader.GetString(2);
-                child.DiscNumber = dataReader.GetInt32(3);
-                child.SongId = dataReader.GetInt32(4);
-                child.TrackNumber = dataReader.GetInt32(5);
-                child.AlbumId = dataReader.GetInt32(6);
-                yield return child;
-            }
-            dataReader.Dispose();
-        }
-
-        private NpgsqlCommand getAllTagsCommand;
-        public IEnumerable<GelbooruTag> Gelbooru_GetAllTags()
-        {
-            if (getAllTagsCommand == null)
-            {
-                getAllTagsCommand = connection.CreateCommand();
-                getAllTagsCommand.CommandText = Resources.Gelbooru_GetTags_Postgre;
-            }
-
-            NpgsqlDataReader dataReader = getAllTagsCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                int numImages = dataReader.GetInt32(1);
-                if (numImages > 0)
-                {
-                    GelbooruTag child = new GelbooruTag();
-                    child.Tag = dataReader.GetString(0);
-                    if (char.IsLetter(child.Tag[0]))
-                    {
-                        child.NumberOfImages = numImages;
-                        child.Id = dataReader.GetInt32(2);
-                        yield return child;
-                    }
-                }
-            }
-            dataReader.Dispose();
-        }
-
+        
         private NpgsqlCommand gelbooruGetPostsByTagCommand;
         public IEnumerable<int> Gelbooru_GetPostsByTag(int tagId)
         {

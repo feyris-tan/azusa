@@ -9,13 +9,6 @@ Do not expect any fancy web design tricks or colorful graphics from this, as thi
 # What can it do?
 - Keep a list of your media collection, including date of purchase, cost, article number, cover scans, and screenshots.
 	- For optical media, cue sheets, IBG Graph Data, checksums, CD-Text, Audio playlists, logfiles and a list of files may be attached.
-- Help increasing a media collection, by keeping a local copy of relevant data from:
-	- VGMDB.info
-	- psxdatacenter.net
-	- vndb.org
-	- myfigurecollection.net
-	- vocadb.net
-	Tools to scrape data from these sources are included within this repository.
 - Have all this on a second, offline machine.
 	- I implemented this feature because I often go to flea markets, conventions and swap meets and lost track of all the stuff I already own. The whole database can be "sync"-ed and be read without access to your home database or internet access.
 	- Connecting to your home database is still possible through an SSH tunnel.

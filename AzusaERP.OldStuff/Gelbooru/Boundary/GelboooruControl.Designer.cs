@@ -1,4 +1,4 @@
-﻿using moe.yo3explorer.azusa.Control.Galleria;
+﻿using AzusaERP.OldStuff;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Boundary
 {
@@ -30,8 +30,8 @@ namespace moe.yo3explorer.azusa.OfflineReaders.Gelbooru.Boundary
         /// </summary>
         private void InitializeComponent()
         {
-            moe.yo3explorer.azusa.Control.Galleria.DefaultGalleriaModel defaultGalleriaModel1 = new moe.yo3explorer.azusa.Control.Galleria.DefaultGalleriaModel();
-            this.galleria1 = new moe.yo3explorer.azusa.Control.Galleria.Galleria();
+            AzusaERP.OldStuff.Galleria.DefaultGalleriaModel defaultGalleriaModel1 = new AzusaERP.OldStuff.Galleria.DefaultGalleriaModel();
+            this.galleria1 = new AzusaERP.OldStuff.Galleria();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.listBox1 = new System.Windows.Forms.ListBox();

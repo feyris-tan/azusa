@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using moe.yo3explorer.azusa.Control.DatabaseIO;
-using moe.yo3explorer.azusa.Control.Galleria;
+using AzusaERP.OldStuff;
 using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
 
 namespace moe.yo3explorer.azusa.OfflineReaders.VgmDb.Boundary
@@ -114,7 +113,7 @@ namespace moe.yo3explorer.azusa.OfflineReaders.VgmDb.Boundary
                 model.Date = "???";
             model.Publisher = entry.publisher;
             
-            DefaultGalleriaModel galleriaModel = new DefaultGalleriaModel();
+            Galleria.DefaultGalleriaModel galleriaModel = new Galleria.DefaultGalleriaModel();
             galleria1.GalleriaModel = galleriaModel;
             galleriaModel.AddRange(database.FindCoversByAlbumId(entry.id));
             galleria1.GalleriaModel = galleriaModel;
