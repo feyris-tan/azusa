@@ -12,7 +12,6 @@ using moe.yo3explorer.azusa.MediaLibrary.Control;
 using moe.yo3explorer.sharpBluRay;
 using moe.yo3explorer.sharpBluRay.FilesystemAbstraction;
 using moe.yo3explorer.sharpBluRay.Model;
-using Org.BouncyCastle.Utilities;
 
 namespace moe.yo3explorer.azusa.Utilities.BDInfo
 {

@@ -14,7 +14,6 @@ using libeuroexchange;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.DatabaseIO;
 using moe.yo3explorer.azusa.Control.DatabaseIO.Drivers;
-using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.Setup;
 using moe.yo3explorer.azusa.MediaLibrary.Control;
 using Renci.SshNet;
@@ -39,25 +38,6 @@ namespace moe.yo3explorer.azusa
                         break;
                     case "--makelicense":
                         CreateLicenseFile();
-                        return;
-                    case "--upgrade1to2":
-                        Program p = new Program();
-                        p.context = AzusaContext.GetInstance();
-                        p.CreateSplashThread();
-                        p.context.Ini = new Ini("azusa.ini");
-                        p.ConnectOnline();
-                        p.context.Splash.InvokeClose();
-                        Migration1to2.Migrate();
-                        return;
-                    case "--upgrade2to3":
-                        Program p23 = new Program();
-                        p23.context = AzusaContext.GetInstance();
-                        p23.CreateSplashThread();
-                        p23.context.Ini = new Ini("azusa.ini");
-                        p23.LoadLicense();
-                        p23.ConnectOnline();
-                        p23.context.Splash.InvokeClose();
-                        Migration2to3.Migrate();
                         return;
                     default:
                         return;
@@ -268,7 +248,10 @@ namespace moe.yo3explorer.azusa
                 throw new StartupFailedException(StartupFailReason.NoDatabaseAvailable);
             }
 
+
+            context.Splash.SetLabel("Frage €-Umrechungskurse ab...");
             UpdateExchangeRates();
+
             context.Splash.SetLabel("Erstelle Hauptfenster...");
             context.MainForm = new MainForm();
             context.Splash.SetLabel("Lade Module...");

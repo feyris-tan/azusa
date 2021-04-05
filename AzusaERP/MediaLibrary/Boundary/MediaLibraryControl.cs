@@ -1227,6 +1227,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 return false;
             }
 
+            if (!context.DatabaseDriver.CanUpdateExchangeRates)
+            {
+                MessageBox.Show(String.Format("Die Plattform für {1} fehlt. Wahrscheinlich ist es {0}.", proposedPlattform.ShortName, label), null, MessageBoxButtons.OK);
+                return false;
+            }
+
             DialogResult dialogResult = MessageBox.Show(String.Format("Ist die Plattform {0} korrekt im Falle von {1}?", proposedPlattform.ShortName, label), null, MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.No)
                 return false;

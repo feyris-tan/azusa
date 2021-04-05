@@ -39,12 +39,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
-      <HintPath>packages\BouncyCastle.1.8.5\lib\BouncyCastle.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="DiscUtils, Version=0.15.1.0, Culture=neutral, PublicKeyToken=5fa5b410cc9c6289, processorArchitecture=MSIL">
-      <HintPath>packages\DiscUtils.0.15.1-ci0002\lib\net45\DiscUtils.dll</HintPath>
-    </Reference>
     <Reference Include="DiscUtils.BootConfig, Version=0.15.1.0, Culture=neutral, PublicKeyToken=5fa5b410cc9c6289, processorArchitecture=MSIL">
       <HintPath>packages\DiscUtils.BootConfig.0.15.1-ci0002\lib\net45\DiscUtils.BootConfig.dll</HintPath>
     </Reference>
@@ -153,9 +147,6 @@
     <Reference Include="NTwain, Version=3.0.0.0, Culture=neutral, PublicKeyToken=f9f7e0c5169536c8, processorArchitecture=MSIL">
       <HintPath>packages\NTwain.3.6.0\lib\net40-client\NTwain.dll</HintPath>
     </Reference>
-    <Reference Include="ObjectListView, Version=2.9.1.25410, Culture=neutral, PublicKeyToken=b1c5bf581481bcd4, processorArchitecture=MSIL">
-      <HintPath>..\..\RyuuguuKomachi\packages\ObjectListView.Official.2.9.2-alpha2\lib\net20\ObjectListView.dll</HintPath>
-    </Reference>
     <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <HintPath>packages\SSH.NET.2016.1.0\lib\net40\Renci.SshNet.dll</HintPath>
     </Reference>
@@ -174,7 +165,6 @@
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Numerics.Vectors.4.6.0-preview5.19224.8\lib\net46\System.Numerics.Vectors.dll</HintPath>
@@ -196,10 +186,7 @@
       <HintPath>packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="TagLibSharp, Version=2.2.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
@@ -209,7 +196,6 @@
   <ItemGroup>
     <Compile Include="AzusaContext.cs" />
     <Compile Include="AzusaPlugin.cs" />
-    <Compile Include="Control\DatabaseIO\Migrations\Migration2to3.cs" />
     <Compile Include="MediaLibrary\Control\AttachmentEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -236,8 +222,6 @@
     <Compile Include="Control\DatabaseIO\Drivers\PostgresDriver.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\PostgresLogProvider.cs" />
     <Compile Include="Control\DatabaseIO\Drivers\RestDriver.cs" />
-    <Compile Include="Control\DatabaseIO\IStreamBlobOwner.cs" />
-    <Compile Include="Control\DatabaseIO\Migrations\Migration1to2.cs" />
     <Compile Include="Control\DatabaseIO\SqlIndex.cs" />
     <Compile Include="Control\DatabaseIO\Sync.cs" />
     <Compile Include="Control\DatabaseIO\SyncException.cs" />
@@ -483,10 +467,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libazudex\libazusadex.csproj">
-      <Project>{e67df67b-de84-4f95-9a0b-5c6a69dc3a86}</Project>
-      <Name>libazusadex</Name>
-    </ProjectReference>
     <ProjectReference Include="..\libAzusaGraph\libAzusaGraph.csproj">
       <Project>{ee06e5ef-7d5d-40b8-b5b2-3a5e9b185107}</Project>
       <Name>libAzusaGraph</Name>
@@ -498,10 +478,6 @@
     <ProjectReference Include="..\libazusax360\libazusax360.csproj">
       <Project>{59f605ad-6133-4d0b-8b23-a0b93f286dd7}</Project>
       <Name>libazusax360</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\libazustreamblob\libazustreamblob.csproj">
-      <Project>{01ce14e8-ffa2-4be2-bd31-3696edde77f8}</Project>
-      <Name>libazustreamblob</Name>
     </ProjectReference>
     <ProjectReference Include="..\libazuworker\libazuworker.csproj">
       <Project>{28df4b21-81b0-49a2-acee-450a07c6fd52}</Project>
@@ -553,9 +529,7 @@
     <Content Include="Resources\GetTotalMissingScreenshots.Postgre.sql" />
     <Content Include="Resources\GetTotalUndumpedMedia.Postgre.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="OfflineReaders\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

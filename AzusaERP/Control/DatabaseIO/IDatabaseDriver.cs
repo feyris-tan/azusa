@@ -51,26 +51,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         DateTime? Sync_GetLatestUpdateForTable(string tableName);
         DbDataReader Sync_GetUpdateSyncReader(string tableName, DateTime? latestUpdate);
         void Sync_CopyUpdatesFrom(string tableName, List<DatabaseColumn> columns, DbDataReader syncReader, SyncLogMessageCallback onMessage, Queue<object> leftovers);
-
-        IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text);
-        IEnumerable<int> Vgmdb_FindAlbumsByArbituraryProducts(string text);
-        IEnumerable<int> Vgmdb_FindAlbumsByAlbumTitle(string text);
-        Bitmap Vgmdb_GetAlbumCover(int entryId);
-        IEnumerable<string> Vgmdb_FindProductNamesByAlbumId(int entryId);
-        IEnumerable<string> Vgmdb_FindArtistNamesByAlbumId(int entryId);
-        IEnumerable<int> Vgmdb_FindArtistIdsByName(string escaped);
-        IEnumerable<int> Vgmdb_FindAlbumIdsByArtistId(int possibleArtist);
-        IEnumerable<Image> FindCoversByAlbumId(int entryId);
-        IEnumerable<int> Vgmdb_FindAlbumsBySkuPart(string startswith);
-        IEnumerable<Tuple<string, int, int, string, int>> Vgmdb_FindTrackDataByAlbum(int entryId);
-        IEnumerable<string> Vgmdb_FindLabelNamesByAlbumId(int entryId);
-        IEnumerable<string> Vgmdb_FindRelatedAlbums(int albumId);
-        string Vgmdb_GetReleaseEvent(int albumId);
-        IEnumerable<string> Vgmdb_FindReprints(int albumId);
-        IEnumerable<Uri> Vgmdb_GetWebsites(int albumId);
         
-        IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId);
-
         IEnumerable<SqlIndex> GetSqlIndexes();
         void CreateIndex(SqlIndex index);
 
@@ -80,12 +61,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         
         DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query);
         
-        Image MyFigureCollection_GetPhoto(int wrappedFigureId);
-        
-        Image Vocadb_GetAlbumCover(int id);
-        List<string> VocaDb_FindAlbumNamesBySongNames(string text);
-        
-        IEnumerable<int> Gelbooru_GetPostsByTag(int tagId);
         void CreateSchema(string schemaName);
         void MoveAndRenameTable(string oldSchemaName, string oldTableName, string schemaName, string newTableName);
 
@@ -101,7 +76,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void UpdateAttachment(Attachment attachment);
         void InsertAttachment(Attachment attachment);
         void DeleteAttachment(Attachment attachment);
-        string GetConnectionString();
         AzusifiedCube GetLatestEuroExchangeRates();
         void InsertEuroExchangeRate(AzusifiedCube cube);
     }

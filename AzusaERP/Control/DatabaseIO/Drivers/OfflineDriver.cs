@@ -4,11 +4,9 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
-using libazustreamblob;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
@@ -17,7 +15,7 @@ using moe.yo3explorer.azusa.Properties;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 {
-    class OfflineDriver : IDatabaseDriver, IStreamBlobOwner
+    class OfflineDriver : IDatabaseDriver
     {
         public OfflineDriver()
         {
@@ -29,8 +27,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             if (!rootDirectory.Exists)
                 rootDirectory.Create();
-
-            azuStreamBlob = new AzusaStreamBlob(rootDirectory);
+            
             connectionBuilder = new SQLiteConnectionStringBuilder();
             connectionBuilder.DataSource = ":memory:";
 
@@ -38,7 +35,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         private DirectoryInfo rootDirectory;
-        private AzusaStreamBlob azuStreamBlob;
         private SQLiteConnectionStringBuilder connectionBuilder;
         private Dictionary<string, SQLiteConnection> connections;
 
@@ -90,7 +86,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         
         public void Dispose()
         {
-            azuStreamBlob.Dispose();
             foreach (KeyValuePair<string, SQLiteConnection> sqLiteConnection in connections)
             {
                 sqLiteConnection.Value.Dispose();
@@ -301,6 +296,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             {
                 idColumn = columns.Find(x => x.ColumnName.ToLowerInvariant().Equals("char_id"));
             }
+            if (idColumn == null)
+            {
+                idColumn = columns.Find(x => x.ColumnName.ToLowerInvariant().Equals("serial"));
+            }
             int successful = 0;
 
             while (syncReader.Read())
@@ -319,17 +318,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     {
                         cmd.Parameters[currentColumn.ParameterName].Value = DBNull.Value;
                         byte[] inBuffer = syncReader.GetByteArray(i);
-                        int keyA = azuStreamBlob.DeriveKey(tableName);
-                        int keyB = azuStreamBlob.DeriveKey(currentColumn.ColumnName);
-                        if (!syncReader.IsDBNull(idColumn.Ordingal))
+                        if (inBuffer != null && inBuffer.Length > 0)
                         {
-                            int keyC = syncReader.GetInt32(idColumn.Ordingal);
-                            azuStreamBlob.Put(keyA, keyB, keyC, inBuffer);
-                        }
-                        else
-                        {
-                            object pk = syncReader.GetValue(0);
-                            Console.WriteLine("Failed to insert row, lacking scalerid: " + pk);
+                            cmd.Parameters[currentColumn.ParameterName].Value = inBuffer;
                         }
                     }
                     else
@@ -416,11 +407,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     if (column.DbType == DbType.Binary)
                     {
                         byte[] buffer = syncReader.GetByteArray(column.Ordingal);
-                        int rowId = syncReader.GetInt32(idColumn.Ordingal);
-                        int currentLen = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey(tableName), azuStreamBlob.DeriveKey(column.ColumnName), rowId);
                         if (buffer != null)
-                            if (buffer.Length != currentLen)
-                                azuStreamBlob.Put(azuStreamBlob.DeriveKey(tableName), azuStreamBlob.DeriveKey(column.ColumnName), rowId, buffer);
+                        {
+                            cmd.Parameters[column.ParameterName].Value = buffer;
+                        }
                     }
                     else
                     {
@@ -455,405 +445,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             syncReader.Dispose();
         }
         
-        private SQLiteCommand vgmdbSearchTrackTranslation;
-        public IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text)
-        {
-            if (vgmdbSearchTrackTranslation == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_disc_track_translation");
-                vgmdbSearchTrackTranslation = connection.CreateCommand();
-                vgmdbSearchTrackTranslation.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_disc_track_translation WHERE name LIKE @name";
-                vgmdbSearchTrackTranslation.Parameters.Add("@name", DbType.String);
-            }
-
-            vgmdbSearchTrackTranslation.Parameters["@name"].Value = text;
-            SQLiteDataReader ndr = vgmdbSearchTrackTranslation.ExecuteReader();
-            while (ndr.Read())
-            {
-                yield return ndr.GetInt32(0);
-            }
-            ndr.Dispose();
-        }
-
-        private SQLiteCommand vgmFindAlbumsByArbituraryProducts;
-        public IEnumerable<int> Vgmdb_FindAlbumsByArbituraryProducts(string text)
-        {
-            if (vgmFindAlbumsByArbituraryProducts == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_arbituaryproducts");
-                vgmFindAlbumsByArbituraryProducts = connection.CreateCommand();
-                vgmFindAlbumsByArbituraryProducts.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_arbituaryproducts WHERE name LIKE @name";
-                vgmFindAlbumsByArbituraryProducts.Parameters.Add("@name", DbType.String);
-            }
-
-            vgmFindAlbumsByArbituraryProducts.Parameters["@name"].Value = text;
-            SQLiteDataReader ndr = vgmFindAlbumsByArbituraryProducts.ExecuteReader();
-            while (ndr.Read())
-            {
-                yield return ndr.GetInt32(0);
-            }
-            ndr.Dispose();
-        }
-
-        private SQLiteCommand vgmFindAlbumsByAlbumTitle;
-        public IEnumerable<int> Vgmdb_FindAlbumsByAlbumTitle(string text)
-        {
-            if (vgmFindAlbumsByAlbumTitle == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_titles");
-                vgmFindAlbumsByAlbumTitle = connection.CreateCommand();
-                vgmFindAlbumsByAlbumTitle.CommandText =
-                    "SELECT DISTINCT albumid FROM dump_vgmdb.album_titles WHERE title LIKE @name";
-                vgmFindAlbumsByAlbumTitle.Parameters.Add("@name", DbType.String);
-            }
-
-            vgmFindAlbumsByAlbumTitle.Parameters["@name"].Value = text;
-            SQLiteDataReader ndr = vgmFindAlbumsByAlbumTitle.ExecuteReader();
-            while (ndr.Read())
-            {
-                yield return ndr.GetInt32(0);
-            }
-            ndr.Dispose();
-        }
-
-        public Bitmap Vgmdb_GetAlbumCover(int entryId)
-        {
-            byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb.albums"), azuStreamBlob.DeriveKey("picture_full"), entryId);
-
-            Bitmap result = null;
-            if (blob != null)
-                if (blob.Length > 0)
-                {
-                    MemoryStream ms = new MemoryStream(blob, false);
-                    result = (Bitmap)Image.FromStream(ms);
-                    ms.Dispose();
-                }
-
-            return result;
-        }
-
-        private SQLiteCommand vgmdbGetArbitraryProductNamesByAlbumId;
-        private SQLiteCommand vgmdbGetProductNamesByAlbumId;
-        public IEnumerable<string> Vgmdb_FindProductNamesByAlbumId(int entryId)
-        {
-            if (vgmdbGetArbitraryProductNamesByAlbumId == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_arbituaryproducts");
-                vgmdbGetArbitraryProductNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetArbitraryProductNamesByAlbumId.CommandText = "SELECT name FROM dump_vgmdb.album_arbituaryproducts WHERE albumid = @id";
-                vgmdbGetArbitraryProductNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
-
-                vgmdbGetProductNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetProductNamesByAlbumId.CommandText =
-                    "SELECT prod.name FROM dump_vgmdb.product_albums root JOIN dump_vgmdb.products prod ON root.productid = prod.id WHERE root.albumid = @id";
-                vgmdbGetProductNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbGetArbitraryProductNamesByAlbumId.Parameters["@id"].Value = entryId;
-            vgmdbGetProductNamesByAlbumId.Parameters["@id"].Value = entryId;
-
-            SQLiteDataReader dataReader = vgmdbGetArbitraryProductNamesByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetString(0);
-            dataReader.Dispose();
-
-            dataReader = vgmdbGetProductNamesByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetString(0);
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbGetArbitraryArtistNamesByAlbumId, vgmdbGetArtistNamesByAlbumId;
-        public IEnumerable<string> Vgmdb_FindArtistNamesByAlbumId(int entryId)
-        {
-            if (vgmdbGetArbitraryArtistNamesByAlbumId == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_artist_arbitrary");
-                vgmdbGetArbitraryArtistNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetArbitraryArtistNamesByAlbumId.CommandText = Resources.VgmdbGetArbitraryArtistsByAlbumId_Postgre;
-                vgmdbGetArbitraryArtistNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
-
-                vgmdbGetArtistNamesByAlbumId = connection.CreateCommand();
-                vgmdbGetArtistNamesByAlbumId.CommandText = Resources.VgmdbGetArtistNamesByAlbumId_Postgre;
-                vgmdbGetArtistNamesByAlbumId.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbGetArbitraryArtistNamesByAlbumId.Parameters["@id"].Value = entryId;
-            vgmdbGetArtistNamesByAlbumId.Parameters["@id"].Value = entryId;
-
-            SQLiteDataReader dataReader = vgmdbGetArbitraryArtistNamesByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return String.Format("{0} ({1})", dataReader.GetString(0), dataReader.GetString(1));
-            dataReader.Dispose();
-
-            dataReader = vgmdbGetArtistNamesByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return String.Format("{0} ({1})", dataReader.GetString(0), dataReader.GetString(1));
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbFindArtistsByName;
-        public IEnumerable<int> Vgmdb_FindArtistIdsByName(string escaped)
-        {
-            if (vgmdbFindArtistsByName == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.artist");
-                vgmdbFindArtistsByName = connection.CreateCommand();
-                vgmdbFindArtistsByName.CommandText = "SELECT id FROM dump_vgmdb.artist WHERE name LIKE @name";
-                vgmdbFindArtistsByName.Parameters.Add("@name", DbType.String);
-            }
-
-            vgmdbFindArtistsByName.Parameters["@name"].Value = escaped;
-            SQLiteDataReader dataReader = vgmdbFindArtistsByName.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetInt32(0);
-            dataReader.Dispose();
-
-        }
-
-        private SQLiteCommand vgmdbFindAlbumIdsByArtistId;
-        public IEnumerable<int> Vgmdb_FindAlbumIdsByArtistId(int possibleArtist)
-        {
-            if (vgmdbFindAlbumIdsByArtistId == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_artists");
-                vgmdbFindAlbumIdsByArtistId = connection.CreateCommand();
-                vgmdbFindAlbumIdsByArtistId.CommandText = "SELECT albumid FROM dump_vgmdb.album_artists WHERE artistid=@id";
-                vgmdbFindAlbumIdsByArtistId.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbFindAlbumIdsByArtistId.Parameters["@id"].Value = possibleArtist;
-            SQLiteDataReader dataReader = vgmdbFindAlbumIdsByArtistId.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetInt32(0);
-            dataReader.Dispose();
-
-        }
-
-        private SQLiteCommand vgmdbFindCoversByAlbumId;
-        public IEnumerable<Image> FindCoversByAlbumId(int entryId)
-        {
-            if (vgmdbFindCoversByAlbumId == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_cover");
-                vgmdbFindCoversByAlbumId = connection.CreateCommand();
-                vgmdbFindCoversByAlbumId.CommandText = "SELECT scalerid FROM dump_vgmdb.album_cover WHERE albumid=@id";
-                vgmdbFindCoversByAlbumId.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbFindCoversByAlbumId.Parameters["@id"].Value = entryId;
-            SQLiteDataReader dataReader = vgmdbFindCoversByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-            {
-                int scalerId = dataReader.GetInt32(0);
-                byte[] blob = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vgmdb.album_cover"),azuStreamBlob.DeriveKey("buffer"),scalerId);
-                if (blob != null)
-                {
-                    if (blob.Length > 0)
-                    {
-                        MemoryStream ms = new MemoryStream(blob, false);
-                        Image image = Image.FromStream(ms);
-                        ms.Dispose();
-                        yield return image;
-                    }
-                }
-            }
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbFindAlbumsBySkuPart;
-        public IEnumerable<int> Vgmdb_FindAlbumsBySkuPart(string startswith)
-        {
-            if (vgmdbFindAlbumsBySkuPart == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.albums");
-                vgmdbFindAlbumsBySkuPart = connection.CreateCommand();
-                vgmdbFindAlbumsBySkuPart.CommandText = "SELECT id FROM dump_vgmdb.albums WHERE catalog LIKE @key";
-                vgmdbFindAlbumsBySkuPart.Parameters.Add("@key", DbType.String);
-            }
-
-            vgmdbFindAlbumsBySkuPart.Parameters["@key"].Value = startswith;
-            SQLiteDataReader dataReader = vgmdbFindAlbumsBySkuPart.ExecuteReader();
-            while (dataReader.Read())
-                yield return dataReader.GetInt32(0);
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbFindTrackDataByAlbum;
-        public IEnumerable<Tuple<string, int, int, string, int>> Vgmdb_FindTrackDataByAlbum(int entryId)
-        {
-            if (vgmdbFindTrackDataByAlbum == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_disc_track_translation");
-                vgmdbFindTrackDataByAlbum = connection.CreateCommand();
-                vgmdbFindTrackDataByAlbum.CommandText = Resources.VgmdbGetTracksByAlbum_Postgre;
-                vgmdbFindTrackDataByAlbum.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbFindTrackDataByAlbum.Parameters["@id"].Value = entryId;
-            SQLiteDataReader dataReader = vgmdbFindTrackDataByAlbum.ExecuteReader();
-            string currentLanguage = null;
-            while (dataReader.Read())
-            {
-                string discname = dataReader.GetString(0);
-                int discIndex = dataReader.GetInt32(1);
-                int trackIndex = dataReader.GetInt32(2);
-                string trackName = dataReader.GetString(3);
-                int trackLength = dataReader.GetInt32(4);
-                string language = dataReader.GetString(5);
-                if (currentLanguage == null)
-                    currentLanguage = language;
-                else if (!currentLanguage.Equals(language))
-                    break;
-                yield return new Tuple<string, int, int, string, int>(discname, discIndex, trackIndex, trackName, trackLength);
-            }
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbFindArbituraryLabelsByAlbumId, vgmdbFindLabelsByAlbumId;
-        public IEnumerable<string> Vgmdb_FindLabelNamesByAlbumId(int entryId)
-        {
-            if (vgmdbFindArbituraryLabelsByAlbumId == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_label_arbiturary");
-                vgmdbFindArbituraryLabelsByAlbumId = connection.CreateCommand();
-                vgmdbFindArbituraryLabelsByAlbumId.CommandText = Resources.VgmdbFindArbituraryLabelNamesByAlbumId_Postgre;
-                vgmdbFindArbituraryLabelsByAlbumId.Parameters.Add("@id", DbType.Int32);
-
-                vgmdbFindLabelsByAlbumId = connection.CreateCommand();
-                vgmdbFindLabelsByAlbumId.CommandText = Resources.VgmdbFindLabelsByAlbumId_Postgre;
-                vgmdbFindLabelsByAlbumId.Parameters.Add("@id", DbType.Int32);
-            }
-
-            vgmdbFindArbituraryLabelsByAlbumId.Parameters["@id"].Value = entryId;
-            vgmdbFindLabelsByAlbumId.Parameters["@id"].Value = entryId;
-
-            SQLiteDataReader dataReader = vgmdbFindArbituraryLabelsByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return String.Format("{1}: {0}", dataReader.GetString(0), dataReader.GetString(1));
-            dataReader.Dispose();
-
-            dataReader = vgmdbFindLabelsByAlbumId.ExecuteReader();
-            while (dataReader.Read())
-                yield return String.Format("{1}: {0}", dataReader.GetString(0), dataReader.GetString(1));
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbFindRelatedAlbumsCommand;
-        public IEnumerable<string> Vgmdb_FindRelatedAlbums(int albumId)
-        {
-            if (vgmdbFindRelatedAlbumsCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_relatedalbum");
-                vgmdbFindRelatedAlbumsCommand = connection.CreateCommand();
-                vgmdbFindRelatedAlbumsCommand.CommandText = Resources.VgmdbGetRelatedAlbums_Postgre;
-                vgmdbFindRelatedAlbumsCommand.Parameters.Add("@albumid", DbType.Int32);
-            }
-
-            vgmdbFindRelatedAlbumsCommand.Parameters["@albumid"].Value = albumId;
-            SQLiteDataReader dataReader = vgmdbFindRelatedAlbumsCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                string sku = dataReader.GetString(0);
-                string name = dataReader.GetString(1);
-                yield return String.Format("{0}, {1}", sku, name);
-            }
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbGetReleaseEvent;
-        public string Vgmdb_GetReleaseEvent(int albumId)
-        {
-            if (vgmdbGetReleaseEvent == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_releaseevent");
-                vgmdbGetReleaseEvent = connection.CreateCommand();
-                vgmdbGetReleaseEvent.CommandText = Resources.VgmDbGetReleaseEvent;
-                vgmdbGetReleaseEvent.Parameters.Add("@albumid", DbType.Int32);
-            }
-
-            vgmdbGetReleaseEvent.Parameters["@albumid"].Value = albumId;
-            SQLiteDataReader dataReader = vgmdbGetReleaseEvent.ExecuteReader();
-            string result = null;
-            if (dataReader.Read())
-                if (!dataReader.IsDBNull(0))
-                    result = dataReader.GetString(0);
-            dataReader.Dispose();
-            return result;
-        }
-
-        private SQLiteCommand vgmdbFindReprintCommand;
-        public IEnumerable<string> Vgmdb_FindReprints(int albumId)
-        {
-            if (vgmdbFindReprintCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_reprints");
-                vgmdbFindReprintCommand = connection.CreateCommand();
-                vgmdbFindReprintCommand.CommandText = Resources.VgmdbGetReprints_Postgre;
-                vgmdbFindReprintCommand.Parameters.Add("@albumid", DbType.Int32);
-            }
-
-            vgmdbFindReprintCommand.Parameters["@albumid"].Value = albumId;
-            SQLiteDataReader dataReader = vgmdbFindReprintCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                string sku = dataReader.GetString(0);
-                string name = dataReader.GetString(1);
-                yield return String.Format("{0}, {1}", sku, name);
-            }
-            dataReader.Dispose();
-        }
-
-        private SQLiteCommand vgmdbGetWebsitesCommand;
-        public IEnumerable<Uri> Vgmdb_GetWebsites(int albumId)
-        {
-            if (vgmdbGetWebsitesCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vgmdb.album_websites");
-                vgmdbGetWebsitesCommand = connection.CreateCommand();
-                vgmdbGetWebsitesCommand.CommandText = "SELECT link FROM dump_vgmdb.album_websites WHERE albumid=@albumid";
-                vgmdbGetWebsitesCommand.Parameters.Add("@albumid", DbType.Int32);
-            }
-
-            vgmdbGetWebsitesCommand.Parameters["@albumid"].Value = albumId;
-            SQLiteDataReader dataReader = vgmdbGetWebsitesCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                string url = dataReader.GetString(0);
-                if (!url.StartsWith("http"))
-                    continue;
-                Uri uri = new Uri(url);
-                yield return uri;
-            }
-            dataReader.Dispose();
-        }
         
-        private SQLiteCommand psxDatacenterGetScreenshots;
-        public IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId)
-        {
-            if (psxDatacenterGetScreenshots == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_psxdatacenter.game_screenshots");
-                psxDatacenterGetScreenshots = connection.CreateCommand();
-                psxDatacenterGetScreenshots.CommandText =
-                    "SELECT screenshot.scalerid FROM dump_psxdatacenter.game_screenshots root JOIN dump_psxdatacenter.screenshots screenshot ON root.screenshotid = screenshot.id WHERE root.gameid=@id";
-                psxDatacenterGetScreenshots.Parameters.Add("@id", DbType.Int32);
-            }
-
-            psxDatacenterGetScreenshots.Parameters["@id"].Value = previewId;
-            SQLiteDataReader dataReader = psxDatacenterGetScreenshots.ExecuteReader();
-            while (dataReader.Read())
-            {
-                int scalerId = dataReader.GetInt32(0);
-                yield return azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_psxdatacenter.screenshots"),
-                    azuStreamBlob.DeriveKey("buffer"), scalerId);
-            }
-
-            dataReader.Dispose();
-        }
-
         private XmlSerializer indexXmlSerializer;
         private FileInfo indexXmlFileInfo;
         private List<SqlIndex> sqlIndexes;
@@ -959,12 +551,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     child.Modified = dataReader.GetDateTime(6);
                 if (!dataReader.IsDBNull(7))
                 {
-                    //child.Header = dataReader.GetByteArray(7);
-                    int key1 = azuStreamBlob.DeriveKey("azusa.filesysteminfo");
-                    int key2 = azuStreamBlob.DeriveKey("head");
-                    int key2b = (int)(child.Id << 32);
-                    int key3 = (int) (child.Id & 0xffff0000);
-                    child.Header = azuStreamBlob.Get(key1, key2 + key2b, key3);
+                    child.Header = dataReader.GetByteArray(7);
                 }
 
                 child.ParentId = dataReader.GetInt64(8);
@@ -976,64 +563,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         public DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query)
         {
             throw new NotImplementedException();
-        }
-
-        public Image MyFigureCollection_GetPhoto(int wrappedFigureId)
-        {
-            byte[] buffer = azuStreamBlob.Get(
-                azuStreamBlob.DeriveKey("dump_myfigurecollection.figurephotos"),
-                azuStreamBlob.DeriveKey("image"), 
-                wrappedFigureId);
-            return Image.FromStream(new MemoryStream(buffer));
-        }
-        
-        public Image Vocadb_GetAlbumCover(int id)
-        {
-            byte[] buffer = azuStreamBlob.Get(azuStreamBlob.DeriveKey("dump_vocadb.albums"), azuStreamBlob.DeriveKey("cover"), id);
-            if (buffer == null || buffer.Length == 0)
-                return null;
-            Image image = Image.FromStream(new MemoryStream(buffer));
-            return image;
-        }
-
-        private SQLiteCommand vocadbFindAlbumNamesBySongNamesCommand;
-        public List<string> VocaDb_FindAlbumNamesBySongNames(string text)
-        {
-            if (vocadbFindAlbumNamesBySongNamesCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_vocadb.albumtracks");
-                vocadbFindAlbumNamesBySongNamesCommand = connection.CreateCommand();
-                vocadbFindAlbumNamesBySongNamesCommand.CommandText = Resources.Vocadb_FindSongRelatedAlbum;
-                vocadbFindAlbumNamesBySongNamesCommand.Parameters.Add("@query", DbType.String);
-            }
-            vocadbFindAlbumNamesBySongNamesCommand.Parameters["@query"].Value = "%" + text + "%";
-            var dataReader = vocadbFindAlbumNamesBySongNamesCommand.ExecuteReader();
-            List<string> result = new List<string>();
-            while (dataReader.Read())
-                result.Add(dataReader.GetString(0));
-            dataReader.Dispose();
-            return result;
-        }
-        
-        private SQLiteCommand gelbooruGetPostsByTagCommand;
-        public IEnumerable<int> Gelbooru_GetPostsByTag(int tagId)
-        {
-            if (gelbooruGetPostsByTagCommand == null)
-            {
-                SQLiteConnection connection = GetConnectionForTable("dump_gb.posttags");
-                gelbooruGetPostsByTagCommand = connection.CreateCommand();
-                gelbooruGetPostsByTagCommand.CommandText =
-                    "SELECT DISTINCT postid FROM dump_gb.posttags WHERE tagid = @tagid";
-                gelbooruGetPostsByTagCommand.Parameters.Add("@tagid", DbType.Int32);
-            }
-
-            gelbooruGetPostsByTagCommand.Parameters["@tagid"].Value = tagId;
-            SQLiteDataReader dataReader = gelbooruGetPostsByTagCommand.ExecuteReader();
-            while (dataReader.Read())
-            {
-                yield return dataReader.GetInt32(0);
-            }
-            dataReader.Dispose();
         }
         
         public void CreateSchema(string schemaName)
@@ -1130,14 +659,38 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
 
-        public string GetConnectionString()
-        {
-            return null;
-        }
-
+        private SQLiteCommand getLatestEuroExchangeRatesCommand;
         public AzusifiedCube GetLatestEuroExchangeRates()
         {
-            throw new NotImplementedException();
+            if (getLatestEuroExchangeRatesCommand == null)
+            {
+                SQLiteConnection conn = GetConnectionForTable("azusa.euro_exchange_rates");
+                getLatestEuroExchangeRatesCommand = conn.CreateCommand();
+                getLatestEuroExchangeRatesCommand.CommandText = "SELECT * FROM euro_exchange_rates ORDER BY dateAdded DESC";
+            }
+
+            SQLiteDataReader dataReader = getLatestEuroExchangeRatesCommand.ExecuteReader();
+            AzusifiedCube cube = new AzusifiedCube();
+            if (dataReader.Read())
+            {
+                cube.CubeDate = dataReader.GetDateTime(0);
+                cube.DateAdded = dataReader.GetDateTime(1);
+                cube.USD = dataReader.GetDouble(2);
+                cube.JPY = dataReader.GetDouble(3);
+                cube.GBP = dataReader.GetDouble(4);
+                dataReader.Close();
+                return cube;
+            }
+            else
+            {
+                dataReader.Close();
+                cube.CubeDate = new DateTime(2021, 4, 5);
+                cube.DateAdded = DateTime.Now;
+                cube.USD = 1.1746;
+                cube.JPY = 130.03;
+                cube.GBP = 0.85195;
+                return cube;
+            }
         }
 
         public void InsertEuroExchangeRate(AzusifiedCube cube)
@@ -1307,12 +860,15 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(12))
                 m.PlaylistContent = ndr.GetString(12);
 
-            m.CdTextContent = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.media"), azuStreamBlob.DeriveKey("cdtext"), m.Id);
+            if (!ndr.IsDBNull(13))
+                m.CdTextContent = ndr.GetByteArray(13);
 
             if (!ndr.IsDBNull(14))
                 m.LogfileContent = ndr.GetString(14);
 
-            m.MdsContent = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.media"), azuStreamBlob.DeriveKey("mediadescriptorsidecar"), m.Id);
+            if (!ndr.IsDBNull(15))
+                m.MdsContent = ndr.GetByteArray(15);
+
             m.isSealed = ndr.GetBoolean(16);
 
             if (!ndr.IsDBNull(17))
@@ -1359,8 +915,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 mt.LongName = dataReader.GetString(2);
                 mt.GraphData = dataReader.GetBoolean(3);
                 mt.DateAdded = dataReader.GetDateTime(4);
+                mt.Icon = dataReader.GetByteArray(5);
                 mt.IgnoreForStatistics = dataReader.GetBoolean(6);
-                mt.Icon = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.mediatypes"), azuStreamBlob.DeriveKey("icon"), mt.Id);
                 if (!dataReader.IsDBNull(8))
                     mt.HasFilesystem = dataReader.GetBoolean(8);
                 yield return mt;
@@ -1384,7 +940,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 result.Id = ndr.GetInt32(0);
                 result.InShelf = ndr.GetInt32(1);
                 result.Name = ndr.GetString(2);
-                result.Picture = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("picture"), result.Id);
+                result.Picture = ndr.GetByteArray(3);
+
 
                 if (!ndr.IsDBNull(4))
                     result.Price = ndr.GetDouble(4);
@@ -1404,7 +961,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 if (!ndr.IsDBNull(9))
                     result.CountryOfOriginId = ndr.GetInt32(9);
 
-                result.Screenshot = azuStreamBlob.Get(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("screenshot"), result.Id);
+                result.Screenshot = ndr.GetByteArray(10);
 
                 if (!ndr.IsDBNull(11))
                     result.DateAdded = ndr.GetDateTime(11);
@@ -1438,9 +995,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                     product.Price = dataReader.GetDouble(2);
                 if (!dataReader.IsDBNull(3))
                     product.BoughtOn = dataReader.GetDateTime(3);
-
-                product.ScreenshotSize = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("screenshot"), product.Id);
-                product.CoverSize = azuStreamBlob.GetSize(azuStreamBlob.DeriveKey("azusa.products"), azuStreamBlob.DeriveKey("picture"), product.Id);
+                if (!dataReader.IsDBNull(4))
+                    product.ScreenshotSize = dataReader.GetInt64(4);
+                if (!dataReader.IsDBNull(5))
+                    product.CoverSize = dataReader.GetInt64(5);
 
                 if (!dataReader.IsDBNull(6))
                     product.NSFW = dataReader.GetBoolean(6);
@@ -1521,9 +1079,5 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotSupportedException();
         }
         
-        public AzusaStreamBlob GetStreamBlob()
-        {
-            return azuStreamBlob;
-        }
     }
 }

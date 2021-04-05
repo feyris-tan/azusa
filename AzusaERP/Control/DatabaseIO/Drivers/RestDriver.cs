@@ -318,91 +318,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
     
-        public IEnumerable<int> Vgmdb_FindAlbumsByTrackMask(string text)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> Vgmdb_FindAlbumsByArbituraryProducts(string text)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> Vgmdb_FindAlbumsByAlbumTitle(string text)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public Bitmap Vgmdb_GetAlbumCover(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<string> Vgmdb_FindProductNamesByAlbumId(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<string> Vgmdb_FindArtistNamesByAlbumId(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> Vgmdb_FindArtistIdsByName(string escaped)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> Vgmdb_FindAlbumIdsByArtistId(int possibleArtist)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Image> FindCoversByAlbumId(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> Vgmdb_FindAlbumsBySkuPart(string startswith)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Tuple<string, int, int, string, int>> Vgmdb_FindTrackDataByAlbum(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<string> Vgmdb_FindLabelNamesByAlbumId(int entryId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<string> Vgmdb_FindRelatedAlbums(int albumId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string Vgmdb_GetReleaseEvent(int albumId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<string> Vgmdb_FindReprints(int albumId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Uri> Vgmdb_GetWebsites(int albumId)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public IEnumerable<byte[]> PsxDc_GetScreenshots(int previewId)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<SqlIndex> GetSqlIndexes()
         {
             throw new NotImplementedException();
@@ -433,26 +348,6 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             throw new NotImplementedException();
         }
         
-        public Image MyFigureCollection_GetPhoto(int wrappedFigureId)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public Image Vocadb_GetAlbumCover(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<string> VocaDb_FindAlbumNamesBySongNames(string text)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public IEnumerable<int> Gelbooru_GetPostsByTag(int tagId)
-        {
-            throw new NotImplementedException();
-        }
-
         public void CreateSchema(string schemaName)
         {
             throw new NotImplementedException();
@@ -517,12 +412,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         {
             throw new NotImplementedException();
         }
-
-        public string GetConnectionString()
-        {
-            return null;
-        }
-
+        
         public AzusifiedCube GetLatestEuroExchangeRates()
         {
             throw new NotImplementedException();

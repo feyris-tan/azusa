@@ -19,9 +19,14 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         {
             List<string> tableNames = source.GetAllTableNames();
             tableNames = tableNames.OrderBy(x => x).ToList();
-
+            
             foreach (string tableName in tableNames)
             {
+                if (tableName.StartsWith("pg_catalog."))
+                    continue;
+                if (tableName.StartsWith("information_schema."))
+                    continue;
+
                 List<DatabaseColumn> columns = source.Sync_DefineTable(tableName);
                 if (!columns.Any(x => x.ColumnName.ToLowerInvariant().Equals("dateadded")))
                 {
@@ -80,25 +85,25 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
                     //Delta 2
                     Message(String.Format("Lese \u03942 für {0}", tableName));
                     syncReader = source.Sync_GetUpdateSyncReader(tableName, latestUpdate);
-                    Queue<object> leftovers = new Queue<object>();
-                    target.Sync_CopyUpdatesFrom(tableName, columns, syncReader, Message, leftovers);
-
-                    if (leftovers.Count > 0)
+                    if (latestUpdate != null)
                     {
-                        DatabaseColumn idColumn = GetIdColumn(columns);
-                        while (leftovers.Count > 0)
+                        Queue<object> leftovers = new Queue<object>();
+                        target.Sync_CopyUpdatesFrom(tableName, columns, syncReader, Message, leftovers);
+
+                        if (leftovers.Count > 0)
                         {
-                            Message(String.Format("\u03943 für {0} wird verarbeitet...",tableName));
-                            DbDataReader reader = source.Sync_ArbitrarySelect(tableName, idColumn, leftovers.Dequeue());
-                            target.Sync_CopyFrom(tableName, columns, reader, Message);
+                            DatabaseColumn idColumn = GetIdColumn(columns);
+                            while (leftovers.Count > 0)
+                            {
+                                Message(String.Format("\u03943 für {0} wird verarbeitet...", tableName));
+                                DbDataReader reader =
+                                    source.Sync_ArbitrarySelect(tableName, idColumn, leftovers.Dequeue());
+                                target.Sync_CopyFrom(tableName, columns, reader, Message);
+                            }
                         }
                     }
                 }
-            }
-            IStreamBlobOwner streamBlobOwner = target as IStreamBlobOwner;
-            if (streamBlobOwner != null)
-            {
-                streamBlobOwner.GetStreamBlob().Flush();
+                syncReader.Close();
             }
 
             List<SqlIndex> sourceIndexes = source.GetSqlIndexes().ToList();
