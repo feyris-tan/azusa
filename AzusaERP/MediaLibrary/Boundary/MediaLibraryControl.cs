@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using DiscUtils;
@@ -79,7 +80,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             foreach (Shelf shelf in ShelfService.GetShelves())
             {
                 tabControl1.TabPages.Add(new ShelfTabPage(shelf));
-                productInShelf.Items.Add(shelf);
             }
 
             currentShelf = ((ShelfTabPage) tabControl1.TabPages[0]).Shelf;
@@ -214,22 +214,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             }
 
             productISBN.Text = currentProduct.Sku;
-            productId.Value = currentProduct.Id;
             productNSFW.Checked = currentProduct.NSFW;
-            if (currentProduct.DateAdded != DateTime.MinValue)
-            {
-                productDateInserted.Value = currentProduct.DateAdded;
-            }
-
-            foreach (Shelf s in productInShelf.Items)
-            {
-                if (s.Id == currentProduct.InShelf)
-                {
-                    productInShelf.SelectedItem = s;
-                    break;
-                }
-            }
-
             productCover.Data = currentProduct.Picture;
             productCover.DataChanged = false;
 
@@ -298,12 +283,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mediaMetadata.Enabled = enabled;
             mediaGraphData.Enabled = enabled;
             graphDataPlot.Enabled = enabled;
-            mediaCueSheet.Enabled = enabled;
-            mediaCdText.Enabled = enabled;
-            mediaChecksum.Enabled = enabled;
-            mediaOriginalPlaylist.Enabled = enabled;
-            mediaLogfile.Enabled = enabled;
-            mediaMds.Enabled = enabled;
             mediaMoreOptionsButton.Enabled = enabled;
             mediaSave.Enabled = enabled;
             imageParsenToolStripMenuItem.Enabled = enabled;
@@ -329,10 +308,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mediaStillSealed.Checked = currentMedia.isSealed;
             mediaStorageSpaceId.Value = currentMedia.DumpStorageSpaceId;
             mediaDumpPath.Text = currentMedia.DumpStorageSpacePath;
-            mediaID.Value = currentMedia.Id;
-            mediaProductId.Value = currentMedia.RelatedProductId;
-            if (currentMedia.DateAdded > mediaDateAdded.MinDate)
-                mediaDateAdded.Value = currentMedia.DateAdded;
             mediaMetadata.Text = currentMedia.MetaFileContent.unix2dos();
             mediaGraphData.Text = currentMedia.GraphDataContent.unix2dos();
 
@@ -348,15 +323,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                     graphDataPlot.Clear();
                 }
             }
-
-            mediaCueSheet.Text = currentMedia.CueSheetContent.unix2dos();
-            mediaCdText.Data = currentMedia.CdTextContent;
-            mediaChecksum.Text = currentMedia.ChecksumContent.unix2dos();
-            mediaOriginalPlaylist.Text = currentMedia.PlaylistContent.unix2dos();
-            mediaLogfile.Text = currentMedia.LogfileContent.unix2dos();
-            mediaMds.Data = currentMedia.MdsContent;
-            mediaFauxHash.Text = currentMedia.FauxHash.ToString();
-
+            
             UpdateFilesystemTreeView();
         }
 
@@ -477,8 +444,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
         private void mediaSave_Click(object sender, EventArgs e)
         {
-            currentMedia.Id = (int) mediaID.Value;
-            currentMedia.RelatedProductId = (int) mediaProductId.Value;
             currentMedia.Name = mediaName.Text;
             currentMedia.MediaTypeId = ((MediaType) mediaType.SelectedItem).Id;
             currentMedia.SKU = mediaSku.Text;
@@ -486,15 +451,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentMedia.DumpStorageSpaceId = (int) mediaStorageSpaceId.Value;
             currentMedia.DumpStorageSpacePath = mediaDumpPath.Text;
             currentMedia.MetaFileContent = mediaMetadata.Text;
-            currentMedia.DateAdded = mediaDateAdded.Value;
-            currentMedia.CueSheetContent = mediaCueSheet.Text;
-            currentMedia.ChecksumContent = mediaChecksum.Text;
-            currentMedia.PlaylistContent = mediaOriginalPlaylist.Text;
-            currentMedia.CdTextContent = mediaCdText.Data;
-            currentMedia.LogfileContent = mediaLogfile.Text;
-            currentMedia.MdsContent = mediaMds.Data;
             currentMedia.GraphDataContent = mediaGraphData.Text;
-            currentMedia.FauxHash = Convert.ToInt64(mediaFauxHash.Text);
 
             Media temp = currentMedia;
 
@@ -582,7 +539,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             string fullname = fi.FullName.Substring(fi.Directory.Root.FullName.Length);
             mediaDumpPath.Text = fullname;
             AutoSetStorageSpaceId(fi.Directory.Root.FullName);
-            SetHeaderCrc32(fi);
 
             DirectoryInfo rootDir = fi.Directory;
             DeleteIfNecessary(rootDir, "Thumbs.db");
@@ -590,30 +546,61 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             string extension = Path.GetExtension(filename).ToLowerInvariant();
             if (extension.Equals(".cue"))
             {
-                if (string.IsNullOrEmpty(mediaCueSheet.Text))
+                if (TestMediaAttachment(currentMedia, "CUE Sheet"))
                 {
-                    mediaCueSheet.Text = mediaMetadata.Text;
+                    SetMediaAttachment(currentMedia,"CUE Sheet",Encoding.UTF8.GetBytes("mediaMetadata.Text"));
                 }
             }
         }
 
-        private void SetHeaderCrc32(FileInfo fi)
+        private void SetMediaAttachment(Media media, string attachmentTypeName, byte[] data)
         {
-            byte[] buffer = new byte[512];
-            FileStream fs = fi.OpenRead();
-            int headerLen = fs.Read(buffer, 0, 512);
-            fs.Dispose();
+            if (data == null)
+                return;
+            if (data.Length == 0)
+                return;
 
-            long result = 0;
-            for (int i = 0; i < headerLen; i++)
+            AttachmentType attachmentType = context.DatabaseDriver.GetAllMediaAttachmentTypes().First(x => x.name.Equals(attachmentTypeName));
+            if (attachmentType == null)
+                return;
+
+            Attachment attachment = context.DatabaseDriver.GetAllMediaAttachments(media).First(x => x._TypeId == attachmentType.id);
+            if (attachment == null)
             {
-                result += buffer[i];
-                result <<= 1;
+                attachment = new Attachment();
+                attachment._Buffer = data;
+                attachment._Complete = true;
+                attachment._TypeId = attachmentType.id;
+                attachment._MediaId = media.Id;
+                context.DatabaseDriver.InsertAttachment(attachment);
             }
-
-            mediaFauxHash.Text = result.ToString();
+            else
+            {
+                attachment._Buffer = data;
+                attachment._Complete = true;
+                attachment._DateUpdated = DateTime.Now;
+                attachment._TypeId = attachmentType.id;
+                attachment._MediaId = media.Id;
+                context.DatabaseDriver.UpdateAttachment(attachment);
+            }
         }
 
+        private bool TestMediaAttachment(Media media, string attachmentTypeName)
+        {
+            AttachmentType attachmentType = context.DatabaseDriver.GetAllMediaAttachmentTypes().First(x => x.name.Equals(attachmentTypeName));
+            if (attachmentType == null)
+                return false;
+
+            Attachment attachment = context.DatabaseDriver.GetAllMediaAttachments(media).First(x => x._TypeId == attachmentType.id);
+            if (!attachment._Complete)
+                return false;
+
+            if (attachment._Buffer == null)
+                return false;
+
+            return attachment._Buffer.Length > 0;
+        }
+        
         private void AutoSetStorageSpaceId(string rootName)
         {
             string mediaId = Path.Combine(rootName, "azusa_storagespace_id.xml");
@@ -635,7 +622,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                 string fullname = fi.FullName.Substring(fi.Directory.Root.FullName.Length);
                 mediaDumpPath.Text = fullname;
                 AutoSetStorageSpaceId(fi.Directory.Root.FullName);
-                SetHeaderCrc32(fi);
             }
         }
 

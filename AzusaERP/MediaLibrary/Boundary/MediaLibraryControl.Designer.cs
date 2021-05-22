@@ -40,6 +40,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.metafilesAutomatischErgänzenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageOrdnerImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSXISOBatchImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dVDBoxImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vervollständigkeitsassistentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.allesVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regalVervollständigenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,10 +68,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.label4 = new System.Windows.Forms.Label();
             this.productISBN = new System.Windows.Forms.TextBox();
             this.productSave = new System.Windows.Forms.Button();
-            this.productCost = new moe.yo3explorer.azusa.MediaLibrary.Control.CurrencyConverterTextBox();
             this.productNSFW = new System.Windows.Forms.CheckBox();
             this.productTabCover = new System.Windows.Forms.TabPage();
-            this.productCover = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabMedia = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.productMediaListView = new System.Windows.Forms.ListView();
@@ -79,7 +78,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productAddMediaButton = new System.Windows.Forms.Button();
             this.productRemoveMediaButton = new System.Windows.Forms.Button();
             this.productTabScreenshots = new System.Windows.Forms.TabPage();
-            this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabLinks = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
@@ -88,14 +86,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productSupplier = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.productCountryOfOrigin = new System.Windows.Forms.ComboBox();
-            this.productTabReadOnlyData = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.label5 = new System.Windows.Forms.Label();
-            this.productId = new System.Windows.Forms.NumericUpDown();
-            this.label6 = new System.Windows.Forms.Label();
-            this.productDateInserted = new System.Windows.Forms.DateTimePicker();
-            this.label7 = new System.Windows.Forms.Label();
-            this.productInShelf = new System.Windows.Forms.ComboBox();
             this.mediaTabPages = new System.Windows.Forms.TabControl();
             this.mediaTabInfo = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
@@ -122,35 +112,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.automatischLadenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.graphdataChartTab = new System.Windows.Forms.TabPage();
             this.graphDataPlot = new NPlot.Windows.PlotSurface2D();
-            this.mediaTabCueSheet = new System.Windows.Forms.TabPage();
-            this.mediaCueSheet = new System.Windows.Forms.TextBox();
-            this.mediaTabChecksum = new System.Windows.Forms.TabPage();
-            this.mediaChecksum = new System.Windows.Forms.TextBox();
-            this.mediaTabCdText = new System.Windows.Forms.TabPage();
-            this.mediaCdText = new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper();
-            this.mediaTabOgPlaylist = new System.Windows.Forms.TabPage();
-            this.mediaOriginalPlaylist = new System.Windows.Forms.TextBox();
-            this.mediaTabLogfile = new System.Windows.Forms.TabPage();
-            this.mediaLogfile = new System.Windows.Forms.TextBox();
-            this.mediaTabMds = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
-            this.mediaMds = new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper();
             this.mediaTabFilesystem = new System.Windows.Forms.TabPage();
             this.mediaFilesystemTreeView = new System.Windows.Forms.TreeView();
             this.filesystemContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.imageParsenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.discScannenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filesystemImageList = new System.Windows.Forms.ImageList(this.components);
-            this.mediaTabDbInfo = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
-            this.label16 = new System.Windows.Forms.Label();
-            this.mediaID = new System.Windows.Forms.NumericUpDown();
-            this.label17 = new System.Windows.Forms.Label();
-            this.mediaProductId = new System.Windows.Forms.NumericUpDown();
-            this.label18 = new System.Windows.Forms.Label();
-            this.mediaDateAdded = new System.Windows.Forms.DateTimePicker();
-            this.label19 = new System.Windows.Forms.Label();
-            this.mediaFauxHash = new System.Windows.Forms.TextBox();
             this.mediaMoreOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.setMetadataAndDump = new System.Windows.Forms.ToolStripMenuItem();
             this.öffneDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -163,7 +130,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.dVDBoxImportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.productCost = new moe.yo3explorer.azusa.MediaLibrary.Control.CurrencyConverterTextBox();
+            this.productCover = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
+            this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -184,9 +153,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabScreenshots.SuspendLayout();
             this.productTabLinks.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            this.productTabReadOnlyData.SuspendLayout();
-            this.tableLayoutPanel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.productId)).BeginInit();
             this.mediaTabPages.SuspendLayout();
             this.mediaTabInfo.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
@@ -197,19 +163,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.graphdataTextTab.SuspendLayout();
             this.graphDataContextMenuStrip.SuspendLayout();
             this.graphdataChartTab.SuspendLayout();
-            this.mediaTabCueSheet.SuspendLayout();
-            this.mediaTabChecksum.SuspendLayout();
-            this.mediaTabCdText.SuspendLayout();
-            this.mediaTabOgPlaylist.SuspendLayout();
-            this.mediaTabLogfile.SuspendLayout();
-            this.mediaTabMds.SuspendLayout();
-            this.tableLayoutPanel9.SuspendLayout();
             this.mediaTabFilesystem.SuspendLayout();
             this.filesystemContextMenuStrip.SuspendLayout();
-            this.mediaTabDbInfo.SuspendLayout();
-            this.tableLayoutPanel8.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.mediaID)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mediaProductId)).BeginInit();
             this.mediaMoreOptions.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -279,6 +234,13 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.pSXISOBatchImportToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
             this.pSXISOBatchImportToolStripMenuItem.Text = "PSXISO Batch Import";
             this.pSXISOBatchImportToolStripMenuItem.Click += new System.EventHandler(this.pSXISOBatchImportToolStripMenuItem_Click);
+            // 
+            // dVDBoxImportierenToolStripMenuItem
+            // 
+            this.dVDBoxImportierenToolStripMenuItem.Name = "dVDBoxImportierenToolStripMenuItem";
+            this.dVDBoxImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.dVDBoxImportierenToolStripMenuItem.Text = "DVD-Box importieren";
+            this.dVDBoxImportierenToolStripMenuItem.Click += new System.EventHandler(this.dVDBoxImportierenToolStripMenuItem_Click);
             // 
             // vervollständigkeitsassistentToolStripMenuItem
             // 
@@ -428,7 +390,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.tabControl2.Controls.Add(this.productTabMedia);
             this.tabControl2.Controls.Add(this.productTabScreenshots);
             this.tabControl2.Controls.Add(this.productTabLinks);
-            this.tabControl2.Controls.Add(this.productTabReadOnlyData);
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.Location = new System.Drawing.Point(0, 0);
             this.tabControl2.Name = "tabControl2";
@@ -563,15 +524,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productSave.UseVisualStyleBackColor = true;
             this.productSave.Click += new System.EventHandler(this.productSave_Click);
             // 
-            // productCost
-            // 
-            this.productCost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productCost.Location = new System.Drawing.Point(73, 71);
-            this.productCost.Name = "productCost";
-            this.productCost.Size = new System.Drawing.Size(105, 17);
-            this.productCost.TabIndex = 11;
-            this.productCost.Value = 0D;
-            // 
             // productNSFW
             // 
             this.productNSFW.AutoSize = true;
@@ -592,19 +544,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabCover.TabIndex = 2;
             this.productTabCover.Text = "Cover";
             this.productTabCover.UseVisualStyleBackColor = true;
-            // 
-            // productCover
-            // 
-            this.productCover.AllowDrop = true;
-            this.productCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.productCover.Data = null;
-            this.productCover.DataChanged = true;
-            this.productCover.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productCover.Location = new System.Drawing.Point(0, 0);
-            this.productCover.MediumId = 0;
-            this.productCover.Name = "productCover";
-            this.productCover.Size = new System.Drawing.Size(187, 166);
-            this.productCover.TabIndex = 0;
             // 
             // productTabMedia
             // 
@@ -705,19 +644,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabScreenshots.Text = "Screenshot";
             this.productTabScreenshots.UseVisualStyleBackColor = true;
             // 
-            // productScreenshot
-            // 
-            this.productScreenshot.AllowDrop = true;
-            this.productScreenshot.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.productScreenshot.Data = null;
-            this.productScreenshot.DataChanged = true;
-            this.productScreenshot.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productScreenshot.Location = new System.Drawing.Point(0, 0);
-            this.productScreenshot.MediumId = 0;
-            this.productScreenshot.Name = "productScreenshot";
-            this.productScreenshot.Size = new System.Drawing.Size(187, 166);
-            this.productScreenshot.TabIndex = 0;
-            // 
             // productTabLinks
             // 
             this.productTabLinks.Controls.Add(this.tableLayoutPanel4);
@@ -807,112 +733,12 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productCountryOfOrigin.Size = new System.Drawing.Size(95, 21);
             this.productCountryOfOrigin.TabIndex = 5;
             // 
-            // productTabReadOnlyData
-            // 
-            this.productTabReadOnlyData.Controls.Add(this.tableLayoutPanel3);
-            this.productTabReadOnlyData.Location = new System.Drawing.Point(4, 22);
-            this.productTabReadOnlyData.Name = "productTabReadOnlyData";
-            this.productTabReadOnlyData.Size = new System.Drawing.Size(187, 166);
-            this.productTabReadOnlyData.TabIndex = 1;
-            this.productTabReadOnlyData.Text = "Datenbankeigenschaften";
-            this.productTabReadOnlyData.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel3
-            // 
-            this.tableLayoutPanel3.ColumnCount = 2;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 85F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Controls.Add(this.label5, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.productId, 1, 0);
-            this.tableLayoutPanel3.Controls.Add(this.label6, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.productDateInserted, 1, 1);
-            this.tableLayoutPanel3.Controls.Add(this.label7, 0, 2);
-            this.tableLayoutPanel3.Controls.Add(this.productInShelf, 1, 2);
-            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 4;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 24.99813F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(187, 166);
-            this.tableLayoutPanel3.TabIndex = 0;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(21, 13);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "ID:";
-            // 
-            // productId
-            // 
-            this.productId.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productId.Enabled = false;
-            this.productId.Location = new System.Drawing.Point(88, 3);
-            this.productId.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.productId.Name = "productId";
-            this.productId.Size = new System.Drawing.Size(96, 20);
-            this.productId.TabIndex = 1;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 41);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(78, 13);
-            this.label6.TabIndex = 2;
-            this.label6.Text = "Eingabedatum:";
-            // 
-            // productDateInserted
-            // 
-            this.productDateInserted.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productDateInserted.Enabled = false;
-            this.productDateInserted.Location = new System.Drawing.Point(88, 44);
-            this.productDateInserted.Name = "productDateInserted";
-            this.productDateInserted.Size = new System.Drawing.Size(96, 20);
-            this.productDateInserted.TabIndex = 3;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 82);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(38, 13);
-            this.label7.TabIndex = 4;
-            this.label7.Text = "Regal:";
-            // 
-            // productInShelf
-            // 
-            this.productInShelf.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productInShelf.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.productInShelf.Enabled = false;
-            this.productInShelf.FormattingEnabled = true;
-            this.productInShelf.Location = new System.Drawing.Point(88, 85);
-            this.productInShelf.Name = "productInShelf";
-            this.productInShelf.Size = new System.Drawing.Size(96, 21);
-            this.productInShelf.TabIndex = 5;
-            // 
             // mediaTabPages
             // 
             this.mediaTabPages.Controls.Add(this.mediaTabInfo);
             this.mediaTabPages.Controls.Add(this.mediaTabMetadata);
             this.mediaTabPages.Controls.Add(this.mediaTabGraphdata);
-            this.mediaTabPages.Controls.Add(this.mediaTabCueSheet);
-            this.mediaTabPages.Controls.Add(this.mediaTabChecksum);
-            this.mediaTabPages.Controls.Add(this.mediaTabCdText);
-            this.mediaTabPages.Controls.Add(this.mediaTabOgPlaylist);
-            this.mediaTabPages.Controls.Add(this.mediaTabLogfile);
-            this.mediaTabPages.Controls.Add(this.mediaTabMds);
             this.mediaTabPages.Controls.Add(this.mediaTabFilesystem);
-            this.mediaTabPages.Controls.Add(this.mediaTabDbInfo);
             this.mediaTabPages.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mediaTabPages.Location = new System.Drawing.Point(0, 0);
             this.mediaTabPages.Name = "mediaTabPages";
@@ -1215,172 +1041,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.graphDataPlot.YAxis1 = null;
             this.graphDataPlot.YAxis2 = null;
             // 
-            // mediaTabCueSheet
-            // 
-            this.mediaTabCueSheet.Controls.Add(this.mediaCueSheet);
-            this.mediaTabCueSheet.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabCueSheet.Name = "mediaTabCueSheet";
-            this.mediaTabCueSheet.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabCueSheet.TabIndex = 4;
-            this.mediaTabCueSheet.Text = "CUE-Sheet";
-            this.mediaTabCueSheet.UseVisualStyleBackColor = true;
-            // 
-            // mediaCueSheet
-            // 
-            this.mediaCueSheet.AllowDrop = true;
-            this.mediaCueSheet.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaCueSheet.Enabled = false;
-            this.mediaCueSheet.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mediaCueSheet.Location = new System.Drawing.Point(0, 0);
-            this.mediaCueSheet.MaxLength = 999999999;
-            this.mediaCueSheet.Multiline = true;
-            this.mediaCueSheet.Name = "mediaCueSheet";
-            this.mediaCueSheet.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.mediaCueSheet.Size = new System.Drawing.Size(187, 173);
-            this.mediaCueSheet.TabIndex = 2;
-            this.mediaCueSheet.WordWrap = false;
-            this.mediaCueSheet.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBox_DragAndDrop);
-            this.mediaCueSheet.DragEnter += new System.Windows.Forms.DragEventHandler(this.Global_DragEnter);
-            // 
-            // mediaTabChecksum
-            // 
-            this.mediaTabChecksum.Controls.Add(this.mediaChecksum);
-            this.mediaTabChecksum.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabChecksum.Name = "mediaTabChecksum";
-            this.mediaTabChecksum.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabChecksum.TabIndex = 6;
-            this.mediaTabChecksum.Text = "Prüfsumme";
-            this.mediaTabChecksum.UseVisualStyleBackColor = true;
-            // 
-            // mediaChecksum
-            // 
-            this.mediaChecksum.AllowDrop = true;
-            this.mediaChecksum.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaChecksum.Enabled = false;
-            this.mediaChecksum.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mediaChecksum.Location = new System.Drawing.Point(0, 0);
-            this.mediaChecksum.MaxLength = 999999999;
-            this.mediaChecksum.Multiline = true;
-            this.mediaChecksum.Name = "mediaChecksum";
-            this.mediaChecksum.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.mediaChecksum.Size = new System.Drawing.Size(187, 173);
-            this.mediaChecksum.TabIndex = 3;
-            this.mediaChecksum.WordWrap = false;
-            this.mediaChecksum.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBox_DragAndDrop);
-            this.mediaChecksum.DragEnter += new System.Windows.Forms.DragEventHandler(this.Global_DragEnter);
-            // 
-            // mediaTabCdText
-            // 
-            this.mediaTabCdText.Controls.Add(this.mediaCdText);
-            this.mediaTabCdText.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabCdText.Name = "mediaTabCdText";
-            this.mediaTabCdText.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabCdText.TabIndex = 5;
-            this.mediaTabCdText.Text = "CD-Text";
-            this.mediaTabCdText.UseVisualStyleBackColor = true;
-            // 
-            // mediaCdText
-            // 
-            this.mediaCdText.Data = null;
-            this.mediaCdText.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaCdText.Enabled = false;
-            this.mediaCdText.Location = new System.Drawing.Point(0, 0);
-            this.mediaCdText.MediumId = 0;
-            this.mediaCdText.Name = "mediaCdText";
-            this.mediaCdText.Size = new System.Drawing.Size(187, 173);
-            this.mediaCdText.TabIndex = 0;
-            // 
-            // mediaTabOgPlaylist
-            // 
-            this.mediaTabOgPlaylist.Controls.Add(this.mediaOriginalPlaylist);
-            this.mediaTabOgPlaylist.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabOgPlaylist.Name = "mediaTabOgPlaylist";
-            this.mediaTabOgPlaylist.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabOgPlaylist.TabIndex = 7;
-            this.mediaTabOgPlaylist.Text = "Original-Playlist";
-            this.mediaTabOgPlaylist.UseVisualStyleBackColor = true;
-            // 
-            // mediaOriginalPlaylist
-            // 
-            this.mediaOriginalPlaylist.AllowDrop = true;
-            this.mediaOriginalPlaylist.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaOriginalPlaylist.Enabled = false;
-            this.mediaOriginalPlaylist.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mediaOriginalPlaylist.Location = new System.Drawing.Point(0, 0);
-            this.mediaOriginalPlaylist.MaxLength = 999999999;
-            this.mediaOriginalPlaylist.Multiline = true;
-            this.mediaOriginalPlaylist.Name = "mediaOriginalPlaylist";
-            this.mediaOriginalPlaylist.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.mediaOriginalPlaylist.Size = new System.Drawing.Size(187, 173);
-            this.mediaOriginalPlaylist.TabIndex = 4;
-            this.mediaOriginalPlaylist.WordWrap = false;
-            this.mediaOriginalPlaylist.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBox_DragAndDrop);
-            this.mediaOriginalPlaylist.DragEnter += new System.Windows.Forms.DragEventHandler(this.Global_DragEnter);
-            // 
-            // mediaTabLogfile
-            // 
-            this.mediaTabLogfile.Controls.Add(this.mediaLogfile);
-            this.mediaTabLogfile.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabLogfile.Name = "mediaTabLogfile";
-            this.mediaTabLogfile.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabLogfile.TabIndex = 8;
-            this.mediaTabLogfile.Text = "Logfile";
-            this.mediaTabLogfile.UseVisualStyleBackColor = true;
-            // 
-            // mediaLogfile
-            // 
-            this.mediaLogfile.AllowDrop = true;
-            this.mediaLogfile.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaLogfile.Enabled = false;
-            this.mediaLogfile.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mediaLogfile.Location = new System.Drawing.Point(0, 0);
-            this.mediaLogfile.MaxLength = 999999999;
-            this.mediaLogfile.Multiline = true;
-            this.mediaLogfile.Name = "mediaLogfile";
-            this.mediaLogfile.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.mediaLogfile.Size = new System.Drawing.Size(187, 173);
-            this.mediaLogfile.TabIndex = 4;
-            this.mediaLogfile.WordWrap = false;
-            this.mediaLogfile.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBox_DragAndDrop);
-            this.mediaLogfile.DragEnter += new System.Windows.Forms.DragEventHandler(this.Global_DragEnter);
-            // 
-            // mediaTabMds
-            // 
-            this.mediaTabMds.Controls.Add(this.tableLayoutPanel9);
-            this.mediaTabMds.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabMds.Name = "mediaTabMds";
-            this.mediaTabMds.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabMds.TabIndex = 9;
-            this.mediaTabMds.Text = "MDS";
-            this.mediaTabMds.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel9
-            // 
-            this.tableLayoutPanel9.ColumnCount = 1;
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel9.Controls.Add(this.mediaMds, 0, 0);
-            this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel9.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel9.Name = "tableLayoutPanel9";
-            this.tableLayoutPanel9.RowCount = 1;
-            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 66.47399F));
-            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.52601F));
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(187, 173);
-            this.tableLayoutPanel9.TabIndex = 0;
-            // 
-            // mediaMds
-            // 
-            this.mediaMds.Data = null;
-            this.mediaMds.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaMds.Enabled = false;
-            this.mediaMds.Location = new System.Drawing.Point(3, 3);
-            this.mediaMds.MediumId = 0;
-            this.mediaMds.Name = "mediaMds";
-            this.mediaMds.Size = new System.Drawing.Size(181, 167);
-            this.mediaMds.TabIndex = 0;
-            this.mediaMds.DataChanged += new moe.yo3explorer.azusa.MediaLibrary.Control.BinaryFileDropper.DataChangeDelegate(this.mediaMds_DataChanged);
-            // 
             // mediaTabFilesystem
             // 
             this.mediaTabFilesystem.Controls.Add(this.mediaFilesystemTreeView);
@@ -1436,122 +1096,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.filesystemImageList.Images.SetKeyName(1, "closedDir.png");
             this.filesystemImageList.Images.SetKeyName(2, "file.png");
             this.filesystemImageList.Images.SetKeyName(3, "openDir.png");
-            // 
-            // mediaTabDbInfo
-            // 
-            this.mediaTabDbInfo.Controls.Add(this.tableLayoutPanel8);
-            this.mediaTabDbInfo.Location = new System.Drawing.Point(4, 22);
-            this.mediaTabDbInfo.Name = "mediaTabDbInfo";
-            this.mediaTabDbInfo.Size = new System.Drawing.Size(187, 173);
-            this.mediaTabDbInfo.TabIndex = 1;
-            this.mediaTabDbInfo.Text = "Datenbankeigenschaften";
-            this.mediaTabDbInfo.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel8
-            // 
-            this.tableLayoutPanel8.ColumnCount = 2;
-            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 46.92738F));
-            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 53.07262F));
-            this.tableLayoutPanel8.Controls.Add(this.label16, 0, 0);
-            this.tableLayoutPanel8.Controls.Add(this.mediaID, 1, 0);
-            this.tableLayoutPanel8.Controls.Add(this.label17, 0, 1);
-            this.tableLayoutPanel8.Controls.Add(this.mediaProductId, 1, 1);
-            this.tableLayoutPanel8.Controls.Add(this.label18, 0, 2);
-            this.tableLayoutPanel8.Controls.Add(this.mediaDateAdded, 1, 2);
-            this.tableLayoutPanel8.Controls.Add(this.label19, 0, 3);
-            this.tableLayoutPanel8.Controls.Add(this.mediaFauxHash, 1, 3);
-            this.tableLayoutPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel8.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel8.Name = "tableLayoutPanel8";
-            this.tableLayoutPanel8.RowCount = 4;
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25.00062F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 24.99813F));
-            this.tableLayoutPanel8.Size = new System.Drawing.Size(187, 173);
-            this.tableLayoutPanel8.TabIndex = 0;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(3, 0);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(21, 13);
-            this.label16.TabIndex = 0;
-            this.label16.Text = "ID:";
-            // 
-            // mediaID
-            // 
-            this.mediaID.Enabled = false;
-            this.mediaID.Location = new System.Drawing.Point(90, 3);
-            this.mediaID.Maximum = new decimal(new int[] {
-            65000,
-            0,
-            0,
-            0});
-            this.mediaID.Name = "mediaID";
-            this.mediaID.Size = new System.Drawing.Size(89, 20);
-            this.mediaID.TabIndex = 1;
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(3, 43);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(61, 13);
-            this.label17.TabIndex = 2;
-            this.label17.Text = "Produkt-ID:";
-            // 
-            // mediaProductId
-            // 
-            this.mediaProductId.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaProductId.Enabled = false;
-            this.mediaProductId.Location = new System.Drawing.Point(90, 46);
-            this.mediaProductId.Maximum = new decimal(new int[] {
-            32000,
-            0,
-            0,
-            0});
-            this.mediaProductId.Name = "mediaProductId";
-            this.mediaProductId.Size = new System.Drawing.Size(94, 20);
-            this.mediaProductId.TabIndex = 3;
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(3, 86);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(78, 13);
-            this.label18.TabIndex = 4;
-            this.label18.Text = "Eingabedatum:";
-            // 
-            // mediaDateAdded
-            // 
-            this.mediaDateAdded.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaDateAdded.Enabled = false;
-            this.mediaDateAdded.Location = new System.Drawing.Point(90, 89);
-            this.mediaDateAdded.Name = "mediaDateAdded";
-            this.mediaDateAdded.Size = new System.Drawing.Size(94, 20);
-            this.mediaDateAdded.TabIndex = 5;
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(3, 129);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(76, 26);
-            this.label19.TabIndex = 6;
-            this.label19.Text = "Dump-Header-CRC32";
-            // 
-            // mediaFauxHash
-            // 
-            this.mediaFauxHash.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaFauxHash.Enabled = false;
-            this.mediaFauxHash.Location = new System.Drawing.Point(90, 132);
-            this.mediaFauxHash.Name = "mediaFauxHash";
-            this.mediaFauxHash.ReadOnly = true;
-            this.mediaFauxHash.Size = new System.Drawing.Size(94, 20);
-            this.mediaFauxHash.TabIndex = 7;
             // 
             // mediaMoreOptions
             // 
@@ -1631,12 +1175,40 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.filesystemIsoParseOpenFileDialog.Filter = "ISO9660 (*.iso), DD (*.img), httpd-ack (*.gdi)|*.iso;*.img;*.gdi";
             // 
-            // dVDBoxImportierenToolStripMenuItem
+            // productCost
             // 
-            this.dVDBoxImportierenToolStripMenuItem.Name = "dVDBoxImportierenToolStripMenuItem";
-            this.dVDBoxImportierenToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
-            this.dVDBoxImportierenToolStripMenuItem.Text = "DVD-Box importieren";
-            this.dVDBoxImportierenToolStripMenuItem.Click += new System.EventHandler(this.dVDBoxImportierenToolStripMenuItem_Click);
+            this.productCost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productCost.Location = new System.Drawing.Point(73, 71);
+            this.productCost.Name = "productCost";
+            this.productCost.Size = new System.Drawing.Size(105, 17);
+            this.productCost.TabIndex = 11;
+            this.productCost.Value = 0D;
+            // 
+            // productCover
+            // 
+            this.productCover.AllowDrop = true;
+            this.productCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.productCover.Data = null;
+            this.productCover.DataChanged = true;
+            this.productCover.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productCover.Location = new System.Drawing.Point(0, 0);
+            this.productCover.MediumId = 0;
+            this.productCover.Name = "productCover";
+            this.productCover.Size = new System.Drawing.Size(187, 166);
+            this.productCover.TabIndex = 0;
+            // 
+            // productScreenshot
+            // 
+            this.productScreenshot.AllowDrop = true;
+            this.productScreenshot.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.productScreenshot.Data = null;
+            this.productScreenshot.DataChanged = true;
+            this.productScreenshot.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productScreenshot.Location = new System.Drawing.Point(0, 0);
+            this.productScreenshot.MediumId = 0;
+            this.productScreenshot.Name = "productScreenshot";
+            this.productScreenshot.Size = new System.Drawing.Size(187, 166);
+            this.productScreenshot.TabIndex = 0;
             // 
             // MediaLibraryControl
             // 
@@ -1670,10 +1242,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabLinks.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
-            this.productTabReadOnlyData.ResumeLayout(false);
-            this.tableLayoutPanel3.ResumeLayout(false);
-            this.tableLayoutPanel3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.productId)).EndInit();
             this.mediaTabPages.ResumeLayout(false);
             this.mediaTabInfo.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
@@ -1687,24 +1255,8 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.graphdataTextTab.PerformLayout();
             this.graphDataContextMenuStrip.ResumeLayout(false);
             this.graphdataChartTab.ResumeLayout(false);
-            this.mediaTabCueSheet.ResumeLayout(false);
-            this.mediaTabCueSheet.PerformLayout();
-            this.mediaTabChecksum.ResumeLayout(false);
-            this.mediaTabChecksum.PerformLayout();
-            this.mediaTabCdText.ResumeLayout(false);
-            this.mediaTabOgPlaylist.ResumeLayout(false);
-            this.mediaTabOgPlaylist.PerformLayout();
-            this.mediaTabLogfile.ResumeLayout(false);
-            this.mediaTabLogfile.PerformLayout();
-            this.mediaTabMds.ResumeLayout(false);
-            this.tableLayoutPanel9.ResumeLayout(false);
             this.mediaTabFilesystem.ResumeLayout(false);
             this.filesystemContextMenuStrip.ResumeLayout(false);
-            this.mediaTabDbInfo.ResumeLayout(false);
-            this.tableLayoutPanel8.ResumeLayout(false);
-            this.tableLayoutPanel8.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.mediaID)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mediaProductId)).EndInit();
             this.mediaMoreOptions.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1737,14 +1289,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.TextBox productISBN;
         private System.Windows.Forms.Button productSave;
         private System.Windows.Forms.ToolStripMenuItem neuesProduktToolStripMenuItem;
-        private System.Windows.Forms.TabPage productTabReadOnlyData;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.NumericUpDown productId;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.DateTimePicker productDateInserted;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox productInShelf;
         private System.Windows.Forms.TabPage productTabCover;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.TabPage productTabLinks;
@@ -1776,14 +1320,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.TextBox mediaDumpPath;
-        private System.Windows.Forms.TabPage mediaTabDbInfo;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel8;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.NumericUpDown mediaID;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.NumericUpDown mediaProductId;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.DateTimePicker mediaDateAdded;
         private System.Windows.Forms.TabPage mediaTabMetadata;
         private System.Windows.Forms.TextBox mediaMetadata;
         private System.Windows.Forms.TabPage mediaTabGraphdata;
@@ -1791,19 +1327,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.TabPage graphdataTextTab;
         private System.Windows.Forms.TabPage graphdataChartTab;
         private System.Windows.Forms.TextBox mediaGraphData;
-        private System.Windows.Forms.TabPage mediaTabCueSheet;
-        private System.Windows.Forms.TextBox mediaCueSheet;
-        private System.Windows.Forms.TabPage mediaTabCdText;
-        private Control.BinaryFileDropper mediaCdText;
-        private System.Windows.Forms.TabPage mediaTabChecksum;
-        private System.Windows.Forms.TextBox mediaChecksum;
-        private System.Windows.Forms.TabPage mediaTabOgPlaylist;
-        private System.Windows.Forms.TextBox mediaOriginalPlaylist;
-        private System.Windows.Forms.TabPage mediaTabLogfile;
-        private System.Windows.Forms.TextBox mediaLogfile;
-        private System.Windows.Forms.TabPage mediaTabMds;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
-        private Control.BinaryFileDropper mediaMds;
         private System.Windows.Forms.Button mediaMoreOptionsButton;
         private System.Windows.Forms.ContextMenuStrip mediaMoreOptions;
         private System.Windows.Forms.ToolStripMenuItem setMetadataAndDump;
@@ -1818,8 +1341,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.OpenFileDialog dumpOpenFileDialog;
         private NPlot.Windows.PlotSurface2D graphDataPlot;
         private System.Windows.Forms.CheckBox productNSFW;
-        private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.TextBox mediaFauxHash;
         private System.Windows.Forms.ToolStripMenuItem playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem;
         private System.Windows.Forms.TabPage mediaTabFilesystem;
         private System.Windows.Forms.TreeView mediaFilesystemTreeView;
