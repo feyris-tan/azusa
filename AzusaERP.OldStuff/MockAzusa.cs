@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using moe.yo3explorer.azusa.Control.DatabaseIO.Migrations;
 using moe.yo3explorer.azusa.Control.MailArchive.Entity;
 using moe.yo3explorer.azusa.dex;
 using moe.yo3explorer.azusa.DexcomHistory.Entity;
@@ -17,7 +15,6 @@ using moe.yo3explorer.azusa.OfflineReaders.VgmDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VnDb.Entity;
 using moe.yo3explorer.azusa.OfflineReaders.VocaDB.Entity;
 using moe.yo3explorer.azusa.SedgeTree.Entitiy;
-using moe.yo3explorer.azusa.WarWalking.Boundary;
 using moe.yo3explorer.azusa.WarWalking.Entity;
 
 namespace AzusaERP.OldStuff
@@ -136,6 +133,9 @@ namespace AzusaERP.OldStuff
         Image Vocadb_GetAlbumCover(int wrappedId);
         IEnumerable<VocadbTrackEntry> VocaDb_GetTracksByAlbum(int wrappedId);
         IEnumerable<VocadbSearchResult> VocaDb_Search(string word);
+        List<string> GetAllPublicTableNames();
+        void CreateSchema(string schemaName);
+        void MoveAndRenameTable(string @public, string oldTableName, string schemaName, string newTableName);
     }
 
     interface IPostConnectionTask
@@ -218,6 +218,38 @@ namespace AzusaERP.OldStuff
     {
         public string VnDbKey { get; set; }
         public byte[] Icon { get; set; }
+    }
+
+    class Attachment
+    {
+        public byte[] _Buffer;
+        public bool _Complete;
+        public bool _IsInDatabase;
+        public int _MediaId;
+        public int _TypeId;
+    }
+
+    class PostgresDriver
+    {
+        public IEnumerable<AttachmentMigrationCandidate> GetAttachmentMigrationCandidates()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void BeginTransaction()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertAttachment(Attachment migrateElement)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void EndTransaction(bool b)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

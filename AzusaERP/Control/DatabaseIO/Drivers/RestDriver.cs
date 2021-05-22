@@ -8,6 +8,7 @@ using System.Text.Json;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
+using moe.yo3explorer.azusa.DatabaseTasks;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -419,6 +420,16 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         }
 
         public void InsertEuroExchangeRate(AzusifiedCube cube)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DateTime GetLatestCryptoExchangeRateUpdateDate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InsertCryptoExchangeRate(CryptoExchangeRates exchangeRates)
         {
             throw new NotImplementedException();
         }

@@ -5,6 +5,7 @@ using System.Drawing;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
+using moe.yo3explorer.azusa.DatabaseTasks;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 
 namespace moe.yo3explorer.azusa.Control.DatabaseIO
@@ -76,7 +77,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO
         void UpdateAttachment(Attachment attachment);
         void InsertAttachment(Attachment attachment);
         void DeleteAttachment(Attachment attachment);
+
         AzusifiedCube GetLatestEuroExchangeRates();
         void InsertEuroExchangeRate(AzusifiedCube cube);
+
+        DateTime GetLatestCryptoExchangeRateUpdateDate();
+        void InsertCryptoExchangeRate(CryptoExchangeRates exchangeRates);
     }
 }

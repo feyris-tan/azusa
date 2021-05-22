@@ -85,6 +85,8 @@
     <Compile Include="MailArchive\Control\MailProtocolLogger.cs" />
     <Compile Include="MailArchive\Entity\Folder.cs" />
     <Compile Include="MailArchive\Entity\Mail.cs" />
+    <Compile Include="Migrations\Migration1to2.cs" />
+    <Compile Include="Migrations\Migration2to3.cs" />
     <Compile Include="MockAzusaStreamBlob.cs" />
     <Compile Include="MockHashLib.cs" />
     <Compile Include="MockKeepass.cs" />

@@ -247,11 +247,7 @@ namespace moe.yo3explorer.azusa
             {
                 throw new StartupFailedException(StartupFailReason.NoDatabaseAvailable);
             }
-
-
-            context.Splash.SetLabel("Frage €-Umrechungskurse ab...");
-            UpdateExchangeRates();
-
+            
             context.Splash.SetLabel("Erstelle Hauptfenster...");
             context.MainForm = new MainForm();
             context.Splash.SetLabel("Lade Module...");
@@ -264,28 +260,6 @@ namespace moe.yo3explorer.azusa
 
             context.Splash.InvokeClose();
             return false;
-        }
-
-        private void UpdateExchangeRates()
-        {
-            if (!context.DatabaseDriver.CanUpdateExchangeRates)
-                return;
-
-            AzusifiedCube cube = context.DatabaseDriver.GetLatestEuroExchangeRates();
-            if (cube == null)
-            {
-                cube = new AzusifiedCube();
-                cube.DateAdded = DateTime.MinValue;
-            }
-
-            cube.DateAdded = cube.DateAdded.Date;
-            if (DateTime.Today > cube.DateAdded)
-            {
-                EcbClient ecbClient = EcbClient.GetInstance();
-                Cube ecbCube = ecbClient.DownloadCube();
-                cube = ecbClient.AzusifyCube(ecbCube);
-                context.DatabaseDriver.InsertEuroExchangeRate(cube);
-            }
         }
 
         private void LoadLicense()

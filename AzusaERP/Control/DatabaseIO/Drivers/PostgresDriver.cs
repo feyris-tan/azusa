@@ -10,6 +10,7 @@ using AzusaERP;
 using libeuroexchange.Model;
 using moe.yo3explorer.azusa.Control.FilesystemMetadata.Entity;
 using moe.yo3explorer.azusa.Control.Setup;
+using moe.yo3explorer.azusa.DatabaseTasks;
 using moe.yo3explorer.azusa.MediaLibrary.Entity;
 using moe.yo3explorer.azusa.Properties;
 using Npgsql;
@@ -1387,5 +1388,47 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             insertEuroExchangeRateCommand.ExecuteNonQuery();
         }
 
+        private NpgsqlCommand getLatestCryptoExchangeDateCommand;
+
+        public DateTime GetLatestCryptoExchangeRateUpdateDate()
+        {
+            if (getLatestCryptoExchangeDateCommand == null)
+            {
+                getLatestCryptoExchangeDateCommand = connection.CreateCommand();
+                getLatestCryptoExchangeDateCommand.CommandText = "SELECT dateadded FROM azusa.euro_exchange_rates_crypto ORDER BY dateadded DESC";
+            }
+
+            NpgsqlDataReader npgsqlDataReader = getLatestCryptoExchangeDateCommand.ExecuteReader();
+            DateTime result = DateTime.MinValue;
+            if (npgsqlDataReader.Read())
+            {
+                result = npgsqlDataReader.GetDateTime(0);
+            }
+            npgsqlDataReader.Close();
+            return result;
+        }
+
+        private NpgsqlCommand insertCryptoExcangesCommand;
+        public void InsertCryptoExchangeRate(CryptoExchangeRates exchangeRates)
+        {
+            if (insertCryptoExcangesCommand == null)
+            {
+                insertCryptoExcangesCommand = connection.CreateCommand();
+                insertCryptoExcangesCommand.CommandText =
+                    "INSERT INTO azusa.euro_exchange_rates_crypto (btc,ltc,doge,xch,eth) VALUES (@btc,@ltc,@doge,@xch,@eth)";
+                insertCryptoExcangesCommand.Parameters.Add("@btc", NpgsqlDbType.Double);
+                insertCryptoExcangesCommand.Parameters.Add("@ltc", NpgsqlDbType.Double);
+                insertCryptoExcangesCommand.Parameters.Add("@doge", NpgsqlDbType.Double);
+                insertCryptoExcangesCommand.Parameters.Add("@xch", NpgsqlDbType.Double);
+                insertCryptoExcangesCommand.Parameters.Add("@eth", NpgsqlDbType.Double);
+            }
+
+            insertCryptoExcangesCommand.Parameters["@btc"].Value = exchangeRates.btc;
+            insertCryptoExcangesCommand.Parameters["@ltc"].Value = exchangeRates.ltc;
+            insertCryptoExcangesCommand.Parameters["@doge"].Value = exchangeRates.doge;
+            insertCryptoExcangesCommand.Parameters["@xch"].Value = exchangeRates.xch;
+            insertCryptoExcangesCommand.Parameters["@eth"].Value = exchangeRates.eth;
+            insertCryptoExcangesCommand.ExecuteNonQuery();
+        }
     }
 }
