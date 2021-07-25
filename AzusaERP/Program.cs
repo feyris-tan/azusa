@@ -52,7 +52,9 @@ namespace moe.yo3explorer.azusa
             }
             catch (StartupFailedException e)
             {
-                context.Splash.InvokeClose();
+                if (context.Splash != null)
+                    context.Splash.InvokeClose();
+
                 if (program.IsItAppropriateToAskForSetup())
                 {
                     DialogResult dialogResult = MessageBox.Show(

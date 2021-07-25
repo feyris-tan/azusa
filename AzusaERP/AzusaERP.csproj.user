@@ -8,4 +8,69 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
     <StartAction>Project</StartAction>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Control\Galleria\Galleria.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Control\Setup\PropertyGridForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Control\Setup\SetupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Boundary\MediaLibraryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Boundary\MediaPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\AttachmentEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\AttachmentTextEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\BinaryFileDropper.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\CurrencyConverterTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\GraphDataControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\m3uGeneratorFileDrop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\PictureDrop.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\ScanForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\ShelfSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MediaLibrary\Control\ShelfTabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Splash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TextInputForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Utilities\BandcampImporter\BandcampImportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Utilities\BDInfo\BdInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Utilities\M3uDrop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
