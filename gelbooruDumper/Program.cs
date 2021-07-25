@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text.Encodings.Web;
 using AzusaERP;
 using log4net;
 using Mono.Web;
@@ -153,7 +152,7 @@ namespace gelbooruDumper
             if (markTagAsScrapedCommand == null)
             {
                 markTagAsScrapedCommand = connection.CreateCommand();
-                markTagAsScrapedCommand.CommandText = "UPDATE tags SET scraped = TRUE WHERE tag = @tag";
+                markTagAsScrapedCommand.CommandText = "UPDATE tags SET scraped = TRUE WHERE name = @tag";
                 markTagAsScrapedCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
             }
 
@@ -169,7 +168,7 @@ namespace gelbooruDumper
             if (testForUnscrapedTagCommand == null)
             {
                 testForUnscrapedTagCommand = connection.CreateCommand();
-                testForUnscrapedTagCommand.CommandText = "SELECT tag, id FROM tags WHERE scraped = FALSE AND tag != ''";
+                testForUnscrapedTagCommand.CommandText = "SELECT name, id FROM tags WHERE scraped = FALSE AND name != ''";
             }
             NpgsqlDataReader dataReader = testForUnscrapedTagCommand.ExecuteReader();
             if (dataReader.Read())
@@ -187,7 +186,7 @@ namespace gelbooruDumper
         }
 
         private NpgsqlCommand insertPostTagRelationCommand;
-        private void InsertPostTagRelation(int post, int tag)
+        private void InsertPostTagRelation(int post, long tag)
         {
             if (insertPostTagRelationCommand == null)
             {
@@ -204,12 +203,12 @@ namespace gelbooruDumper
 
         private NpgsqlCommand insertTagCommand;
         private NpgsqlCommand testForTagCommand;
-        private int GetTagId(string tag)
+        private long GetTagId(string tag)
         {
             if (testForTagCommand == null)
             {
                 testForTagCommand = connection.CreateCommand();
-                testForTagCommand.CommandText = "SELECT id FROM tags WHERE tag=@tag";
+                testForTagCommand.CommandText = "SELECT id FROM tags WHERE LOWER(name)=@tag";
                 testForTagCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
             }
 
@@ -217,27 +216,35 @@ namespace gelbooruDumper
             NpgsqlDataReader dataReader = testForTagCommand.ExecuteReader();
             if (dataReader.Read())
             {
-                int result = dataReader.GetInt32(0);
+                long result = dataReader.GetInt64(0);
                 dataReader.Dispose();
                 return result;
             }
             dataReader.Dispose();
 
-            log.Info("Found new tag: " + tag);
+            tagsTag tagsTag = gelbooru.GetTag(tag);
             if (insertTagCommand == null)
             {
                 insertTagCommand = connection.CreateCommand();
-                insertTagCommand.CommandText = "INSERT INTO tags (tag) VALUES (@tag) RETURNING id";
-                insertTagCommand.Parameters.Add("@tag", NpgsqlDbType.Varchar);
+                insertTagCommand.CommandText =
+                    "INSERT INTO tags (id,ambiguous,name,count,type) VALUES (@id,@ambiguous,@name,@count,@type)";
+                insertTagCommand.Parameters.Add("@id", NpgsqlDbType.Bigint);
+                insertTagCommand.Parameters.Add("@ambiguous", NpgsqlDbType.Boolean);
+                insertTagCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
+                insertTagCommand.Parameters.Add("@count", NpgsqlDbType.Bigint);
+                insertTagCommand.Parameters.Add("@type", NpgsqlDbType.Integer);
             }
 
-            insertTagCommand.Parameters["@tag"].Value = tag;
-
-            dataReader = insertTagCommand.ExecuteReader();
-            dataReader.Read();
-            int resultB = dataReader.GetInt32(0);
-            dataReader.Dispose();
-            return resultB;
+            insertTagCommand.Parameters["@id"].Value = long.Parse(tagsTag.id);
+            insertTagCommand.Parameters["@ambiguous"].Value = bool.Parse(tagsTag.ambiguous);
+            insertTagCommand.Parameters["@name"].Value = tagsTag.name;
+            insertTagCommand.Parameters["@count"].Value = long.Parse(tagsTag.count);
+            insertTagCommand.Parameters["@type"].Value = int.Parse(tagsTag.type);
+            insertTagCommand.ExecuteNonQuery();
+            transaction.Commit();
+            transaction = connection.BeginTransaction();
+            
+            return GetTagId(tag);
         }
         
         private NpgsqlCommand handlePostCommand;
@@ -309,7 +316,9 @@ namespace gelbooruDumper
 
             foreach (string tag in post.tags.Split(' '))
             {
-                int tagId = GetTagId(tag);
+                if (tag.Equals(""))
+                    continue;
+                long tagId = GetTagId(tag);
                 InsertPostTagRelation(postId, tagId);
             }
         }
@@ -364,8 +373,9 @@ namespace gelbooruDumper
         {
             if (posts.post != null)
             {
-                foreach (postsPost post in posts.post)
+                for (int i = 0; i < posts.post.Length; i++)
                 {
+                    postsPost post = posts.post[i];
                     int postId = Convert.ToInt32(post.id);
                     if (!TestForPost(postId))
                     {

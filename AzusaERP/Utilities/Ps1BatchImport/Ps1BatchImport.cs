@@ -89,8 +89,6 @@ namespace moe.yo3explorer.azusa.Utilities.Ps1BatchImport
                 {
                     int mediaId = MediaService.CreateMedia(product, gameDisc.Name);
                     Media media = MediaService.GetSpecificMedia(mediaId);
-                    media.ChecksumContent = gameDisc.Md5Content;
-                    media.CueSheetContent = gameDisc.CueContent;
                     media.GraphDataContent = gameDisc.IbgContent;
                     media.MediaTypeId = 0;
                     media.MetaFileContent = gameDisc.CueContent;

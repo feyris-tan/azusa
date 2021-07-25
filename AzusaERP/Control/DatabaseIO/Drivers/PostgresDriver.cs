@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using AzusaERP;
 using libeuroexchange.Model;
@@ -572,13 +573,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                                                  "SET name=@name, mediaTypeId=@mediaTypeId, sku=@sku," +
                                                  "    dumpstoragespace=@dumpstoragespace, dumppath=@dumppath," +
                                                  "    metafile=@metafile, graphdata=@graphdata," +
-                                                 "    untouchedcuesheet=@untouchedcuesheet," +
-                                                 "    untouchedchecksum=@untouchedchecksum," +
-                                                 "    untouchedplaylist=@untouchedplaylist," +
-                                                 "    cdtext=@cdtext, logfile=@logfile," +
-                                                 "    mediadescriptorsidecar=@mediadescriptorsidecar," +
-                                                 "    issealed=@issealed, dateupdated=@dateupdated," +
-                                                 "    fauxhash=@fauxhash " + 
+                                                 "    issealed=@issealed, dateupdated=@dateupdated " +
                                                  "WHERE id=@id";
                 updateMediaCommand.Parameters.Add("@name", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@mediaTypeId", NpgsqlDbType.Integer);
@@ -587,15 +582,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 updateMediaCommand.Parameters.Add("@dumppath", NpgsqlDbType.Varchar);
                 updateMediaCommand.Parameters.Add("@metafile", NpgsqlDbType.Text);
                 updateMediaCommand.Parameters.Add("@graphdata", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@untouchedcuesheet", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@untouchedchecksum", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@untouchedplaylist", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@cdtext", NpgsqlDbType.Bytea);
-                updateMediaCommand.Parameters.Add("@logfile", NpgsqlDbType.Text);
-                updateMediaCommand.Parameters.Add("@mediadescriptorsidecar", NpgsqlDbType.Bytea);
                 updateMediaCommand.Parameters.Add("@issealed", NpgsqlDbType.Boolean);
                 updateMediaCommand.Parameters.Add("@dateupdated", NpgsqlDbType.Timestamp);
-                updateMediaCommand.Parameters.Add("@fauxhash", NpgsqlDbType.Bigint);
                 updateMediaCommand.Parameters.Add("@id", NpgsqlDbType.Integer);
             }
 
@@ -620,28 +608,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
             if (!string.IsNullOrEmpty(media.GraphDataContent))
                 updateMediaCommand.Parameters["@graphdata"].Value = media.GraphDataContent;
-
-            if (!string.IsNullOrEmpty(media.CueSheetContent))
-                updateMediaCommand.Parameters["@untouchedcuesheet"].Value = media.CueSheetContent;
-
-            if (!string.IsNullOrEmpty(media.ChecksumContent))
-                updateMediaCommand.Parameters["@untouchedchecksum"].Value = media.ChecksumContent;
-
-            if (!string.IsNullOrEmpty(media.PlaylistContent))
-                updateMediaCommand.Parameters["@untouchedplaylist"].Value = media.PlaylistContent;
-
-            if (media.CdTextContent != null)
-                updateMediaCommand.Parameters["@cdtext"].Value = media.CdTextContent;
-
-            if (!string.IsNullOrEmpty(media.LogfileContent))
-                updateMediaCommand.Parameters["@logfile"].Value = media.LogfileContent;
-
-            if (media.MdsContent != null)
-                updateMediaCommand.Parameters["@mediadescriptorsidecar"].Value = media.MdsContent;
             
             updateMediaCommand.Parameters["@issealed"].Value = media.isSealed;
             updateMediaCommand.Parameters["@dateupdated"].Value = DateTime.Now;
-            updateMediaCommand.Parameters["@fauxhash"].Value = media.FauxHash;
 
             updateMediaCommand.Parameters["@id"].Value = media.Id;
             int result = updateMediaCommand.ExecuteNonQuery();
@@ -1235,6 +1204,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 getAllMediaAttachmentTypesCommand.CommandText = "SELECT * FROM azusa.media_attachment_types WHERE hidden = FALSE";
             }
 
+            List<AttachmentType> result = new List<AttachmentType>();
             NpgsqlDataReader dataReader = getAllMediaAttachmentTypesCommand.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1243,9 +1213,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 child.dateadded = dataReader.GetDateTime(1);
                 child.name = dataReader.GetString(2);
                 child.displayControlUuid = dataReader.GetGuid(3);
-                yield return child;
+                result.Add(child);
             }
             dataReader.Close();
+            foreach (AttachmentType attachmentType in result)
+                yield return attachmentType;
         }
 
         private NpgsqlCommand getAllMediaAttachmentsCommand;
@@ -1259,6 +1231,8 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             }
 
             getAllMediaAttachmentsCommand.Parameters["@mid"].Value = currentMedia.Id;
+
+            List<Attachment> result = new List<Attachment>();
             NpgsqlDataReader dataReader = getAllMediaAttachmentsCommand.ExecuteReader();
             while (dataReader.Read())
             {
@@ -1273,9 +1247,11 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
                 child._Complete = dataReader.GetBoolean(5);
                 child._Serial = dataReader.GetInt64(6);
-                yield return child;
+                result.Add(child);
             }
             dataReader.Close();
+            foreach (Attachment attachment in result)
+                yield return attachment;
         }
 
         private NpgsqlCommand updateAttachmentCommand;

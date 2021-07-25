@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Drawing;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -157,21 +158,21 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Shop> GetAllShops()
         {
-            string rawJson = webClient.DownloadString("/azusa/shops");
+            string rawJson = webClient.DownloadString("/shops");
             List<Shop> list = JsonConvert.DeserializeObject<List<Shop>>(rawJson);
             return list;
         }
 
         public IEnumerable<Shelf> GetAllShelves()
         {
-            string rawJson = webClient.DownloadString("/azusa/shelves");
+            string rawJson = webClient.DownloadString("/shelves");
             List<Shelf> list = JsonConvert.DeserializeObject<List<Shelf>>(rawJson);
             return list;
         }
 
         public IEnumerable<ProductInShelf> GetProductsInShelf(Shelf shelf)
         {
-            string rawJson = webClient.DownloadString(String.Format("/azusa/products/inshelf/{0}",shelf.Id));
+            string rawJson = webClient.DownloadString(String.Format("/products/inshelf/{0}",shelf.Id));
             JArray deserializeObject = (JArray)JsonConvert.DeserializeObject(rawJson);
             foreach (JToken jToken in deserializeObject)
             {
@@ -187,6 +188,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
                 productInShelf.NumberOfDiscs = jToken.Value<int>("NumberOfDiscs");
                 productInShelf.Price = jToken.Value<double>("Price");
                 productInShelf.relatedShelf = shelf;
+                productInShelf.ScreenshotSize = jToken.Value<long>("ScreenshotSize");
                 yield return productInShelf;
             }
             yield break;
@@ -199,7 +201,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public Product GetProductById(int id)
         {
-            string rawJson = webClient.DownloadString(String.Format("/azusa/products/{0}", id));
+            string rawJson = webClient.DownloadString(String.Format("/products/{0}", id));
             Product product = JsonConvert.DeserializeObject<Product>(rawJson);
             return product;
         }
@@ -221,26 +223,30 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Platform> GetAllPlatforms()
         {
-            string rawJson = webClient.DownloadString("/azusa/platforms");
+            string rawJson = webClient.DownloadString("/platforms");
             List<Platform> list = JsonConvert.DeserializeObject<List<Platform>>(rawJson);
             return list;
         }
 
         public IEnumerable<MediaType> GetMediaTypes()
         {
-            string rawJson = webClient.DownloadString("/azusa/mediaTypes");
+            string rawJson = webClient.DownloadString("/mediaTypes");
             List<MediaType> list = JsonConvert.DeserializeObject<List<MediaType>>(rawJson);
             return list;
         }
 
         public IEnumerable<MediaInProduct> GetMediaByProduct(Product prod)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/media/inProduct/names/" + prod.Id);
+            List<MediaInProductJson> tmp = JsonConvert.DeserializeObject<List<MediaInProductJson>>(rawJson);
+            return tmp.ConvertAll(x => x.Transform()).ToList();
         }
 
         public Media GetMediaById(int o)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/media/" + o);
+            Media tmp = JsonConvert.DeserializeObject<Media>(rawJson);
+            return tmp;
         }
 
         public void UpdateMedia(Media media)
@@ -255,7 +261,7 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<Country> GetAllCountries()
         {
-            string rawJson = webClient.DownloadString("/azusa/countries");
+            string rawJson = webClient.DownloadString("/countries");
             List<Country> list = JsonConvert.DeserializeObject<List<Country>>(rawJson);
             return list;
         }
@@ -341,7 +347,9 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
 
         public IEnumerable<FilesystemMetadataEntity> GetFilesystemMetadata(int currentMediaId, bool dirs)
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString(String.Format("/fsinfo/container/{0}?dirs={1}",currentMediaId,dirs));
+            List<FilesystemMetadataEntity> tmp = JsonConvert.DeserializeObject<List<FilesystemMetadataEntity>>(rawJson);
+            return tmp;
         }
         
         public DbDataReader Sync_ArbitrarySelect(string tableName, DatabaseColumn column, object query)
@@ -416,7 +424,29 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
         
         public AzusifiedCube GetLatestEuroExchangeRates()
         {
-            throw new NotImplementedException();
+            string rawJson = webClient.DownloadString("/exchangerates/latest");
+            JsonDocument jsonDocument = JsonDocument.Parse(rawJson);
+            AzusifiedCube list = new AzusifiedCube();
+
+            string messyDate = jsonDocument.RootElement.GetProperty("cubedate").GetString();
+            if (messyDate.EndsWith("Z"))
+            {
+                messyDate = messyDate.Substring(0, messyDate.Length - 1);
+                list.CubeDate = DateTime.Parse(messyDate);
+                list.CubeDate += new TimeSpan(1, 0, 0, 0);
+
+                long daUnixtime = jsonDocument.RootElement.GetProperty("dateadded").GetInt64();
+                daUnixtime += 7200;
+                list.DateAdded = UnixTimeConverter.FromUnixTime(daUnixtime);
+            }
+            else
+                throw new Exception("Don't know how to parse this timezone: " + messyDate);
+
+            list.USD = jsonDocument.RootElement.GetProperty("usd").GetDouble();
+            list.JPY = jsonDocument.RootElement.GetProperty("jpy").GetDouble();
+            list.GBP = jsonDocument.RootElement.GetProperty("gbp").GetDouble();
+
+            return list;
         }
 
         public void InsertEuroExchangeRate(AzusifiedCube cube)

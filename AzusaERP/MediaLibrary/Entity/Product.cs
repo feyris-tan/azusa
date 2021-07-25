@@ -19,6 +19,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Entity
         public int SupplierId { get; set; }
         public int CountryOfOriginId { get; set; }
         public byte[] Screenshot { get; set; }
+        [JsonConverter(typeof(UnixtimeToDatetimeJsonConverter))]
         public DateTime DateAdded { get; set; }
         public bool Consistent { get; set; }
         public bool NSFW { get; set; }

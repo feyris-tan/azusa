@@ -201,6 +201,8 @@
   <ItemGroup>
     <Compile Include="AzusaContext.cs" />
     <Compile Include="AzusaPlugin.cs" />
+    <Compile Include="Control\FilesystemMetadata\Base\IAzusaDirectory.cs" />
+    <Compile Include="Control\FilesystemMetadata\Base\IAzusaFile.cs" />
     <Compile Include="DatabaseTasks\EuroExchangesRatesCrypto.cs" />
     <Compile Include="DatabaseTasks\EuroExchangeRates.cs" />
     <Compile Include="MediaLibrary\Control\AttachmentEditor.cs">
@@ -214,6 +216,12 @@
     </Compile>
     <Compile Include="MediaLibrary\Control\AttachmentTextEditor.Designer.cs">
       <DependentUpon>AttachmentTextEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\GraphDataControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MediaLibrary\Control\GraphDataControl.Designer.cs">
+      <DependentUpon>GraphDataControl.cs</DependentUpon>
     </Compile>
     <Compile Include="MediaLibrary\Control\ISidecarDisplayControl.cs" />
     <Compile Include="MediaLibrary\Entity\Attachment.cs" />
@@ -249,9 +257,9 @@
       <DependentUpon>SetupForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Control\Setup\StartupFailedException.cs" />
-    <Compile Include="Control\FilesystemMetadata\Boundary\FilesystemMetadataGatherer.cs" />
-    <Compile Include="Control\FilesystemMetadata\Boundary\FilesystemMetadataTreeViewItem.cs" />
-    <Compile Include="Control\FilesystemMetadata\Entity\FilesystemMetadataEntity.cs" />
+    <Compile Include="Control\FilesystemMetadata\FilesystemMetadataGatherer.cs" />
+    <Compile Include="Control\FilesystemMetadata\FilesystemMetadataTreeViewItem.cs" />
+    <Compile Include="Control\FilesystemMetadata\FilesystemMetadataEntity.cs" />
     <Compile Include="Control\Galleria\Galleria.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -427,6 +435,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MediaLibrary\Control\GraphDataControl.resx">
+      <DependentUpon>GraphDataControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Utilities\BandcampImporter\BandcampImportForm.resx">
       <DependentUpon>BandcampImportForm.cs</DependentUpon>

@@ -68,8 +68,10 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.label4 = new System.Windows.Forms.Label();
             this.productISBN = new System.Windows.Forms.TextBox();
             this.productSave = new System.Windows.Forms.Button();
+            this.productCost = new moe.yo3explorer.azusa.MediaLibrary.Control.CurrencyConverterTextBox();
             this.productNSFW = new System.Windows.Forms.CheckBox();
             this.productTabCover = new System.Windows.Forms.TabPage();
+            this.productCover = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabMedia = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.productMediaListView = new System.Windows.Forms.ListView();
@@ -78,6 +80,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productAddMediaButton = new System.Windows.Forms.Button();
             this.productRemoveMediaButton = new System.Windows.Forms.Button();
             this.productTabScreenshots = new System.Windows.Forms.TabPage();
+            this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.productTabLinks = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
@@ -105,13 +108,9 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaTabMetadata = new System.Windows.Forms.TabPage();
             this.mediaMetadata = new System.Windows.Forms.TextBox();
             this.mediaTabGraphdata = new System.Windows.Forms.TabPage();
-            this.tabControl4 = new System.Windows.Forms.TabControl();
-            this.graphdataTextTab = new System.Windows.Forms.TabPage();
-            this.mediaGraphData = new System.Windows.Forms.TextBox();
+            this.graphDataControl1 = new moe.yo3explorer.azusa.MediaLibrary.Control.GraphDataControl();
             this.graphDataContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.automatischLadenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.graphdataChartTab = new System.Windows.Forms.TabPage();
-            this.graphDataPlot = new NPlot.Windows.PlotSurface2D();
             this.mediaTabFilesystem = new System.Windows.Forms.TabPage();
             this.mediaFilesystemTreeView = new System.Windows.Forms.TreeView();
             this.filesystemContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -130,9 +129,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.dumpOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesystemIsoParseOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.productCost = new moe.yo3explorer.azusa.MediaLibrary.Control.CurrencyConverterTextBox();
-            this.productCover = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
-            this.productScreenshot = new moe.yo3explorer.azusa.MediaLibrary.Control.PictureDrop();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -159,10 +155,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             ((System.ComponentModel.ISupportInitialize)(this.mediaStorageSpaceId)).BeginInit();
             this.mediaTabMetadata.SuspendLayout();
             this.mediaTabGraphdata.SuspendLayout();
-            this.tabControl4.SuspendLayout();
-            this.graphdataTextTab.SuspendLayout();
             this.graphDataContextMenuStrip.SuspendLayout();
-            this.graphdataChartTab.SuspendLayout();
             this.mediaTabFilesystem.SuspendLayout();
             this.filesystemContextMenuStrip.SuspendLayout();
             this.mediaMoreOptions.SuspendLayout();
@@ -524,6 +517,15 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productSave.UseVisualStyleBackColor = true;
             this.productSave.Click += new System.EventHandler(this.productSave_Click);
             // 
+            // productCost
+            // 
+            this.productCost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productCost.Location = new System.Drawing.Point(73, 71);
+            this.productCost.Name = "productCost";
+            this.productCost.Size = new System.Drawing.Size(105, 17);
+            this.productCost.TabIndex = 11;
+            this.productCost.Value = 0D;
+            // 
             // productNSFW
             // 
             this.productNSFW.AutoSize = true;
@@ -544,6 +546,19 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabCover.TabIndex = 2;
             this.productTabCover.Text = "Cover";
             this.productTabCover.UseVisualStyleBackColor = true;
+            // 
+            // productCover
+            // 
+            this.productCover.AllowDrop = true;
+            this.productCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.productCover.Data = null;
+            this.productCover.DataChanged = true;
+            this.productCover.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productCover.Location = new System.Drawing.Point(0, 0);
+            this.productCover.MediumId = 0;
+            this.productCover.Name = "productCover";
+            this.productCover.Size = new System.Drawing.Size(187, 166);
+            this.productCover.TabIndex = 0;
             // 
             // productTabMedia
             // 
@@ -643,6 +658,19 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.productTabScreenshots.TabIndex = 4;
             this.productTabScreenshots.Text = "Screenshot";
             this.productTabScreenshots.UseVisualStyleBackColor = true;
+            // 
+            // productScreenshot
+            // 
+            this.productScreenshot.AllowDrop = true;
+            this.productScreenshot.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.productScreenshot.Data = null;
+            this.productScreenshot.DataChanged = true;
+            this.productScreenshot.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.productScreenshot.Location = new System.Drawing.Point(0, 0);
+            this.productScreenshot.MediumId = 0;
+            this.productScreenshot.Name = "productScreenshot";
+            this.productScreenshot.Size = new System.Drawing.Size(187, 166);
+            this.productScreenshot.TabIndex = 0;
             // 
             // productTabLinks
             // 
@@ -943,7 +971,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             // mediaTabGraphdata
             // 
-            this.mediaTabGraphdata.Controls.Add(this.tabControl4);
+            this.mediaTabGraphdata.Controls.Add(this.graphDataControl1);
             this.mediaTabGraphdata.Location = new System.Drawing.Point(4, 22);
             this.mediaTabGraphdata.Name = "mediaTabGraphdata";
             this.mediaTabGraphdata.Size = new System.Drawing.Size(187, 173);
@@ -951,46 +979,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaTabGraphdata.Text = "Graphdaten";
             this.mediaTabGraphdata.UseVisualStyleBackColor = true;
             // 
-            // tabControl4
+            // graphDataControl1
             // 
-            this.tabControl4.Controls.Add(this.graphdataTextTab);
-            this.tabControl4.Controls.Add(this.graphdataChartTab);
-            this.tabControl4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl4.Location = new System.Drawing.Point(0, 0);
-            this.tabControl4.Name = "tabControl4";
-            this.tabControl4.SelectedIndex = 0;
-            this.tabControl4.Size = new System.Drawing.Size(187, 173);
-            this.tabControl4.TabIndex = 0;
-            // 
-            // graphdataTextTab
-            // 
-            this.graphdataTextTab.Controls.Add(this.mediaGraphData);
-            this.graphdataTextTab.Location = new System.Drawing.Point(4, 22);
-            this.graphdataTextTab.Name = "graphdataTextTab";
-            this.graphdataTextTab.Padding = new System.Windows.Forms.Padding(3);
-            this.graphdataTextTab.Size = new System.Drawing.Size(179, 147);
-            this.graphdataTextTab.TabIndex = 0;
-            this.graphdataTextTab.Text = "Texteingabe";
-            this.graphdataTextTab.UseVisualStyleBackColor = true;
-            // 
-            // mediaGraphData
-            // 
-            this.mediaGraphData.AllowDrop = true;
-            this.mediaGraphData.ContextMenuStrip = this.graphDataContextMenuStrip;
-            this.mediaGraphData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mediaGraphData.Enabled = false;
-            this.mediaGraphData.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mediaGraphData.Location = new System.Drawing.Point(3, 3);
-            this.mediaGraphData.MaxLength = 999999999;
-            this.mediaGraphData.Multiline = true;
-            this.mediaGraphData.Name = "mediaGraphData";
-            this.mediaGraphData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.mediaGraphData.ShortcutsEnabled = false;
-            this.mediaGraphData.Size = new System.Drawing.Size(173, 141);
-            this.mediaGraphData.TabIndex = 1;
-            this.mediaGraphData.WordWrap = false;
-            this.mediaGraphData.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBox_DragAndDrop);
-            this.mediaGraphData.DragEnter += new System.Windows.Forms.DragEventHandler(this.Global_DragEnter);
+            this.graphDataControl1.AllowDrop = true;
+            this.graphDataControl1.ContextMenuStrip = this.graphDataContextMenuStrip;
+            this.graphDataControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.graphDataControl1.Location = new System.Drawing.Point(0, 0);
+            this.graphDataControl1.MediumId = 0;
+            this.graphDataControl1.Name = "graphDataControl1";
+            this.graphDataControl1.Size = new System.Drawing.Size(187, 173);
+            this.graphDataControl1.TabIndex = 0;
             // 
             // graphDataContextMenuStrip
             // 
@@ -1005,41 +1003,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.automatischLadenToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.automatischLadenToolStripMenuItem.Text = "automatisch laden";
             this.automatischLadenToolStripMenuItem.Click += new System.EventHandler(this.automatischLadenToolStripMenuItem_Click);
-            // 
-            // graphdataChartTab
-            // 
-            this.graphdataChartTab.Controls.Add(this.graphDataPlot);
-            this.graphdataChartTab.Location = new System.Drawing.Point(4, 22);
-            this.graphdataChartTab.Name = "graphdataChartTab";
-            this.graphdataChartTab.Padding = new System.Windows.Forms.Padding(3);
-            this.graphdataChartTab.Size = new System.Drawing.Size(179, 147);
-            this.graphdataChartTab.TabIndex = 1;
-            this.graphdataChartTab.Text = "Diagramm";
-            this.graphdataChartTab.UseVisualStyleBackColor = true;
-            // 
-            // graphDataPlot
-            // 
-            this.graphDataPlot.AutoScaleAutoGeneratedAxes = false;
-            this.graphDataPlot.AutoScaleTitle = false;
-            this.graphDataPlot.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.graphDataPlot.DateTimeToolTip = false;
-            this.graphDataPlot.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.graphDataPlot.Legend = null;
-            this.graphDataPlot.LegendZOrder = -1;
-            this.graphDataPlot.Location = new System.Drawing.Point(3, 3);
-            this.graphDataPlot.Name = "graphDataPlot";
-            this.graphDataPlot.RightMenu = null;
-            this.graphDataPlot.ShowCoordinates = true;
-            this.graphDataPlot.Size = new System.Drawing.Size(173, 141);
-            this.graphDataPlot.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-            this.graphDataPlot.TabIndex = 0;
-            this.graphDataPlot.Text = "plotSurface2D1";
-            this.graphDataPlot.Title = "";
-            this.graphDataPlot.TitleFont = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.graphDataPlot.XAxis1 = null;
-            this.graphDataPlot.XAxis2 = null;
-            this.graphDataPlot.YAxis1 = null;
-            this.graphDataPlot.YAxis2 = null;
             // 
             // mediaTabFilesystem
             // 
@@ -1175,41 +1138,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             // 
             this.filesystemIsoParseOpenFileDialog.Filter = "ISO9660 (*.iso), DD (*.img), httpd-ack (*.gdi)|*.iso;*.img;*.gdi";
             // 
-            // productCost
-            // 
-            this.productCost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productCost.Location = new System.Drawing.Point(73, 71);
-            this.productCost.Name = "productCost";
-            this.productCost.Size = new System.Drawing.Size(105, 17);
-            this.productCost.TabIndex = 11;
-            this.productCost.Value = 0D;
-            // 
-            // productCover
-            // 
-            this.productCover.AllowDrop = true;
-            this.productCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.productCover.Data = null;
-            this.productCover.DataChanged = true;
-            this.productCover.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productCover.Location = new System.Drawing.Point(0, 0);
-            this.productCover.MediumId = 0;
-            this.productCover.Name = "productCover";
-            this.productCover.Size = new System.Drawing.Size(187, 166);
-            this.productCover.TabIndex = 0;
-            // 
-            // productScreenshot
-            // 
-            this.productScreenshot.AllowDrop = true;
-            this.productScreenshot.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.productScreenshot.Data = null;
-            this.productScreenshot.DataChanged = true;
-            this.productScreenshot.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.productScreenshot.Location = new System.Drawing.Point(0, 0);
-            this.productScreenshot.MediumId = 0;
-            this.productScreenshot.Name = "productScreenshot";
-            this.productScreenshot.Size = new System.Drawing.Size(187, 166);
-            this.productScreenshot.TabIndex = 0;
-            // 
             // MediaLibraryControl
             // 
             this.AllowDrop = true;
@@ -1250,11 +1178,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             this.mediaTabMetadata.ResumeLayout(false);
             this.mediaTabMetadata.PerformLayout();
             this.mediaTabGraphdata.ResumeLayout(false);
-            this.tabControl4.ResumeLayout(false);
-            this.graphdataTextTab.ResumeLayout(false);
-            this.graphdataTextTab.PerformLayout();
             this.graphDataContextMenuStrip.ResumeLayout(false);
-            this.graphdataChartTab.ResumeLayout(false);
             this.mediaTabFilesystem.ResumeLayout(false);
             this.filesystemContextMenuStrip.ResumeLayout(false);
             this.mediaMoreOptions.ResumeLayout(false);
@@ -1323,10 +1247,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.TabPage mediaTabMetadata;
         private System.Windows.Forms.TextBox mediaMetadata;
         private System.Windows.Forms.TabPage mediaTabGraphdata;
-        private System.Windows.Forms.TabControl tabControl4;
-        private System.Windows.Forms.TabPage graphdataTextTab;
-        private System.Windows.Forms.TabPage graphdataChartTab;
-        private System.Windows.Forms.TextBox mediaGraphData;
         private System.Windows.Forms.Button mediaMoreOptionsButton;
         private System.Windows.Forms.ContextMenuStrip mediaMoreOptions;
         private System.Windows.Forms.ToolStripMenuItem setMetadataAndDump;
@@ -1339,7 +1259,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.OpenFileDialog metadataAndDumpOpenFileDialog;
         private System.Windows.Forms.ToolStripMenuItem öffneDumpToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog dumpOpenFileDialog;
-        private NPlot.Windows.PlotSurface2D graphDataPlot;
         private System.Windows.Forms.CheckBox productNSFW;
         private System.Windows.Forms.ToolStripMenuItem playlistAusOrdnerErstellenUndAlsDumpMetadatenSetzenToolStripMenuItem;
         private System.Windows.Forms.TabPage mediaTabFilesystem;
@@ -1366,5 +1285,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
         private System.Windows.Forms.ToolStripMenuItem weitereAnhängeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSXISOBatchImportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dVDBoxImportierenToolStripMenuItem;
+        private GraphDataControl graphDataControl1;
     }
 }

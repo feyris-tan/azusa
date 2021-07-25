@@ -85,10 +85,7 @@ namespace moe.yo3explorer.azusa.Utilities
             {
                 int mediaId = MediaService.CreateMedia(product, gameDisc.Name);
                 Media media = MediaService.GetSpecificMedia(mediaId);
-                media.ChecksumContent = gameDisc.Md5Content;
-                media.CueSheetContent = gameDisc.CueContent;
                 media.GraphDataContent = gameDisc.IbgContent;
-                media.MdsContent = gameDisc.MdsContent;
                 media.MediaTypeId = 1;
                 media.isSealed = false;
 

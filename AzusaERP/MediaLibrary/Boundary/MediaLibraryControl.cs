@@ -19,7 +19,6 @@ using moe.yo3explorer.azusa.Utilities.BandcampImporter;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary;
 using moe.yo3explorer.azusa.Utilities.FolderMapper.Control;
 using moe.yo3explorer.azusa.Utilities.Ps1BatchImport;
-using NPlot;
 
 namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 {
@@ -38,7 +37,6 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             InitializeComponent();
             context = AzusaContext.GetInstance();
             mediaMetadata.MaxLength = Int32.MaxValue;
-            mediaGraphData.MaxLength = Int32.MaxValue;
             UpdateProductSidebar();
         }
 
@@ -281,8 +279,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mediaStorageSpaceId.Enabled = enabled;
             mediaDumpPath.Enabled = enabled;
             mediaMetadata.Enabled = enabled;
-            mediaGraphData.Enabled = enabled;
-            graphDataPlot.Enabled = enabled;
+            graphDataControl1.Enabled = enabled;
             mediaMoreOptionsButton.Enabled = enabled;
             mediaSave.Enabled = enabled;
             imageParsenToolStripMenuItem.Enabled = enabled;
@@ -309,57 +306,16 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             mediaStorageSpaceId.Value = currentMedia.DumpStorageSpaceId;
             mediaDumpPath.Text = currentMedia.DumpStorageSpacePath;
             mediaMetadata.Text = currentMedia.MetaFileContent.unix2dos();
-            mediaGraphData.Text = currentMedia.GraphDataContent.unix2dos();
-
             if (!string.IsNullOrEmpty(currentMedia.GraphDataContent))
             {
-                try
-                {
-                    GraphData gd = new GraphData(new StringReader(currentMedia.GraphDataContent));
-                    UpdateGraphdataPlot(gd);
-                }
-                catch (InvalidMagicException ime)
-                {
-                    graphDataPlot.Clear();
-                }
+                graphDataControl1.Data = Encoding.UTF8.GetBytes(currentMedia.GraphDataContent.unix2dos());
             }
-            
+            else
+            {
+                graphDataControl1.Data = new byte[0];
+            }
+
             UpdateFilesystemTreeView();
-        }
-
-        private void UpdateGraphdataPlot(GraphData gd)
-        {
-            graphDataPlot.Clear();
-            gd.UpdateSyntheticLines();
-
-            double[][] plotData = new double[6][];
-            for (int i = 0; i < plotData.Length; i++) plotData[i] = new double[gd.NumberOfSamples];
-
-            for (int i = 0; i < gd.NumberOfSamples; i++)
-            {
-                GraphDataSample sample = gd.GetSample(i);
-                plotData[0][i] = sample.AverageCpuLoad;
-                plotData[1][i] = sample.AverageReadSpeed;
-                plotData[2][i] = sample.CpuLoad;
-                plotData[3][i] = sample.ReadSpeed;
-                plotData[4][i] = sample.SampleDistance;
-                plotData[5][i] = sample.SectorNo;
-            }
-
-            graphDataPlot.Legend = new Legend();
-            graphDataPlot.XAxis1 = new LinearAxis(0, gd.NumberOfSamples);
-            graphDataPlot.YAxis1 = new LinearAxis(0, gd.SampleRate);
-
-            Color[] colors = {Color.Cyan, Color.Yellow, Color.Pink, Color.Red, Color.Blue, Color.CornflowerBlue};
-            string[] plotNames = {"Ø CPU", "Ø Read speed", "CPU", "Read Speed", "Distance", "SectorNo"};
-            for (int i = 0; i < plotData.Length - 1; i++)
-            {
-                LinePlot linePlot = new LinePlot(plotData[i]);
-                linePlot.Color = colors[i];
-                linePlot.Label = plotNames[i];
-                linePlot.ShowInLegend = true;
-                graphDataPlot.Add(linePlot);
-            }
         }
 
         private void productMediaListView_SelectedIndexChanged(object sender, EventArgs e)
@@ -451,7 +407,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             currentMedia.DumpStorageSpaceId = (int) mediaStorageSpaceId.Value;
             currentMedia.DumpStorageSpacePath = mediaDumpPath.Text;
             currentMedia.MetaFileContent = mediaMetadata.Text;
-            currentMedia.GraphDataContent = mediaGraphData.Text;
+            currentMedia.GraphDataContent = Encoding.UTF8.GetString(graphDataControl1.Data);
 
             Media temp = currentMedia;
 
@@ -515,8 +471,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                             DialogResult.Yes)
                         {
                             importedFromImgBurn = true;
-                            mediaGraphData.MaxLength = Int32.MaxValue;
-                            mediaGraphData.Text = File.ReadAllText(ibgFiles[0].FullName);
+                            graphDataControl1.Data = File.ReadAllBytes(ibgFiles[0].FullName);
                             deleteMe = ibgFiles[0];
                         }
                     }
@@ -591,7 +546,14 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
             if (attachmentType == null)
                 return false;
 
-            Attachment attachment = context.DatabaseDriver.GetAllMediaAttachments(media).First(x => x._TypeId == attachmentType.id);
+            List<Attachment> attachments = context.DatabaseDriver.GetAllMediaAttachments(media).ToList();
+            if (attachments.Count == 0)
+                return false;
+
+            if (!attachments.Any(x => x._TypeId == attachmentType.id))
+                return false;
+
+            Attachment attachment = attachments.First(x => x._TypeId == attachmentType.id);
             if (!attachment._Complete)
                 return false;
 
@@ -684,6 +646,7 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
 
             entites.AddRange(context.DatabaseDriver.GetFilesystemMetadata(currentMedia.Id, true));
             entites.AddRange(context.DatabaseDriver.GetFilesystemMetadata(currentMedia.Id, false));
+            entites.Sort((x, y) => x.ParentId.Value.CompareTo(y.ParentId.Value));
 
             FilesystemMetadataTreeViewItem[] treeNodes = new FilesystemMetadataTreeViewItem[entites.Count];
             for (int i = 0; i < entites.Count; i++)
@@ -699,6 +662,11 @@ namespace moe.yo3explorer.azusa.MediaLibrary.Boundary
                         treeNodes.First(x => x.Entity.Id == treeNodes[i].Entity.ParentId);
                     parent.Nodes.Add(treeNodes[i]);
                 }
+            }
+
+            if (entites.Count > 2)
+            {
+                treeNodes[0].Expand();
             }
         }
 

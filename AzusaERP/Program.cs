@@ -53,17 +53,37 @@ namespace moe.yo3explorer.azusa
             catch (StartupFailedException e)
             {
                 context.Splash.InvokeClose();
-                DialogResult dialogResult = MessageBox.Show(
-                    "Die Azusa-Applikation konnte nicht gestartet werden. Soll das Setup-Werkzeug ausgeführt werden?",
-                    "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                if (dialogResult == DialogResult.Yes)
+                if (program.IsItAppropriateToAskForSetup())
                 {
-                    SetupForm setupForm = new SetupForm(e);
-                    dialogResult = setupForm.ShowDialog();
+                    DialogResult dialogResult = MessageBox.Show(
+                        "Die Azusa-Applikation konnte nicht gestartet werden. Soll das Setup-Werkzeug ausgeführt werden?",
+                        "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        SetupForm setupForm = new SetupForm(e);
+                        dialogResult = setupForm.ShowDialog();
+                    }
                 }
             }
             
             context.DestroyContext();
+        }
+
+        private bool IsItAppropriateToAskForSetup()
+        {
+            if (context == null)
+                return true;
+            if (context.Ini == null)
+                return true;
+            if (!context.Ini.ContainsKey("azusa"))
+                return true;
+            if (!context.Ini["azusa"].ContainsKey("disableSetup"))
+                return true;
+            int disableSetup = context.ReadIniKey("azusa", "disableSetup", 0);
+            if (disableSetup == 0)
+                return true;
+            else
+                return false;
         }
 
         private static void CreateLicenseFile()

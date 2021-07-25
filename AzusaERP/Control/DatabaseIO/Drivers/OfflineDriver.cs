@@ -862,31 +862,10 @@ namespace moe.yo3explorer.azusa.Control.DatabaseIO.Drivers
             if (!ndr.IsDBNull(9))
                 m.GraphDataContent = ndr.GetString(9);
 
-            if (!ndr.IsDBNull(10))
-                m.CueSheetContent = ndr.GetString(10);
+            m.isSealed = ndr.GetBoolean(10);
 
             if (!ndr.IsDBNull(11))
-                m.ChecksumContent = ndr.GetString(11);
-
-            if (!ndr.IsDBNull(12))
-                m.PlaylistContent = ndr.GetString(12);
-
-            if (!ndr.IsDBNull(13))
-                m.CdTextContent = ndr.GetByteArray(13);
-
-            if (!ndr.IsDBNull(14))
-                m.LogfileContent = ndr.GetString(14);
-
-            if (!ndr.IsDBNull(15))
-                m.MdsContent = ndr.GetByteArray(15);
-
-            m.isSealed = ndr.GetBoolean(16);
-
-            if (!ndr.IsDBNull(17))
-                m.DateUpdated = ndr.GetDateTime(17);
-
-            if (!ndr.IsDBNull(18))
-                m.FauxHash = ndr.GetInt64(18);
+                m.DateUpdated = ndr.GetDateTime(11);
 
             ndr.Dispose();
             return m;

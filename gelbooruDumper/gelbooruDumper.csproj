@@ -83,6 +83,7 @@
     <Compile Include="GelbooruClient.cs" />
     <Compile Include="Model\comments.cs" />
     <Compile Include="Model\index_php.cs" />
+    <Compile Include="Model\tags.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -18,11 +18,19 @@ namespace moe.yo3explorer.azusa.Control.JsonIO
         public override DateTime ReadJson(JsonReader reader, Type objectType, DateTime existingValue, bool hasExistingValue,
             JsonSerializer serializer)
         {
-            string result = reader.Value.ToString();
+            string resultWithTimezone = reader.Value.ToString();
+            string result = resultWithTimezone;
+            bool isUtc = result.EndsWith("[UTC]");
+            bool endsWithZ = result.EndsWith("Z") && Char.IsDigit(result.ToCharArray()[result.Length - 2]);
             while (!result.EndsWith("Z"))
                 result = result.Substring(0, result.Length - 1);
             DateTime output = ParseISO8601String(result);
-            output = output.Subtract(new TimeSpan(1, 0, 0));
+            if (isUtc)
+                output -= new TimeSpan(0, 2, 0, 0);
+            else if (endsWithZ)
+                output -= new TimeSpan(0, 2, 0, 0);
+            else
+                throw new TimeZoneNotFoundException(resultWithTimezone);
             return output;
         }
 
@@ -49,7 +57,12 @@ namespace moe.yo3explorer.azusa.Control.JsonIO
             "yyyyMMddTHHZ",
             "yyyy-MM-ddTHHzzz",
             "yyyy-MM-ddTHHzz",
-            "yyyy-MM-ddTHHZ"
+            "yyyy-MM-ddTHHZ",
+            // idk lol, reasteasy sucks
+            "yyyy-MM-ddTHH:mm:ss.fffZ",
+            "yyyy-MM-ddTHH:mm:ss.fffZ[K]",
+            "yyyy-MM-ddZ",
+            "yyyy-MM-ddTHH:mm:ss.ffZ"
         };
 
         public static DateTime ParseISO8601String(string str)

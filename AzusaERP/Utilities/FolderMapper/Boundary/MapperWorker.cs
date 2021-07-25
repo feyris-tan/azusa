@@ -228,22 +228,6 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                             throw new NotImplementedException("xci in multi file mode.");
                         }
                         break;
-                    case ".dvd":
-                        if (!string.IsNullOrEmpty(mediaById.CueSheetContent))
-                            continue;
-
-                        mediaById.CueSheetContent = File.ReadAllText(fileInfo.FullName);
-                        databaseDriver.UpdateMedia(mediaById);
-                        AttemptDelete(fileInfo);
-                        break;
-                    case ".md5":
-                        if (!string.IsNullOrEmpty(mediaById.ChecksumContent))
-                            continue;
-
-                        mediaById.ChecksumContent = File.ReadAllText(fileInfo.FullName);
-                        databaseDriver.UpdateMedia(mediaById);
-                        AttemptDelete(fileInfo);
-                        break;
                     case ".ibg":
                         if (!string.IsNullOrEmpty(mediaById.GraphDataContent))
                             continue;
@@ -279,19 +263,6 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                             AttemptDelete(fileInfo);
                         }
                         break;
-                    case ".log":
-                        if (!string.IsNullOrEmpty(mediaById.LogfileContent))
-                            continue;
-
-                        mediaById.LogfileContent = File.ReadAllText(fileInfo.FullName);
-                        databaseDriver.UpdateMedia(mediaById);
-                        AttemptDelete(fileInfo);
-                        break;
-                    case ".cdt":
-                        mediaById.CdTextContent = File.ReadAllBytes(fileInfo.FullName);
-                        databaseDriver.UpdateMedia(mediaById);
-                        AttemptDelete(fileInfo);
-                        break;
                     case ".m3u8":
                         if (string.IsNullOrEmpty(mediaById.DumpStorageSpacePath))
                         {
@@ -300,13 +271,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                         }
                         string playlist = File.ReadAllText(fileInfo.FullName);
                         bool deletem3u8 = false;
-
-                        if (string.IsNullOrEmpty(mediaById.PlaylistContent))
-                        {
-                            mediaById.PlaylistContent = playlist;
-                            deletem3u8 = true;
-                        }
-
+                        
                         if (string.IsNullOrEmpty(mediaById.MetaFileContent))
                         {
                             mediaById.MetaFileContent = playlist;
@@ -362,13 +327,7 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                         }
                         string cuefile = File.ReadAllText(fileInfo.FullName);
                         bool deleteCue = false;
-
-                        if (string.IsNullOrEmpty(mediaById.CueSheetContent))
-                        {
-                            mediaById.CueSheetContent = cuefile;
-                            deleteCue = true;
-                        }
-
+                        
                         if (string.IsNullOrEmpty(mediaById.MetaFileContent))
                         {
                             mediaById.MetaFileContent = cuefile;
@@ -379,12 +338,6 @@ namespace moe.yo3explorer.azusa.Utilities.FolderMapper.Boundary
                             AttemptDelete(fileInfo);
 
                         databaseDriver.UpdateMedia(mediaById);
-                        break;
-                    case ".txt":
-                        if (fileInfo.Name.ToLowerInvariant().Equals("log.txt"))
-                            goto case ".log";
-                        else
-                            MessageBox.Show("Don't know how to deal with TXT file:" + fileInfo.Name);
                         break;
                     case ".wav":
                         if (singleFileMode)
