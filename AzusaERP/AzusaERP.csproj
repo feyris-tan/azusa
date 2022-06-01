@@ -132,7 +132,7 @@
       <Version>2.9.2-alpha2</Version>
     </PackageReference>
     <PackageReference Include="SSH.NET">
-      <Version>2020.0.1</Version>
+      <Version>2020.0.2</Version>
     </PackageReference>
     <PackageReference Include="Stub.System.Data.SQLite.Core.NetFramework">
       <Version>1.0.114</Version>
